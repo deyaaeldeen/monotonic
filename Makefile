@@ -10,11 +10,10 @@ lib/stdlib++/.git:
 
 .PHONY: assumptions
 assumptions:
-	git grep --color -Hi "postulate" -- "src/**/*.agda"
-	git grep --color -Hi "TERMINATING" -- "src/**/*.agda"
+	git grep --color -Hi "postulate" -- "MonoRef/**/*.agda"
+	git grep --color -Hi "TERMINATING" -- "MonoRef/**/*.agda"
 
 ### cleaning
 .PHONY: clean clean-all
 clean:
-	-rm Readme.agdai
 	-cd MonoRef && find . -iname '*.agdai' -exec rm {} \;
