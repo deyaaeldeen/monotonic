@@ -11,8 +11,8 @@ open import Relation.Nullary
 open import Data.List.Properties.Extra
   using (∈-∷ʳ)
 
-open import MonoRef.Coercions.Original.Reduction
-open import MonoRef.Coercions.Original.Syntax
+open import MonoRef.Coercions.NoSpaceEfficiency.Reduction
+open import MonoRef.Coercions.NoSpaceEfficiency.Syntax
 open import MonoRef.Dynamics.EvalCtx
 open import MonoRef.Dynamics.Original.Store
 open import MonoRef.Dynamics.PureReduction

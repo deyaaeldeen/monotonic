@@ -1,4 +1,4 @@
-module MonoRef.Coercions.Original.Syntax where
+module MonoRef.Coercions.NoSpaceEfficiency.Syntax where
 
 open import MonoRef.Static.Types
 

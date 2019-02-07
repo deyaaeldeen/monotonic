@@ -1,8 +1,8 @@
-module MonoRef.Coercions.Original.Reduction where
+module MonoRef.Coercions.NoSpaceEfficiency.Reduction where
 
 open import Relation.Nullary using (¬_)
 
-open import MonoRef.Coercions.Original.Syntax
+open import MonoRef.Coercions.NoSpaceEfficiency.Syntax
 open import MonoRef.Dynamics.Substitution
 open import MonoRef.Language.Surface
 open import MonoRef.Language.TargetWithoutBlame

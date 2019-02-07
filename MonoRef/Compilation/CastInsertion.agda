@@ -1,6 +1,6 @@
 module MonoRef.Compilation.CastInsertion where
 
-open import MonoRef.Coercions.Original.Syntax
+open import MonoRef.Coercions.NoSpaceEfficiency.Syntax
 open import MonoRef.Language.Surface
 open import MonoRef.Language.TargetWithoutBlame
 open import MonoRef.Static.Context

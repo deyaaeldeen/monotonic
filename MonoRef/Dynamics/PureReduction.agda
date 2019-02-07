@@ -3,7 +3,6 @@ module MonoRef.Dynamics.PureReduction where
 open import Relation.Nullary
   using (¬_)
 
-open import MonoRef.Coercions.Original.Syntax
 open import MonoRef.Dynamics.Substitution
 open import MonoRef.Language.Surface
 open import MonoRef.Language.TargetWithoutBlame

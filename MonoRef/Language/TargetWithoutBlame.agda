@@ -10,7 +10,7 @@ open import Data.List.Membership.Propositional
 open import MonoRef.Static.Types
 open import MonoRef.Static.Types.Relations
 open import MonoRef.Static.Context
-open import MonoRef.Coercions.Original.Syntax
+open import MonoRef.Coercions.NoSpaceEfficiency.Syntax
 open import MonoRef.Language.Surface
 
 infix  4 _∣_⊢_
