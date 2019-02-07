@@ -1,0 +1,3 @@
+[submodule "lib/stdlib++"]
+	path = lib/stdlib++
+	url = https://github.com/deyaaeldeen/stdlib-plusplus.agda.git
