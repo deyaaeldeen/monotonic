@@ -277,7 +277,7 @@ postulate
 ⊓⟹⊑ₗ (~-⇒ x x₁) = ⊑-⇒ (⊓⟹⊑ₗ x) (⊓⟹⊑ₗ x₁)
 ⊓⟹⊑ₗ (~-ref x) = ⊑-ref (⊓⟹⊑ₗ x)
 
-∼P : (T₁ : Type) → (T₂ : Type) → Dec (T₁ ∼ T₂)
+∼P : (T₁ T₂ : Type) → Dec (T₁ ∼ T₂)
 ∼P (t₁ ⇒ t₃) (t₂ ⇒ t₄) with ∼P t₁ t₂ | ∼P t₃ t₄
 ∼P (t₁ ⇒ t₃) (t₂ ⇒ t₄) | yes p | yes p₁ = yes (~-⇒ p p₁)
 ∼P (t₁ ⇒ t₃) (t₂ ⇒ t₄) | yes p | no ¬p = no (¬∼⇒ₒ ¬p)

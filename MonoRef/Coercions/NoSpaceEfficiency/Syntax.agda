@@ -18,23 +18,28 @@ data _⟹_ : Type → Type → Set where
   _▹_ : ∀ {A B C}
     → A ⟹ B
     → B ⟹ C
+      -------
     → A ⟹ C
 
   _⇒_ : ∀ {A A' B B'}
     → A' ⟹ A
     → B ⟹ B'
+      ----------------
     → A ⇒ B ⟹ A' ⇒ B'
 
   _`×_ : ∀ {A A' B B'}
     → A ⟹ A'
     → B ⟹ B'
+      ------------------
     → A `× B ⟹ A' `× B'
 
   Ref_ : ∀ {A : Type}
     → (B : Type)
+      ---------------
     → Ref A ⟹ Ref B
 
   `⊥ : ∀ {A B}
+     --------
     → A ⟹ B
 
 coerce : (t₁ t₂ : Type) → t₁ ⟹ t₂

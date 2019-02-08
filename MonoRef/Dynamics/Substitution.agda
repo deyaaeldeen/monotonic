@@ -17,6 +17,7 @@ rename : ∀ {Γ Δ Σ}
   → (∀ {A} → Σ ∣ Γ ⊢ A → Σ ∣ Δ ⊢ A)
 rename ρ (` x)           = ` (ρ x)
 rename ρ (ƛ N)           = ƛ (rename (ext ρ) N)
+rename ρ (ƛₚ L c)        = ƛₚ (rename ρ L) c
 rename ρ (L · M)         = (rename ρ L) · (rename ρ M)
 rename ρ (`zero)         = `zero
 rename ρ (`suc M)        = `suc (rename ρ M)
@@ -47,6 +48,7 @@ subst : ∀ {Γ Δ Σ}
   → (∀ {A} → Σ ∣ Γ ⊢ A → Σ ∣ Δ ⊢ A)
 subst σ (` k)           = σ k
 subst σ (ƛ N)           = ƛ (subst (exts σ) N)
+subst σ (ƛₚ L c)        = ƛₚ (subst σ L) c
 subst σ (L · M)         = (subst σ L) · (subst σ M)
 subst σ (`zero)         = `zero
 subst σ (`suc M)        = `suc (subst σ M)

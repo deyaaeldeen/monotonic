@@ -15,6 +15,11 @@ infix 3 _≡_[_]
 
 data ECtx {Γ Σ} : (A B : Type) → Set where
 
+  ξ-ƛₚ : ∀ {A A' B B'}
+    → A ⇒ B ⟹ A' ⇒ B'
+      -------------
+    → ECtx (A ⇒ B) (A' ⇒ B')
+
   ξ-appₗ : ∀ {A B}
     → Σ ∣ Γ ⊢ A -- the stuff in the context
       -------------
@@ -94,6 +99,11 @@ data ECtx {Γ Σ} : (A B : Type) → Set where
 
 
 data _≡_[_] {Γ Σ} : ∀ {A B} → Σ ∣ Γ ⊢ B → ECtx A B → Σ ∣ Γ ⊢ A → Set where
+
+  □-ƛₚ : ∀ {A A' B B'} {t : Σ ∣ Γ ⊢ A ⇒ B}
+    → (u : A ⇒ B ⟹ A' ⇒ B')
+      ----------------------------
+    → (ƛₚ t u) ≡ (ξ-ƛₚ u) [ t ]
 
   □-·ₗ : ∀ {A B} {t : Σ ∣ Γ ⊢ A ⇒ B}
     → (u : Σ ∣ Γ ⊢ A)

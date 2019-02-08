@@ -3,6 +3,7 @@ module MonoRef.Dynamics.PureReduction where
 open import Relation.Nullary
   using (¬_)
 
+open import MonoRef.Coercions.NoSpaceEfficiency.Syntax
 open import MonoRef.Dynamics.Substitution
 open import MonoRef.Language.Surface
 open import MonoRef.Language.TargetWithoutBlame
@@ -19,6 +20,15 @@ data _⟶_ {Γ Σ} : ∀ {A} → Σ ∣ Γ ⊢ A → Σ ∣ Γ ⊢ A → Set whe
     → Value W
       --------------------
     → (ƛ N) · W ⟶ N [ W ]
+
+  β-ƛₚ : ∀ {A B A' B'}
+           {V : Σ ∣ Γ ⊢ A ⇒ B}
+           {W : Σ ∣ Γ ⊢ A'}
+           {c : A ⇒ B ⟹ A' ⇒ B'}
+    → Value (ƛₚ V c)
+    → Value W
+      --------------------
+    → (ƛₚ V c) · W ⟶ (V · (W < coerce A' A >)) < coerce B B' >
 
   β-zero :  ∀ {A}
               {M : Σ ∣ Γ ⊢ A}

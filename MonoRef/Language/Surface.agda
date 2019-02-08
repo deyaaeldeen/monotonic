@@ -1,6 +1,5 @@
 module MonoRef.Language.Surface where
 
-open import Data.String using (String)
 open import Data.Nat using (ℕ; zero; suc)
 open import Data.Empty using (⊥; ⊥-elim)
 
@@ -38,11 +37,11 @@ data _⊢ₛ_ : Context → Type → Set where
   _·ᵤ_ : ∀ {Γ} {A}
     → Γ ⊢ₛ ⋆
     → Γ ⊢ₛ A
-      ----------
+      ------
     → Γ ⊢ₛ ⋆
 
   `zero : ∀ {Γ}
-      ----------
+      -------
     → Γ ⊢ₛ `ℕ
 
   `suc_ : ∀ {Γ}
@@ -65,25 +64,25 @@ data _⊢ₛ_ : Context → Type → Set where
 
   !_ : ∀ {Γ A}
     → Γ ⊢ₛ Ref A
-      -----------
+      ----------
     → Γ ⊢ₛ A
 
   !ᵤ_ : ∀ {Γ}
     → Γ ⊢ₛ ⋆
-      -----------
+      ------
     → Γ ⊢ₛ ⋆
 
   _:=_ : ∀ {Γ A B}
     → Γ ⊢ₛ Ref A
     → Γ ⊢ₛ B
     → A ∼ B
-      -----------
+      ---------
     → Γ ⊢ₛ Unit
 
   _:=ᵤ_ : ∀ {Γ A}
     → Γ ⊢ₛ ⋆
     → Γ ⊢ₛ A
-      -----------
+      ---------
     → Γ ⊢ₛ Unit
 
   _`×_ : ∀ {Γ A B}
@@ -99,7 +98,7 @@ data _⊢ₛ_ : Context → Type → Set where
 
   π₁ᵤ_ : ∀ {Γ}
     → Γ ⊢ₛ ⋆
-      -----------
+      ------
     → Γ ⊢ₛ ⋆
 
   π₂_ : ∀ {Γ A B}
@@ -109,7 +108,7 @@ data _⊢ₛ_ : Context → Type → Set where
 
   π₂ᵤ_ : ∀ {Γ}
     → Γ ⊢ₛ ⋆
-      -----------
+      ------
     → Γ ⊢ₛ ⋆
 
   unit : ∀ {Γ}

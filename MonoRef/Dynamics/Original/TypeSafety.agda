@@ -48,6 +48,14 @@ data Progress {Σ A} (M : Σ ∣ ∅ ⊢ A) : (ν : Store Σ) → Set where
 progress : ∀ {Σ A} → (M : Σ ∣ ∅ ⊢ A) → (μ : Store Σ) → NormalStore μ → Progress M μ
 progress (` ()) _ _
 progress (ƛ e) ν μ-evd = done (V-ƛ e) ν μ-evd
+progress (ƛₚ e c) ν μ-evd with progress e ν μ-evd
+progress (ƛₚ e c) ν μ-evd | step (prog-reduce μ-evd'  e⟶e') prec = step (prog-reduce μ-evd' (cong (□-ƛₚ c) (□-ƛₚ c)  e⟶e')) prec
+progress (ƛₚ e c) ν μ-evd | step (cast-reduce  e⟶e') prec = step (cast-reduce (cong (□-ƛₚ c) (□-ƛₚ c)  e⟶e')) prec
+progress (ƛₚ e c) ν μ-evd | step (error mem x) prec = step (error mem x) prec
+progress (ƛₚ e c) ν μ-evd | step (hcast mem red x x₁ CV') prec = step (hcast mem red x x₁ CV') prec
+progress (ƛₚ e c) ν μ-evd | step (hdrop mem red x x₁) prec = step (hdrop mem red x x₁) prec
+progress (ƛₚ e c) ν μ-evd | done v .ν μ-evd' = done (V-ƛₚ v c) ν μ-evd'
+progress (ƛₚ .error c) ν μ-evd' | error refl = step (prog-reduce μ-evd' (cong-error (□-ƛₚ c))) StoreTypingProgress-refl
 progress (e₁ · e₂) ν μ-evd with progress e₁ ν μ-evd
 ... | step (prog-reduce μ-evd' e⟶e') prec = step (prog-reduce μ-evd' (cong (□-·ₗ e₂) (□-·ₗ (embed-expr-with-Σ prec e₂)) e⟶e')) prec
 ... | step (cast-reduce e⟶e') prec = step (cast-reduce (cong (□-·ₗ e₂) (□-·ₗ (embed-expr-with-Σ prec e₂)) e⟶e')) prec
@@ -61,6 +69,7 @@ progress (e₁ · e₂) ν μ-evd with progress e₁ ν μ-evd
 ... | step (hcast mem x y z cv) prec = step (hcast mem x y z cv) prec
 ... | step (hdrop mem x y z) prec = step (hdrop mem x y z) prec
 progress (_ · _) _ _ | done (V-ƛ _) _ _ | done v' _ μ-evd'' = step (prog-reduce μ-evd'' (β-pure (β-ƛ v'))) StoreTypingProgress-refl
+progress (_ · _) _ _ | done v@(V-ƛₚ _ _) _ _ | done v' _ μ-evd'' = step (prog-reduce μ-evd'' (β-pure (β-ƛₚ v v'))) StoreTypingProgress-refl
 ... | error refl = step (prog-reduce μ-evd' (cong-error (□-·ᵣ v))) StoreTypingProgress-refl
 progress (.error · e₂) ν μ-evd | error refl = step (prog-reduce μ-evd (cong-error (□-·ₗ e₂))) StoreTypingProgress-refl
 progress `zero ν μ-evd = done V-zero ν μ-evd

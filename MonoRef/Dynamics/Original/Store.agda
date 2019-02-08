@@ -85,6 +85,7 @@ prefix-weaken-expr : ∀ {Σ Σ' Γ A} → Σ ⊑ₗ Σ'
   → Σ' ∣ Γ ⊢ A
 prefix-weaken-expr _   (` x) = ` x
 prefix-weaken-expr ext (ƛ e) = ƛ prefix-weaken-expr ext e
+prefix-weaken-expr ext (ƛₚ e c) = ƛₚ (prefix-weaken-expr ext e) c
 prefix-weaken-expr ext (e · e₁) =
   prefix-weaken-expr ext e · prefix-weaken-expr ext e₁
 prefix-weaken-expr _   `zero = `zero
@@ -113,6 +114,7 @@ prefix-weaken-val : ∀ {Σ Σ' Γ A} {v : Σ ∣ Γ ⊢ A} → (ext : Σ ⊑ₗ
   → Value v
   → Value (prefix-weaken-expr ext v)
 prefix-weaken-val ext (V-ƛ N) = V-ƛ (prefix-weaken-expr ext N)
+prefix-weaken-val ext (V-ƛₚ e c) = V-ƛₚ (prefix-weaken-val ext e) c
 prefix-weaken-val _   V-zero = V-zero
 prefix-weaken-val ext (V-suc v) = V-suc (prefix-weaken-val ext v)
 prefix-weaken-val _   V-unit = V-unit
@@ -302,6 +304,7 @@ typeprecise-strenthen-expr : ∀ {Σ Σ' Γ A} → Σ' ⊑ₕ Σ
   → Σ' ∣ Γ ⊢ A
 typeprecise-strenthen-expr _    (` x) = ` x
 typeprecise-strenthen-expr prec (ƛ e) = ƛ typeprecise-strenthen-expr prec e
+typeprecise-strenthen-expr prec (ƛₚ e c) = ƛₚ (typeprecise-strenthen-expr prec e) c
 typeprecise-strenthen-expr prec (e · e₁) =
   typeprecise-strenthen-expr prec e · typeprecise-strenthen-expr prec e₁
 typeprecise-strenthen-expr _    `zero = `zero
@@ -332,6 +335,7 @@ typeprecise-strenthen-val : ∀ {Σ Σ' Γ A} {v : Σ ∣ Γ ⊢ A} → (prec : 
   → Value v
   → Value (typeprecise-strenthen-expr prec v)
 typeprecise-strenthen-val prec (V-ƛ N) = V-ƛ (typeprecise-strenthen-expr prec N)
+typeprecise-strenthen-val prec (V-ƛₚ e c) = V-ƛₚ (typeprecise-strenthen-val prec e) c
 typeprecise-strenthen-val _    V-zero = V-zero
 typeprecise-strenthen-val prec (V-suc v) = V-suc (typeprecise-strenthen-val prec v)
 typeprecise-strenthen-val _    V-unit = V-unit
