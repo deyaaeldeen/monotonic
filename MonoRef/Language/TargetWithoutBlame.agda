@@ -1,4 +1,9 @@
-module MonoRef.Language.TargetWithoutBlame where
+open import MonoRef.Static.Types
+  using (Type)
+
+module MonoRef.Language.TargetWithoutBlame (_⟹_ : Type → Type → Set)
+                                           (_! : (A : Type) → A ⟹ Type.⋆)
+                                            where
 
 open import Relation.Binary.PropositionalEquality
   using (_≡_)
@@ -10,7 +15,6 @@ open import Data.List.Membership.Propositional
 open import MonoRef.Static.Types
 open import MonoRef.Static.Types.Relations
 open import MonoRef.Static.Context
-open import MonoRef.Coercions.NoSpaceEfficiency.Syntax
 open import MonoRef.Language.Surface
 
 infix  4 _∣_⊢_
@@ -31,7 +35,7 @@ data _∣_⊢_ (Σ : StoreTyping) : Context → Type → Set where
 
   ƛₚ  :  ∀ {Γ A A' B B'}
     → Σ ∣ Γ ⊢ A ⇒ B
-    → A ⇒ B ⟹ A' ⇒ B'
+    → (A ⇒ B) ⟹ (A' ⇒ B')
       ----------
     → Σ ∣ Γ ⊢ A' ⇒ B'
 
@@ -130,7 +134,7 @@ data Value : ∀ {Σ Γ A} → Σ ∣ Γ ⊢ A → Set where
 
   V-ƛₚ : ∀ {Σ Γ A A' B B'} {V : Σ ∣ Γ ⊢ A ⇒ B}
     → Value V
-    → (c : A ⇒ B ⟹ A' ⇒ B')
+    → (c : (A ⇒ B) ⟹ (A' ⇒ B'))
       ---------------------------
     → Value (ƛₚ V c)
 

@@ -1,6 +1,6 @@
 module MonoRef.Dynamics.Substitution where
 
-open import MonoRef.Language.TargetWithoutBlame
+open import MonoRef.Language.TargetWithoutBlameNoSE
 open import MonoRef.Static.Context
 
 

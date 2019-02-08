@@ -23,7 +23,7 @@ open import Data.List.All.Properties.Extra
   using (_All[_]≔'_ ; _all-∷ʳ_)
 
 open import MonoRef.Coercions.NoSpaceEfficiency.Syntax
-open import MonoRef.Language.TargetWithoutBlame
+open import MonoRef.Language.TargetWithoutBlameNoSE
 open import MonoRef.Static.Context
 open import MonoRef.Static.Types
 open import MonoRef.Static.Types.Relations

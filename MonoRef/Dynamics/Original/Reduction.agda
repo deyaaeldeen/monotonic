@@ -16,7 +16,7 @@ open import MonoRef.Coercions.NoSpaceEfficiency.Syntax
 open import MonoRef.Dynamics.EvalCtx
 open import MonoRef.Dynamics.Original.Store
 open import MonoRef.Dynamics.PureReduction
-open import MonoRef.Language.TargetWithoutBlame
+open import MonoRef.Language.TargetWithoutBlameNoSE
 open import MonoRef.Static.Context
 open import MonoRef.Static.Types
 open import MonoRef.Static.Types.Relations

@@ -6,7 +6,7 @@ open import Relation.Nullary
 open import MonoRef.Coercions.NoSpaceEfficiency.Syntax
 open import MonoRef.Dynamics.Substitution
 open import MonoRef.Language.Surface
-open import MonoRef.Language.TargetWithoutBlame
+open import MonoRef.Language.TargetWithoutBlameNoSE
 open import MonoRef.Static.Context
 open import MonoRef.Static.Types
 
