@@ -1,4 +1,4 @@
-module MonoRef.Dynamics.Original.EvalCtx where
+module MonoRef.Dynamics.Original.Frames where
 
 open import MonoRef.Coercions.NoSpaceEfficiency.Syntax
 open import MonoRef.Language.TargetWithoutBlameNoSE
@@ -13,92 +13,92 @@ infix 3 _≡_[_]
 -- an evaluation context because the hole can not appear inside a binding
 -- construct
 
-data ECtx {Γ Σ} : (A B : Type) → Set where
+data Frame {Γ Σ} : (A B : Type) → Set where
 
   ξ-ƛₚ : ∀ {A A' B B'}
     → A ⇒ B ⟹ A' ⇒ B'
       -------------
-    → ECtx (A ⇒ B) (A' ⇒ B')
+    → Frame (A ⇒ B) (A' ⇒ B')
 
   ξ-appₗ : ∀ {A B}
     → Σ ∣ Γ ⊢ A -- the stuff in the context
       -------------
-    → ECtx (A ⇒ B) B
+    → Frame (A ⇒ B) B
     --     ^ the type of the hole
     --             ^ the type of the context after being filled
 
   ξ-appᵣ : ∀ {A B}
     → Σ ∣ Γ ⊢ A ⇒ B
       -------------
-    → ECtx A B
+    → Frame A B
 
   ξ-suc :
       -----------
-      ECtx `ℕ `ℕ
+      Frame `ℕ `ℕ
 
   ξ-caseₚ : ∀ {A}
     → Σ ∣ Γ ⊢ A
     → Σ ∣ Γ , `ℕ ⊢ A
       --------------
-    → ECtx `ℕ A
+    → Frame `ℕ A
 
   ξ-×ₗ : ∀ {A B}
     → Σ ∣ Γ ⊢ B
       ---------------
-    → ECtx A (A `× B)
+    → Frame A (A `× B)
 
   ξ-×ᵣ : ∀ {A B}
     → Σ ∣ Γ ⊢ A
       ---------------
-    → ECtx B (A `× B)
+    → Frame B (A `× B)
 
   ξ-πₗ : ∀ {A B}
       ---------------
-    → ECtx (A `× B) A
+    → Frame (A `× B) A
 
   ξ-πᵣ : ∀ {A B}
       ---------------
-    → ECtx (A `× B) B
+    → Frame (A `× B) B
 
   ξ-ref : ∀ {A}
       --------------
-    → ECtx A (Ref A)
+    → Frame A (Ref A)
 
   ξ-!ₛ : ∀ {A}
       --------------
-    → ECtx (Ref A) A
+    → Frame (Ref A) A
 
   ξ-! : ∀ {A}
       --------------
-    → ECtx (Ref A) A
+    → Frame (Ref A) A
 
   ξ-:=ₛₗ : ∀ {A}
     → Σ ∣ Γ ⊢ A
       -----------------
-    → ECtx (Ref A) Unit
+    → Frame (Ref A) Unit
 
   ξ-:=ₛᵣ : ∀ {A}
     → Σ ∣ Γ ⊢ Ref A
       ------------
-    → ECtx A Unit
+    → Frame A Unit
 
   ξ-:=ₗ : ∀ {A}
     → Σ ∣ Γ ⊢ A
       -----------------
-    → ECtx (Ref A) Unit
+    → Frame (Ref A) Unit
 
   ξ-:=ᵣ : ∀ {A}
     → Σ ∣ Γ ⊢ Ref A
       ------------
-    → ECtx A Unit
+    → Frame A Unit
 
   ξ-<> : ∀ {A B}
     → A ⟹ B
       --------
-    → ECtx A B
+    → Frame A B
 
 
-data _≡_[_] {Γ Σ} : ∀ {A B} → Σ ∣ Γ ⊢ B → ECtx A B → Σ ∣ Γ ⊢ A → Set where
+data _≡_[_] {Γ Σ} : ∀ {A B} → Σ ∣ Γ ⊢ B → Frame A B → Σ ∣ Γ ⊢ A → Set where
 
   □-ƛₚ : ∀ {A A' B B'} {t : Σ ∣ Γ ⊢ A ⇒ B}
     → (u : A ⇒ B ⟹ A' ⇒ B')

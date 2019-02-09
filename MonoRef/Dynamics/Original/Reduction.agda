@@ -13,7 +13,7 @@ open import Data.List.Properties.Extra
 
 open import MonoRef.Coercions.NoSpaceEfficiency.Reduction
 open import MonoRef.Coercions.NoSpaceEfficiency.Syntax
-open import MonoRef.Dynamics.Original.EvalCtx
+open import MonoRef.Dynamics.Original.Frames
 open import MonoRef.Dynamics.Original.Store
 open import MonoRef.Dynamics.Original.PureReduction
 open import MonoRef.Language.TargetWithoutBlameNoSE
@@ -62,14 +62,14 @@ data _,_⟶ᵤᵣ_,_ {Γ Σ} : ∀ {Σ' A}
   cong : ∀ {Σ' A B} {μ : Store Σ} {ν : Store Σ'}
            {M : Σ ∣ Γ ⊢ B} {M' : Σ' ∣ Γ ⊢ B}
            {t : Σ ∣ Γ ⊢ A} {t' : Σ' ∣ Γ ⊢ A}
-           {ξ : ECtx A B} {ξ' : ECtx A B}
+           {ξ : Frame A B} {ξ' : Frame A B}
     → M  ≡ ξ [ t  ]
     → M' ≡ ξ' [ t' ]
     → t , μ ⟶ᵤᵣ t' , ν
       ----------------
     → M , μ ⟶ᵤᵣ M' , ν
 
-  cong-error : ∀ {A B M} {ν : Store Σ} {ξ : ECtx A B}
+  cong-error : ∀ {A B M} {ν : Store Σ} {ξ : Frame A B}
     → M  ≡ ξ [ error  ]
       ----------------------------
     → M , ν ⟶ᵤᵣ error {Σ = Σ} , ν
@@ -133,7 +133,7 @@ data _,_,_⟶ₑ_,_ {Σ} : ∀ {Σ' A}
   cong : ∀ {Σ' A B} {μ : Store Σ} {ν : Store Σ'} {μ-evd : NormalStore μ}
            {M : Σ ∣ ∅ ⊢ B} {M' : Σ' ∣ ∅ ⊢ B}
            {t : Σ ∣ ∅ ⊢ A} {t' : Σ' ∣ ∅ ⊢ A}
-           {ξ : ECtx A B} {ξ' : ECtx A B}
+           {ξ : Frame A B} {ξ' : Frame A B}
     → M  ≡ ξ [ t  ]
     → M' ≡ ξ' [ t' ]
     → t , μ , μ-evd ⟶ₑ t' , ν
@@ -142,7 +142,7 @@ data _,_,_⟶ₑ_,_ {Σ} : ∀ {Σ' A}
 
   cong-error : ∀ {A B} {μ : Store Σ} {μ-evd : NormalStore μ}
                  {M : Σ ∣ ∅ ⊢ B}
-                 {ξ : ECtx A B}
+                 {ξ : Frame A B}
     → M  ≡ ξ [ error  ]
       -----------------------------------
     → M , μ , μ-evd ⟶ₑ error {Σ = Σ} , μ
