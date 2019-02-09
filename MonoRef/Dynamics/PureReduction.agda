@@ -1,14 +1,17 @@
-module MonoRef.Dynamics.PureReduction where
+open import MonoRef.Static.Types
+
+module MonoRef.Dynamics.PureReduction (_⟹_ : Type → Type → Set)
+                                      (_! : (A : Type) → A ⟹ ⋆)
+                                      (coerce : (A B : Type) → A ⟹ B)
+                                      where
 
 open import Relation.Nullary
   using (¬_)
 
-open import MonoRef.Coercions.NoSpaceEfficiency.Syntax
-open import MonoRef.Dynamics.Substitution
+open import MonoRef.Dynamics.Substitution _⟹_ _!
 open import MonoRef.Language.Surface
-open import MonoRef.Language.TargetWithoutBlameNoSE
+open import MonoRef.Language.TargetWithoutBlame _⟹_ _!
 open import MonoRef.Static.Context
-open import MonoRef.Static.Types
 
 infix 3 _⟶_
 
@@ -24,7 +27,7 @@ data _⟶_ {Γ Σ} : ∀ {A} → Σ ∣ Γ ⊢ A → Σ ∣ Γ ⊢ A → Set whe
   β-ƛₚ : ∀ {A B A' B'}
            {V : Σ ∣ Γ ⊢ A ⇒ B}
            {W : Σ ∣ Γ ⊢ A'}
-           {c : A ⇒ B ⟹ A' ⇒ B'}
+           {c : (A ⇒ B) ⟹ (A' ⇒ B')}
     → Value (ƛₚ V c)
     → Value W
       --------------------

@@ -13,9 +13,9 @@ open import Data.List.Properties.Extra
 
 open import MonoRef.Coercions.NoSpaceEfficiency.Reduction
 open import MonoRef.Coercions.NoSpaceEfficiency.Syntax
-open import MonoRef.Dynamics.EvalCtx
+open import MonoRef.Dynamics.Original.EvalCtx
 open import MonoRef.Dynamics.Original.Store
-open import MonoRef.Dynamics.PureReduction
+open import MonoRef.Dynamics.Original.PureReduction
 open import MonoRef.Language.TargetWithoutBlameNoSE
 open import MonoRef.Static.Context
 open import MonoRef.Static.Types

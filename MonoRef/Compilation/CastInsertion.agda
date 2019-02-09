@@ -1,10 +1,13 @@
-module MonoRef.Compilation.CastInsertion where
-
-open import MonoRef.Coercions.NoSpaceEfficiency.Syntax
-open import MonoRef.Language.Surface
-open import MonoRef.Language.TargetWithoutBlameNoSE
-open import MonoRef.Static.Context
 open import MonoRef.Static.Types
+
+module MonoRef.Compilation.CastInsertion (_⟹_ : Type → Type → Set)
+                                         (_! : (A : Type) → A ⟹ ⋆)
+                                         (_`? : (A : Type) → ⋆ ⟹ A)
+                                         (coerce : (A B : Type) → A ⟹ B) where
+
+open import MonoRef.Language.Surface
+open import MonoRef.Language.TargetWithoutBlame _⟹_ _!
+open import MonoRef.Static.Context
 open import MonoRef.Static.Types.Relations
 
 infix  3 _∣_⊢_⦂_↪_

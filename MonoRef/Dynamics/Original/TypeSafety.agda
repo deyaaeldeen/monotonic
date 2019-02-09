@@ -14,11 +14,11 @@ open import Data.List.Prefix
 
 open import MonoRef.Coercions.NoSpaceEfficiency.Reduction
 open import MonoRef.Coercions.NoSpaceEfficiency.Syntax
-open import MonoRef.Dynamics.EvalCtx
+open import MonoRef.Dynamics.Original.EvalCtx
 open import MonoRef.Dynamics.Original.Reduction
 open import MonoRef.Dynamics.Original.Store
-open import MonoRef.Dynamics.PureReduction
-open import MonoRef.Dynamics.Substitution
+open import MonoRef.Dynamics.Original.PureReduction
+open import MonoRef.Dynamics.Original.Substitution
 open import MonoRef.Language.TargetWithoutBlameNoSE
 open import MonoRef.Static.Context
 open import MonoRef.Static.Types

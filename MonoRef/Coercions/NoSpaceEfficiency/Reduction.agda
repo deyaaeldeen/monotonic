@@ -20,6 +20,7 @@ data _⟶ᵤ_ {Γ Σ} : ∀ {A} → Σ ∣ Γ ⊢ A → Σ ∣ Γ ⊢ A → Set 
       -----------------------------
     → V < ι > ⟶ᵤ V
 
+-- partially eager similar to the original paper of monotonic references
   !?₁ : ∀ {A B} {V : Σ ∣ Γ ⊢ A}
     → Value V
     → A ∼ B

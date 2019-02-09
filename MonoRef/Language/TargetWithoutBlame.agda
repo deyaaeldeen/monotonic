@@ -1,8 +1,7 @@
 open import MonoRef.Static.Types
-  using (Type)
 
 module MonoRef.Language.TargetWithoutBlame (_⟹_ : Type → Type → Set)
-                                           (_! : (A : Type) → A ⟹ Type.⋆)
+                                           (_! : (A : Type) → A ⟹ ⋆)
                                             where
 
 open import Relation.Binary.PropositionalEquality

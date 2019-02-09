@@ -1,6 +1,9 @@
-module MonoRef.Dynamics.Substitution where
+open import MonoRef.Static.Types
 
-open import MonoRef.Language.TargetWithoutBlameNoSE
+module MonoRef.Dynamics.Substitution (_⟹_ : Type → Type → Set)
+                                     (_! : (A : Type) → A ⟹ ⋆) where
+
+open import MonoRef.Language.TargetWithoutBlame _⟹_ _!
 open import MonoRef.Static.Context
 
 
