@@ -85,7 +85,6 @@ prefix-weaken-expr : ∀ {Σ Σ' Γ A} → Σ ⊑ₗ Σ'
   → Σ' ∣ Γ ⊢ A
 prefix-weaken-expr _   (` x) = ` x
 prefix-weaken-expr ext (ƛ e) = ƛ prefix-weaken-expr ext e
-prefix-weaken-expr ext (ƛₚ e c) = ƛₚ (prefix-weaken-expr ext e) c
 prefix-weaken-expr ext (e · e₁) =
   prefix-weaken-expr ext e · prefix-weaken-expr ext e₁
 prefix-weaken-expr _   `zero = `zero
@@ -304,7 +303,6 @@ typeprecise-strenthen-expr : ∀ {Σ Σ' Γ A} → Σ' ⊑ₕ Σ
   → Σ' ∣ Γ ⊢ A
 typeprecise-strenthen-expr _    (` x) = ` x
 typeprecise-strenthen-expr prec (ƛ e) = ƛ typeprecise-strenthen-expr prec e
-typeprecise-strenthen-expr prec (ƛₚ e c) = ƛₚ (typeprecise-strenthen-expr prec e) c
 typeprecise-strenthen-expr prec (e · e₁) =
   typeprecise-strenthen-expr prec e · typeprecise-strenthen-expr prec e₁
 typeprecise-strenthen-expr _    `zero = `zero

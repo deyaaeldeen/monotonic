@@ -33,7 +33,7 @@ data _⟹_ : Type → Type → Set where
       ------------------
     → A `× B ⟹ A' `× B'
 
-  Ref_ : ∀ {A : Type}
+  Ref : ∀ {A : Type}
     → (B : Type)
       ---------------
     → Ref A ⟹ Ref B

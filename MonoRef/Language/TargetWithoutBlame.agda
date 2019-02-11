@@ -1,20 +1,16 @@
 open import MonoRef.Static.Types
 
 module MonoRef.Language.TargetWithoutBlame (_⟹_ : Type → Type → Set)
-                                           (_! : (A : Type) → A ⟹ ⋆)
+                                           (_! : (A : Type) → (A ⟹ ⋆))
                                             where
 
-open import Relation.Binary.PropositionalEquality
-  using (_≡_)
-open import Data.List
-  using (List; _∷_)
+open import Data.List using (List)
 open import Data.List.Membership.Propositional
   using (_∈_)
 
-open import MonoRef.Static.Types
 open import MonoRef.Static.Types.Relations
 open import MonoRef.Static.Context
-open import MonoRef.Language.Surface
+
 
 infix  4 _∣_⊢_
 
@@ -31,12 +27,6 @@ data _∣_⊢_ (Σ : StoreTyping) : Context → Type → Set where
     → Σ ∣ Γ , A ⊢ B
       ----------
     → Σ ∣ Γ ⊢ A ⇒ B
-
-  ƛₚ  :  ∀ {Γ A A' B B'}
-    → Σ ∣ Γ ⊢ A ⇒ B
-    → (A ⇒ B) ⟹ (A' ⇒ B')
-      ----------
-    → Σ ∣ Γ ⊢ A' ⇒ B'
 
   _·_ : ∀ {Γ A B}
     → Σ ∣ Γ ⊢ A ⇒ B
@@ -124,21 +114,16 @@ data _∣_⊢_ (Σ : StoreTyping) : Context → Type → Set where
   error : ∀ {Γ A}
     → Σ ∣ Γ ⊢ A
 
+
 data Value : ∀ {Σ Γ A} → Σ ∣ Γ ⊢ A → Set where
 
   V-ƛ : ∀ {Σ Γ A B}
     → (N : Σ ∣ Γ , A ⊢ B)
-      ---------------------------
+      ------------------
     → Value (ƛ N)
 
-  V-ƛₚ : ∀ {Σ Γ A A' B B'} {V : Σ ∣ Γ ⊢ A ⇒ B}
-    → Value V
-    → (c : (A ⇒ B) ⟹ (A' ⇒ B'))
-      ---------------------------
-    → Value (ƛₚ V c)
-
   V-zero : ∀ {Γ Σ}
-      -----------------
+      -----------------------------
     → Value (`zero {Σ = Σ} {Γ = Γ})
 
   V-suc : ∀ {Σ Γ} {V : Σ ∣ Γ ⊢ `ℕ}
@@ -147,23 +132,29 @@ data Value : ∀ {Σ Γ A} → Σ ∣ Γ ⊢ A → Set where
     → Value (`suc V)
 
   V-unit : ∀ {Σ Γ}
-      -----------------
+      ----------------------------
     → Value (unit {Σ = Σ} {Γ = Γ})
 
   V-addr : ∀ {Σ Γ A B}
     → (x : A ∈ Σ)
     → (y : A ⊑ B)
-      -----------------
+      ------------------------
     → Value (addr {Γ = Γ} x y)
 
   V-pair : ∀ {Σ Γ A B}
            {V₁ : Σ ∣ Γ ⊢ A} {V₂ : Σ ∣ Γ ⊢ B}
     → Value V₁
     → Value V₂
-      -----------------
+      ---------------
     → Value (V₁ `× V₂)
 
   V-inj : ∀ {Σ Γ A} {V : Σ ∣ Γ ⊢ A}
     → Value V
       -----------------
     → Value (V < A ! >)
+
+  V-ƛₚ : ∀ {Σ Γ A A' B B'} {V : Σ ∣ Γ ⊢ A ⇒ B}
+    → Value V
+    → (c : (A ⇒ B) ⟹ (A' ⇒ B'))
+      ---------------------------
+    → Value (V < c >)
