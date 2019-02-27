@@ -1,9 +1,11 @@
 open import MonoRef.Static.Types
 
-module MonoRef.Compilation.CastInsertion (_⟹_ : Type → Type → Set)
-                                         (_! : (A : Type) → A ⟹ ⋆)
-                                         (_`? : (A : Type) → ⋆ ⟹ A)
-                                         (coerce : (A B : Type) → A ⟹ B) where
+module MonoRef.Compilation.CastInsertion
+  (_⟹_ : Type → Type → Set)
+  (_! : (A : Type) → A ⟹ ⋆)
+  (_`? : (A : Type) → ⋆ ⟹ A)
+  (coerce : (A B : Type) → A ⟹ B)
+  where
 
 open import MonoRef.Language.Surface
 open import MonoRef.Language.TargetWithoutBlame _⟹_ _!
@@ -64,7 +66,7 @@ data _∣_⊢_⦂_↪_ : (Σ : StoreTyping) → (Γ : Context) → (T : Type)
     → Σ ∣ Γ ⊢ A ⦂ sz ↪ tz
     → Σ ∣ Γ , `ℕ ⊢ A ⦂ ss ↪ ts
       ----------------------------------------------------------
-    → Σ ∣ Γ ⊢ A ⦂ case sn ∼-rd sz ss ↪ case (tn < `ℕ `? >) tz ts
+    → Σ ∣ Γ ⊢ A ⦂ case sn ∼-⋆L sz ss ↪ case (tn < `ℕ `? >) tz ts
 
   ref_ : ∀ {Γ Σ A} {s t}
     → Σ ∣ Γ ⊢ A ⦂ s ↪ t

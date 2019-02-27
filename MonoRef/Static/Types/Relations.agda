@@ -18,6 +18,7 @@ infix  4 _⊑_
 infix  4 static_
 infix  4 _∼_
 
+
 data _⊑_ : Type → Type → Set where
   ⊑-refl : ∀ {A} → A ⊑ A
   ⊑-dyn : ∀ {A} → A ⊑ ⋆
@@ -35,19 +36,19 @@ data static_ : Type → Set where
 data _∼_ : Type → Type → Set where
   ∼-ℕ-refl : `ℕ ∼ `ℕ
   ∼-Unit-refl : Unit ∼ Unit
-  ∼-ld : ∀ {A} → A ∼ ⋆
-  ∼-rd : ∀ {A} → ⋆ ∼ A
+  ∼-⋆R : ∀ {A} → A ∼ ⋆
+  ∼-⋆L : ∀ {A} → ⋆ ∼ A
   ~-× : ∀ {A B C D} → A ∼ B → C ∼ D → A `× C ∼ B `× D
   ~-⇒ : ∀ {A B C D} → A ∼ B → C ∼ D → A ⇒ C ∼ B ⇒ D
   ~-ref : ∀ {A B} → A ∼ B → Ref A ∼ Ref B
 
 ∼-refl : Reflexive _∼_
-∼-refl {x ⇒ x₁} = ~-⇒ ∼-refl ∼-refl
-∼-refl {Ref x} = ~-ref ∼-refl
-∼-refl {x `× x₁} = ~-× ∼-refl ∼-refl
+∼-refl {_ ⇒ _} = ~-⇒ ∼-refl ∼-refl
+∼-refl {Ref _} = ~-ref ∼-refl
+∼-refl {_ `× _} = ~-× ∼-refl ∼-refl
 ∼-refl {`ℕ} = ∼-ℕ-refl
 ∼-refl {Unit} = ∼-Unit-refl
-∼-refl {⋆} = ∼-ld
+∼-refl {⋆} = ∼-⋆R
 
 ¬∼×ₗ : ∀ {T₁ T₂ T₃ T₄} → ¬ T₁ ∼ T₂ → ¬ (_`×_ T₁ T₃) ∼ (_`×_ T₂ T₄)
 ¬∼×ₗ ¬T₁∼T₂ (~-× x _) = ¬T₁∼T₂ x
@@ -87,13 +88,13 @@ data _∼_ : Type → Type → Set where
 ∼⊑P : ∀ {T₁ T₂} → T₁ ∼ T₂ → Dec (T₂ ⊑ T₁)
 ∼⊑P ∼-ℕ-refl = yes ⊑-refl
 ∼⊑P ∼-Unit-refl = yes ⊑-refl
-∼⊑P {T₁ ⇒ T₂} ∼-ld = no (λ ())
-∼⊑P {Ref T₁} ∼-ld = no (λ ())
-∼⊑P {T₁ `× T₂} ∼-ld = no (λ ())
-∼⊑P {`ℕ} ∼-ld = no (λ ())
-∼⊑P {Unit} ∼-ld = no (λ ())
-∼⊑P {⋆} ∼-ld = yes ⊑-refl
-∼⊑P ∼-rd = yes ⊑-dyn
+∼⊑P {T₁ ⇒ T₂} ∼-⋆R = no (λ ())
+∼⊑P {Ref T₁} ∼-⋆R = no (λ ())
+∼⊑P {T₁ `× T₂} ∼-⋆R = no (λ ())
+∼⊑P {`ℕ} ∼-⋆R = no (λ ())
+∼⊑P {Unit} ∼-⋆R = no (λ ())
+∼⊑P {⋆} ∼-⋆R = yes ⊑-refl
+∼⊑P ∼-⋆L = yes ⊑-dyn
 ∼⊑P (~-× x y) with ∼⊑P x | ∼⊑P y
 ∼⊑P (~-× x y) | yes p | yes p₁ = yes (⊑-× p p₁)
 ∼⊑P (~-× x y) | yes p | no ¬p = no λ k → ¬p (⊑-×-injectiveᵣ k)
@@ -111,18 +112,18 @@ data _∼_ : Type → Type → Set where
 ∼≡P : ∀ {T₁ T₂} → T₁ ∼ T₂ → Dec (T₁ ≡ T₂)
 ∼≡P ∼-ℕ-refl = yes refl
 ∼≡P ∼-Unit-refl = yes refl
-∼≡P {T₁ ⇒ T₂} ∼-ld = no (λ ())
-∼≡P {Ref T₁} ∼-ld = no (λ ())
-∼≡P {T₁ `× T₂} ∼-ld = no (λ ())
-∼≡P {`ℕ} ∼-ld = no (λ ())
-∼≡P {Unit} ∼-ld = no (λ ())
-∼≡P {⋆} ∼-ld = yes refl
-∼≡P {T₂ = T₂ ⇒ T₃} ∼-rd = no (λ ())
-∼≡P {T₂ = Ref T₂} ∼-rd = no (λ ())
-∼≡P {T₂ = T₂ `× T₃} ∼-rd = no (λ ())
-∼≡P {T₂ = `ℕ} ∼-rd = no (λ ())
-∼≡P {T₂ = Unit} ∼-rd = no (λ ())
-∼≡P {T₂ = ⋆} ∼-rd = yes refl
+∼≡P {T₁ ⇒ T₂} ∼-⋆R = no (λ ())
+∼≡P {Ref T₁} ∼-⋆R = no (λ ())
+∼≡P {T₁ `× T₂} ∼-⋆R = no (λ ())
+∼≡P {`ℕ} ∼-⋆R = no (λ ())
+∼≡P {Unit} ∼-⋆R = no (λ ())
+∼≡P {⋆} ∼-⋆R = yes refl
+∼≡P {T₂ = T₂ ⇒ T₃} ∼-⋆L = no (λ ())
+∼≡P {T₂ = Ref T₂} ∼-⋆L = no (λ ())
+∼≡P {T₂ = T₂ `× T₃} ∼-⋆L = no (λ ())
+∼≡P {T₂ = `ℕ} ∼-⋆L = no (λ ())
+∼≡P {T₂ = Unit} ∼-⋆L = no (λ ())
+∼≡P {T₂ = ⋆} ∼-⋆L = yes refl
 ∼≡P (~-× x y) with ∼≡P x | ∼≡P y
 ∼≡P (~-× x y) | yes p | yes p₁ = yes (cong₂ _`×_ p p₁)
 ∼≡P (~-× x y) | yes refl | no ¬p = no λ {refl → ¬p refl}
@@ -141,8 +142,8 @@ data _∼_ : Type → Type → Set where
 ⊓ : ∀ {T₁ T₂} → T₁ ∼ T₂ → Type
 ⊓ ∼-ℕ-refl = `ℕ
 ⊓ ∼-Unit-refl = Unit
-⊓ {T₁} ∼-ld = T₁
-⊓ {T₂ = T₂} ∼-rd = T₂
+⊓ {T₁} ∼-⋆R = T₁
+⊓ {T₂ = T₂} ∼-⋆L = T₂
 ⊓ (~-× x y) = (⊓ x) `× (⊓ y)
 ⊓ (~-⇒ x y) = (⊓ x) ⇒ (⊓ y)
 ⊓ (~-ref x) = Ref (⊓ x)
@@ -150,8 +151,8 @@ data _∼_ : Type → Type → Set where
 ⊓⟹⊑ᵣ : ∀ {T₁ T₂} → (T₁∼T₂ : T₁ ∼ T₂) → ⊓ T₁∼T₂ ⊑ T₂
 ⊓⟹⊑ᵣ ∼-ℕ-refl = ⊑-refl
 ⊓⟹⊑ᵣ ∼-Unit-refl = ⊑-refl
-⊓⟹⊑ᵣ ∼-ld = ⊑-dyn
-⊓⟹⊑ᵣ ∼-rd = ⊑-refl
+⊓⟹⊑ᵣ ∼-⋆R = ⊑-dyn
+⊓⟹⊑ᵣ ∼-⋆L = ⊑-refl
 ⊓⟹⊑ᵣ (~-× x x₁) = ⊑-× (⊓⟹⊑ᵣ x) (⊓⟹⊑ᵣ x₁)
 ⊓⟹⊑ᵣ (~-⇒ x x₁) = ⊑-⇒ (⊓⟹⊑ᵣ x) (⊓⟹⊑ᵣ x₁)
 ⊓⟹⊑ᵣ (~-ref x) = ⊑-ref (⊓⟹⊑ᵣ x)
@@ -169,8 +170,8 @@ data _∼_ : Type → Type → Set where
     helper : ∀ {A} → (eq : A ∼ A) → ⊓ eq ≡ A
     helper ∼-ℕ-refl = refl
     helper ∼-Unit-refl = refl
-    helper ∼-ld = refl
-    helper ∼-rd = refl
+    helper ∼-⋆R = refl
+    helper ∼-⋆L = refl
     helper (~-× x y) with helper x
     ... | l rewrite l with helper y
     ... | r rewrite r = refl
@@ -188,8 +189,8 @@ postulate
 -- ¬⊑⟹⊑' : ∀ {A B} → (c : A ∼ B) → ¬ B ⊑ A → A ⊑ B
 -- ¬⊑⟹⊑' ∼-ℕ-refl x = ⊑-refl
 -- ¬⊑⟹⊑' ∼-Unit-refl x = ⊑-refl
--- ¬⊑⟹⊑' ∼-ld x = ⊑-dyn
--- ¬⊑⟹⊑' ∼-rd x with x ⊑-dyn
+-- ¬⊑⟹⊑' ∼-⋆R x = ⊑-dyn
+-- ¬⊑⟹⊑' ∼-⋆L x with x ⊑-dyn
 -- ... | ()
 -- ¬⊑⟹⊑' (~-× c c₁) x = {!!}
 -- ¬⊑⟹⊑' (~-⇒ c c₁) x with ¬⊑-⇒-injective x
@@ -205,9 +206,9 @@ postulate
 ⊑⟹⊓≡ : ∀ {A B} → (c : A ∼ B) → A ⊑ B → ⊓ c ≡ A
 ⊑⟹⊓≡ ∼-ℕ-refl y = refl
 ⊑⟹⊓≡ ∼-Unit-refl y = refl
-⊑⟹⊓≡ ∼-ld y = refl
-⊑⟹⊓≡ ∼-rd ⊑-refl = refl
-⊑⟹⊓≡ ∼-rd ⊑-dyn = refl
+⊑⟹⊓≡ ∼-⋆R y = refl
+⊑⟹⊓≡ ∼-⋆L ⊑-refl = refl
+⊑⟹⊓≡ ∼-⋆L ⊑-dyn = refl
 ⊑⟹⊓≡ (~-× x x₁) ⊑-refl with ⊑⟹⊓≡ x ⊑-refl
 ... | l rewrite l with ⊑⟹⊓≡ x₁ ⊑-refl
 ... | r rewrite r = refl
@@ -252,9 +253,9 @@ postulate
 ¬≡⟹¬⊓∼ : ∀ {A B} → ¬ A ≡ B → B ⊑ A → (c : A ∼ B) → ¬ ⊓ c ≡ A
 ¬≡⟹¬⊓∼ x prec ∼-ℕ-refl w = x refl
 ¬≡⟹¬⊓∼ x prec ∼-Unit-refl w = x refl
-¬≡⟹¬⊓∼ x ⊑-refl ∼-ld w = x refl
-¬≡⟹¬⊓∼ x ⊑-dyn ∼-ld w = x refl
-¬≡⟹¬⊓∼ x prec ∼-rd w = x (sym w)
+¬≡⟹¬⊓∼ x ⊑-refl ∼-⋆R w = x refl
+¬≡⟹¬⊓∼ x ⊑-dyn ∼-⋆R w = x refl
+¬≡⟹¬⊓∼ x prec ∼-⋆L w = x (sym w)
 ¬≡⟹¬⊓∼ x prec (~-× c c₁) w with ¬≡-×-injective x
 ¬≡⟹¬⊓∼ x prec (~-× c c₁) w | inj₁ x₁ with ¬≡⟹¬⊓∼ x₁ (⊑-×-injectiveₗ prec) c
 ...| l = l (≡-×-injectiveₗ w)
@@ -271,8 +272,8 @@ postulate
 ⊓⟹⊑ₗ : ∀ {T₁ T₂} → (T₁∼T₂ : T₁ ∼ T₂) → ⊓ T₁∼T₂ ⊑ T₁
 ⊓⟹⊑ₗ ∼-ℕ-refl = ⊑-refl
 ⊓⟹⊑ₗ ∼-Unit-refl = ⊑-refl
-⊓⟹⊑ₗ ∼-ld = ⊑-refl
-⊓⟹⊑ₗ ∼-rd = ⊑-dyn
+⊓⟹⊑ₗ ∼-⋆R = ⊑-refl
+⊓⟹⊑ₗ ∼-⋆L = ⊑-dyn
 ⊓⟹⊑ₗ (~-× x x₁) = ⊑-× (⊓⟹⊑ₗ x) (⊓⟹⊑ₗ x₁)
 ⊓⟹⊑ₗ (~-⇒ x x₁) = ⊑-⇒ (⊓⟹⊑ₗ x) (⊓⟹⊑ₗ x₁)
 ⊓⟹⊑ₗ (~-ref x) = ⊑-ref (⊓⟹⊑ₗ x)
@@ -287,7 +288,7 @@ postulate
 ∼P (t₁ ⇒ t₃) (t₂ `× t₄) = no (λ ())
 ∼P (t₁ ⇒ t₃) `ℕ = no (λ ())
 ∼P (t₁ ⇒ t₃) Unit = no (λ ())
-∼P (t₁ ⇒ t₃) ⋆ = yes ∼-ld
+∼P (t₁ ⇒ t₃) ⋆ = yes ∼-⋆R
 ∼P (Ref t₁) (t₂ ⇒ t₃) = no (λ ())
 ∼P (Ref t₁) (Ref t₂) with ∼P t₁ t₂
 ∼P (Ref t₁) (Ref t₂) | yes p = yes (~-ref p)
@@ -295,7 +296,7 @@ postulate
 ∼P (Ref t₁) (t₂ `× t₃) = no (λ ())
 ∼P (Ref t₁) `ℕ = no (λ ())
 ∼P (Ref t₁) Unit = no (λ ())
-∼P (Ref t₁) ⋆ = yes ∼-ld
+∼P (Ref t₁) ⋆ = yes ∼-⋆R
 ∼P (t₁ `× t₃) (t₂ ⇒ t₄) = no (λ ())
 ∼P (t₁ `× t₃) (Ref t₂) = no (λ ())
 ∼P (t₁ `× t₃) (t₂ `× t₄) with ∼P t₁ t₂ | ∼P t₃ t₄
@@ -305,20 +306,20 @@ postulate
 ∼P (t₁ `× t₃) (t₂ `× t₄) | no ¬p | no ¬p₁ = no (¬∼×ₗ ¬p)
 ∼P (t₁ `× t₃) `ℕ = no (λ ())
 ∼P (t₁ `× t₃) Unit = no (λ ())
-∼P (t₁ `× t₃) ⋆ = yes ∼-ld
+∼P (t₁ `× t₃) ⋆ = yes ∼-⋆R
 ∼P `ℕ (t₂ ⇒ t₃) = no (λ ())
 ∼P `ℕ (Ref t₂) = no (λ ())
 ∼P `ℕ (t₂ `× t₃) = no (λ ())
 ∼P `ℕ `ℕ = yes ∼-ℕ-refl
 ∼P `ℕ Unit = no (λ ())
-∼P `ℕ ⋆ = yes ∼-ld
+∼P `ℕ ⋆ = yes ∼-⋆R
 ∼P Unit (t₂ ⇒ t₃) = no (λ ())
 ∼P Unit (Ref t₂) = no (λ ())
 ∼P Unit (t₂ `× t₃) = no (λ ())
 ∼P Unit `ℕ = no (λ ())
 ∼P Unit Unit = yes ∼-Unit-refl
-∼P Unit ⋆ = yes ∼-ld
-∼P ⋆ t₂ = yes ∼-rd
+∼P Unit ⋆ = yes ∼-⋆R
+∼P ⋆ t₂ = yes ∼-⋆L
 
 ⊑-trans : Transitive _⊑_
 ⊑-trans ⊑-refl prec2 = prec2

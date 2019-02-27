@@ -1,9 +1,9 @@
-open import Size
-
 open import MonoRef.Static.Types
 
-module MonoRef.Dynamics.Substitution (_⟹_ : Type → Type → Set)
-                                     (_! : (A : Type) → A ⟹ ⋆) where
+module MonoRef.Dynamics.Substitution
+  (_⟹_ : Type → Type → Set)
+  (_! : (A : Type) → A ⟹ ⋆)
+  where
 
 open import MonoRef.Language.TargetWithoutBlame _⟹_ _!
 open import MonoRef.Static.Context

@@ -94,10 +94,10 @@ data Frame {Γ Σ} : (A B : Type) → Set where
 
   ξ-<> : ∀ {A B}
     → A ⟹ B
-      --------
+      ---------
     → Frame A B
 
-
+-- a view for decomposition
 data _≡_[_] {Γ Σ} : ∀ {A B} → Σ ∣ Γ ⊢ B → Frame A B → Σ ∣ Γ ⊢ A → Set where
 
   □-·ₗ : ∀ {A B} {t : Σ ∣ Γ ⊢ A ⇒ B}
