@@ -1,15 +1,12 @@
 module MonoRef.Static.Types.Relations where
 
-open import Data.Product
-  using (_×_)
-open import Data.Sum
-  using (_⊎_ ; inj₁ ; inj₂)
-open import Relation.Binary.PropositionalEquality
-  using (_≡_ ; refl ; cong₂ ; sym)
-open import Relation.Binary
-  using (Reflexive ; Transitive)
-open import Relation.Nullary using
-  (Dec ; yes ; no ; ¬_)
+open import Data.Empty using (⊥; ⊥-elim)
+open import Data.List using (List)
+open import Data.Product using (∃-syntax ; -,_)
+open import Relation.Binary.PropositionalEquality using (_≡_ ; _≢_ ; refl ; cong₂)
+open import Relation.Binary using (Antisymmetric ; Decidable ; Reflexive ; Transitive ; Symmetric)
+open import Relation.Nullary using (Dec ; yes ; no ; ¬_)
+open import Relation.Nullary.Negation using (contradiction)
 
 open import MonoRef.Static.Types
 
@@ -18,29 +15,129 @@ infix  4 _⊑_
 infix  4 static_
 infix  4 _∼_
 
+StoreTyping = List Type
+
+data Injectable : Type → Set where
+  I-⇒    : ∀ {A B} → Injectable (A ⇒ B)
+  I-Ref  : ∀ {A}   → Injectable (Ref A)
+  I-×    : ∀ {A B} → Injectable (A `× B)
+  I-ℕ    :           Injectable `ℕ
+  I-Unit :           Injectable Unit
+
+data Base : Type → Set where
+  B-`ℕ   : Base `ℕ
+  B-Unit : Base Unit
 
 data _⊑_ : Type → Type → Set where
   ⊑-refl : ∀ {A} → A ⊑ A
-  ⊑-dyn : ∀ {A} → A ⊑ ⋆
-  ⊑-× : ∀ {A B C D} → A ⊑ B → C ⊑ D → A `× C ⊑ B `× D
-  ⊑-⇒ : ∀ {A B C D} → A ⊑ B → C ⊑ D → A ⇒ C ⊑ B ⇒ D
-  ⊑-ref : ∀ {A B} → A ⊑ B → Ref A ⊑ Ref B
+  ⊑-dyn  : ∀ {A} → A ⊑ ⋆
+  ⊑-×    : ∀ {A B C D} → A ⊑ B → C ⊑ D → A `× C ⊑ B `× D
+  ⊑-⇒    : ∀ {A B A' B'} → A ⊑ A' → B ⊑ B' → A ⇒ B ⊑ A' ⇒ B'
+  ⊑-ref  : ∀ {A B} → A ⊑ B → Ref A ⊑ Ref B
 
 data static_ : Type → Set where
-  static-ℕ : static `ℕ
+  static-ℕ    : static `ℕ
   static-unit : static Unit
-  static-⇒ : ∀ {A B} → static A → static B → static A ⇒ B
-  static-ref : ∀ {A} → static A → static Ref A
-  static-× : ∀ {A B} → static A → static B → static A `× B
+  static-⇒    : ∀ {A B} → static A → static B → static A ⇒ B
+  static-ref  : ∀ {A} → static A → static Ref A
+  static-×    : ∀ {A B} → static A → static B → static A `× B
 
 data _∼_ : Type → Type → Set where
   ∼-ℕ-refl : `ℕ ∼ `ℕ
   ∼-Unit-refl : Unit ∼ Unit
   ∼-⋆R : ∀ {A} → A ∼ ⋆
   ∼-⋆L : ∀ {A} → ⋆ ∼ A
-  ~-× : ∀ {A B C D} → A ∼ B → C ∼ D → A `× C ∼ B `× D
-  ~-⇒ : ∀ {A B C D} → A ∼ B → C ∼ D → A ⇒ C ∼ B ⇒ D
+  ~-⇒ : ∀ {A B A' B'} → A ∼ B → A' ∼ B' → A ⇒ A' ∼ B ⇒ B'
+  ~-× : ∀ {A B A' B'} → A ∼ B → A' ∼ B' → A `× A' ∼ B `× B'
   ~-ref : ∀ {A B} → A ∼ B → Ref A ∼ Ref B
+
+{- Shallow Consistency, used in Lazy Casts -}
+
+data _⌣_ : Type → Type → Set where
+  ⌣-ℕ-refl : `ℕ ⌣ `ℕ
+  ⌣-Unit-refl : Unit ⌣ Unit
+  ⌣-⋆L : ∀ {A} → ⋆ ⌣ A
+  ⌣-⋆R : ∀ {A} → A ⌣ ⋆
+  ⌣-⇒ : ∀{A B A' B'} → (A ⇒ B) ⌣ (A' ⇒ B')
+  ⌣-× : ∀{A B A' B'} → (A `× B) ⌣ (A' `× B')
+  ⌣-ref : ∀{A B} → (Ref A) ⌣ (Ref B)
+
+≡Type-decidable : Decidable (_≡_ {A = Type})
+≡Type-decidable (A ⇒ B) (A' ⇒ B')
+  with ≡Type-decidable A A' | ≡Type-decidable B B'
+... | yes refl | yes refl = yes refl
+... | yes refl | no B≢B' = no λ {refl → B≢B' refl}
+... | no A≢A'  | _ = no λ {refl → A≢A' refl}
+≡Type-decidable (_ ⇒ _) (Ref _) = no (λ ())
+≡Type-decidable (_ ⇒ _) (_ `× _) = no (λ ())
+≡Type-decidable (_ ⇒ _) `ℕ = no (λ ())
+≡Type-decidable (_ ⇒ _) Unit = no (λ ())
+≡Type-decidable (_ ⇒ _) ⋆ = no (λ ())
+≡Type-decidable (Ref A) (_ ⇒ _) = no (λ ())
+≡Type-decidable (Ref A) (Ref B) with ≡Type-decidable A B
+≡Type-decidable (Ref A) (Ref .A) | yes refl = yes refl
+≡Type-decidable (Ref A) (Ref B) | no A≢B = no (λ {refl → A≢B refl})
+≡Type-decidable (Ref _) (_ `× _) = no (λ ())
+≡Type-decidable (Ref _) `ℕ = no (λ ())
+≡Type-decidable (Ref _) Unit = no (λ ())
+≡Type-decidable (Ref _) ⋆ = no (λ ())
+≡Type-decidable (_ `× _) (_ ⇒ _) = no (λ ())
+≡Type-decidable (_ `× _) (Ref _) = no (λ ())
+≡Type-decidable (A `× B) (A' `× B')
+  with ≡Type-decidable A A' | ≡Type-decidable B B'
+... | yes refl | yes refl = yes refl
+... | yes refl | no B≢B' = no λ {refl → B≢B' refl}
+... | no A≢A' | _ = no λ {refl → A≢A' refl}
+≡Type-decidable (_ `× _) `ℕ = no (λ ())
+≡Type-decidable (_ `× _) Unit = no (λ ())
+≡Type-decidable (_ `× _) ⋆ = no (λ ())
+≡Type-decidable `ℕ (_ ⇒ _) = no (λ ())
+≡Type-decidable `ℕ (Ref _) = no (λ ())
+≡Type-decidable `ℕ (_ `× _) = no (λ ())
+≡Type-decidable `ℕ `ℕ = yes refl
+≡Type-decidable `ℕ Unit = no (λ ())
+≡Type-decidable `ℕ ⋆ = no (λ ())
+≡Type-decidable Unit (_ ⇒ _) = no (λ ())
+≡Type-decidable Unit (Ref _) = no (λ ())
+≡Type-decidable Unit (_ `× _) = no (λ ())
+≡Type-decidable Unit `ℕ = no (λ ())
+≡Type-decidable Unit Unit = yes refl
+≡Type-decidable Unit ⋆ = no (λ ())
+≡Type-decidable ⋆ (_ ⇒ _) = no (λ ())
+≡Type-decidable ⋆ (Ref _) = no (λ ())
+≡Type-decidable ⋆ (_ `× _) = no (λ ())
+≡Type-decidable ⋆ `ℕ = no (λ ())
+≡Type-decidable ⋆ Unit = no (λ ())
+≡Type-decidable ⋆ ⋆ = yes refl
+
+T≡⋆? : (A : Type) → Dec (A ≡ ⋆)
+T≡⋆? ⋆ = yes refl
+T≡⋆? (_ ⇒ _) = no (λ ())
+T≡⋆? (Ref _) = no (λ ())
+T≡⋆? (_ `× _) = no (λ ())
+T≡⋆? `ℕ = no (λ ())
+T≡⋆? Unit = no (λ ())
+
+T≡Ref? : (A : Type) → Dec (∃[ B ] (A ≡ Ref B))
+T≡Ref? (_ ⇒ _) = no (λ ())
+T≡Ref? (Ref _) = yes (-, refl)
+T≡Ref? (_ `× _) = no (λ ())
+T≡Ref? `ℕ = no (λ ())
+T≡Ref? Unit = no (λ ())
+T≡Ref? ⋆ = no (λ ())
+
+¬⋆⇒Injectable : ∀ {A} → A ≢ ⋆ → Injectable A
+¬⋆⇒Injectable {_ ⇒ _}  ¬⋆ = I-⇒
+¬⋆⇒Injectable {Ref _}  ¬⋆ = I-Ref
+¬⋆⇒Injectable {_ `× _} ¬⋆ = I-×
+¬⋆⇒Injectable {`ℕ}     ¬⋆ = I-ℕ
+¬⋆⇒Injectable {Unit}   ¬⋆ = I-Unit
+¬⋆⇒Injectable {⋆}      ¬⋆ = contradiction refl ¬⋆
+
+Injectable⋆⇒⊥ : Injectable ⋆ → ⊥
+Injectable⋆⇒⊥ ()
+
+{- Properties of the consistency relation -}
 
 ∼-refl : Reflexive _∼_
 ∼-refl {_ ⇒ _} = ~-⇒ ∼-refl ∼-refl
@@ -50,95 +147,207 @@ data _∼_ : Type → Type → Set where
 ∼-refl {Unit} = ∼-Unit-refl
 ∼-refl {⋆} = ∼-⋆R
 
-¬∼×ₗ : ∀ {T₁ T₂ T₃ T₄} → ¬ T₁ ∼ T₂ → ¬ (_`×_ T₁ T₃) ∼ (_`×_ T₂ T₄)
-¬∼×ₗ ¬T₁∼T₂ (~-× x _) = ¬T₁∼T₂ x
+∼-sym : Symmetric _∼_
+∼-sym ∼-ℕ-refl = ∼-ℕ-refl
+∼-sym ∼-Unit-refl = ∼-Unit-refl
+∼-sym ∼-⋆R = ∼-⋆L
+∼-sym ∼-⋆L = ∼-⋆R
+∼-sym (~-⇒ x x₁) = ~-⇒ (∼-sym x) (∼-sym x₁)
+∼-sym (~-× x x₁) = ~-× (∼-sym x) (∼-sym x₁)
+∼-sym (~-ref x) = ~-ref (∼-sym x)
 
-¬∼×ᵣ : ∀ {T₁ T₂ T₃ T₄} → ¬ T₃ ∼ T₄ → ¬ (_`×_ T₁ T₃) ∼ (_`×_ T₂ T₄)
-¬∼×ᵣ ¬T₃∼T₄ (~-× _ x) = ¬T₃∼T₄ x
+∼-decidable : Decidable _∼_
+∼-decidable (A ⇒ B) (A' ⇒ B')
+  with ∼-decidable A A' | ∼-decidable B B'
+... | yes p | yes p₁ = yes (~-⇒ p p₁)
+... | yes p | no ¬p = no λ {(~-⇒ _ x) → ¬p x}
+... | no ¬p | yes p = no λ {(~-⇒ x _) → ¬p x}
+... | no ¬p | no ¬p₁ = no λ {(~-⇒ x _) → ¬p x}
+∼-decidable (_ ⇒ _) (Ref _) = no (λ ())
+∼-decidable (_ ⇒ _) (_ `× _) = no (λ ())
+∼-decidable (_ ⇒ _) `ℕ = no (λ ())
+∼-decidable (_ ⇒ _) Unit = no (λ ())
+∼-decidable (_ ⇒ _) ⋆ = yes ∼-⋆R
+∼-decidable (Ref _) (_ ⇒ _) = no (λ ())
+∼-decidable (Ref A) (Ref B)
+  with ∼-decidable A B
+... | yes p = yes (~-ref p)
+... | no ¬p = no λ {(~-ref x) → ¬p x}
+∼-decidable (Ref _) (_ `× _) = no (λ ())
+∼-decidable (Ref _) `ℕ = no (λ ())
+∼-decidable (Ref _) Unit = no (λ ())
+∼-decidable (Ref _) ⋆ = yes ∼-⋆R
+∼-decidable (_ `× _) (_ ⇒ _) = no (λ ())
+∼-decidable (_ `× _) (Ref _) = no (λ ())
+∼-decidable (A `× B) (A' `× B')
+  with ∼-decidable A A' | ∼-decidable B B'
+... | yes p | yes p₁ = yes (~-× p p₁)
+... | yes p | no ¬p = no λ {(~-× _ x) → ¬p x}
+... | no ¬p | yes p = no λ {(~-× x _) → ¬p x}
+... | no ¬p | no ¬p₁ = no λ {(~-× x _) → ¬p x}
+∼-decidable (_ `× _) `ℕ = no (λ ())
+∼-decidable (_ `× _) Unit = no (λ ())
+∼-decidable (_ `× _) ⋆ = yes ∼-⋆R
+∼-decidable `ℕ (A' ⇒ B) = no (λ ())
+∼-decidable `ℕ (Ref _) = no (λ ())
+∼-decidable `ℕ (_ `× _) = no (λ ())
+∼-decidable `ℕ `ℕ = yes ∼-ℕ-refl
+∼-decidable `ℕ Unit = no (λ ())
+∼-decidable `ℕ ⋆ = yes ∼-⋆R
+∼-decidable Unit (_ ⇒ _) = no (λ ())
+∼-decidable Unit (Ref _) = no (λ ())
+∼-decidable Unit (_ `× _) = no (λ ())
+∼-decidable Unit `ℕ = no (λ ())
+∼-decidable Unit Unit = yes ∼-Unit-refl
+∼-decidable Unit ⋆ = yes ∼-⋆R
+∼-decidable ⋆ _ = yes ∼-⋆L
 
-¬∼⇒ᵢ : ∀ {T₁ T₂ T₃ T₄} → ¬ T₁ ∼ T₂ → ¬ (_⇒_ T₁ T₃) ∼ (_⇒_ T₂ T₄)
-¬∼⇒ᵢ ¬T₁∼T₂ (~-⇒ x _) = ¬T₁∼T₂ x
+{- Properties of shallow consistency -}
 
-¬∼⇒ₒ : ∀ {T₁ T₂ T₃ T₄} → ¬ T₃ ∼ T₄ → ¬ (_⇒_ T₁ T₃) ∼ (_⇒_ T₂ T₄)
-¬∼⇒ₒ ¬T₃∼T₄ (~-⇒ _ x) = ¬T₃∼T₄ x
+⌣-decidable : Decidable _⌣_
+⌣-decidable (_ ⇒ _) (_ ⇒ _) = yes ⌣-⇒
+⌣-decidable (_ ⇒ _) (Ref _) = no (λ ())
+⌣-decidable (_ ⇒ _) (_ `× _) = no (λ ())
+⌣-decidable (_ ⇒ _) `ℕ = no (λ ())
+⌣-decidable (_ ⇒ _) Unit = no (λ ())
+⌣-decidable (_ ⇒ _) ⋆ = yes ⌣-⋆R
+⌣-decidable (Ref _) (_ ⇒ _) = no (λ ())
+⌣-decidable (Ref _) (Ref _) = yes ⌣-ref
+⌣-decidable (Ref _) (_ `× _) = no (λ ())
+⌣-decidable (Ref _) `ℕ = no (λ ())
+⌣-decidable (Ref _) Unit = no (λ ())
+⌣-decidable (Ref _) ⋆ = yes ⌣-⋆R
+⌣-decidable (_ `× _) (_ ⇒ _) = no (λ ())
+⌣-decidable (_ `× _) (Ref _) = no (λ ())
+⌣-decidable (_ `× _) (_ `× _) = yes ⌣-×
+⌣-decidable (_ `× _) `ℕ = no (λ ())
+⌣-decidable (_ `× _) Unit = no (λ ())
+⌣-decidable (_ `× _) ⋆ = yes ⌣-⋆R
+⌣-decidable `ℕ (_ ⇒ _) = no (λ ())
+⌣-decidable `ℕ (Ref _) = no (λ ())
+⌣-decidable `ℕ (_ `× _) = no (λ ())
+⌣-decidable `ℕ `ℕ = yes ⌣-ℕ-refl
+⌣-decidable `ℕ Unit = no (λ ())
+⌣-decidable `ℕ ⋆ = yes ⌣-⋆R
+⌣-decidable Unit (_ ⇒ _) = no (λ ())
+⌣-decidable Unit (Ref _) = no (λ ())
+⌣-decidable Unit (_ `× _) = no (λ ())
+⌣-decidable Unit `ℕ = no (λ ())
+⌣-decidable Unit Unit = yes ⌣-Unit-refl
+⌣-decidable Unit ⋆ = yes ⌣-⋆R
+⌣-decidable ⋆ _ = yes ⌣-⋆L
 
-¬∼Ref : ∀ {T₁ T₂} → ¬ T₁ ∼ T₂ → ¬ (Ref T₁) ∼ (Ref T₂)
-¬∼Ref ¬T₁∼T₂ (~-ref x) = ¬T₁∼T₂ x
+⌣-decidableᵢ : ∀ {A B} → Injectable A → Injectable B → Dec (A ⌣ B)
+⌣-decidableᵢ {A} {B} _ _ = ⌣-decidable A B
 
-⊑-Ref-injective : ∀ {A B : Type} → Ref A ⊑ Ref B → A ⊑ B
-⊑-Ref-injective ⊑-refl = ⊑-refl
-⊑-Ref-injective (⊑-ref x) = x
+{- Properties of type precision  -}
 
-⊑-⇒-injectiveₗ : ∀ {A B C D : Type} → A ⇒ C ⊑ B ⇒ D → A ⊑ B
-⊑-⇒-injectiveₗ ⊑-refl = ⊑-refl
-⊑-⇒-injectiveₗ (⊑-⇒ x _) = x
+⊑-trans : Transitive _⊑_
+⊑-trans ⊑-refl prec2 = prec2
+⊑-trans ⊑-dyn ⊑-refl = ⊑-dyn
+⊑-trans ⊑-dyn ⊑-dyn = ⊑-dyn
+⊑-trans (⊑-× prec1 prec3) ⊑-refl = ⊑-× prec1 prec3
+⊑-trans (⊑-× prec1 prec3) ⊑-dyn = ⊑-dyn
+⊑-trans (⊑-× prec1 prec3) (⊑-× prec2 prec4) =
+  ⊑-× (⊑-trans prec1 prec2) (⊑-trans prec3 prec4)
+⊑-trans (⊑-⇒ prec1 prec3) ⊑-refl = ⊑-⇒ prec1 prec3
+⊑-trans (⊑-⇒ prec1 prec3) ⊑-dyn = ⊑-dyn
+⊑-trans (⊑-⇒ prec1 prec3) (⊑-⇒ prec2 prec4) =
+  ⊑-⇒ (⊑-trans prec1 prec2) (⊑-trans prec3 prec4)
+⊑-trans (⊑-ref prec1) ⊑-refl = ⊑-ref prec1
+⊑-trans (⊑-ref prec1) ⊑-dyn = ⊑-dyn
+⊑-trans (⊑-ref prec1) (⊑-ref prec2) = ⊑-ref (⊑-trans prec1 prec2)
 
-⊑-⇒-injectiveᵣ : ∀ {A B C D : Type} → A ⇒ C ⊑ B ⇒ D → C ⊑ D
-⊑-⇒-injectiveᵣ ⊑-refl = ⊑-refl
-⊑-⇒-injectiveᵣ (⊑-⇒ _ x) = x
+⋆⊑⋆ : ∀ {A} → ⋆ ⊑ A → A ≡ ⋆
+⋆⊑⋆ ⊑-refl = refl
+⋆⊑⋆ ⊑-dyn = refl
 
-⊑-×-injectiveₗ : ∀ {A B C D : Type} → A `× C ⊑ B `× D → A ⊑ B
-⊑-×-injectiveₗ ⊑-refl = ⊑-refl
-⊑-×-injectiveₗ (⊑-× x _) = x
+⊑-antisymmetric : Antisymmetric _≡_ _⊑_
+⊑-antisymmetric ⊑-refl _ = refl
+⊑-antisymmetric ⊑-dyn x = ⋆⊑⋆ x
+⊑-antisymmetric (⊑-× a b) x
+  with ⊑-antisymmetric a | ⊑-antisymmetric b
+⊑-antisymmetric (⊑-× a b) ⊑-refl | w | q = refl
+⊑-antisymmetric (⊑-× a b) (⊑-× a' b') | w | q rewrite w a' | q b' = refl
+⊑-antisymmetric (⊑-⇒ a b) x
+  with ⊑-antisymmetric a | ⊑-antisymmetric b
+⊑-antisymmetric (⊑-⇒ a b) ⊑-refl | w | q = refl
+⊑-antisymmetric (⊑-⇒ a b) (⊑-⇒ a' b') | w | q rewrite w a' | q b' = refl
+⊑-antisymmetric (⊑-ref a) ⊑-refl = refl
+⊑-antisymmetric (⊑-ref a) (⊑-ref x)
+  with ⊑-antisymmetric a
+... | w rewrite w x = refl
 
-⊑-×-injectiveᵣ : ∀ {A B C D : Type} → A `× C ⊑ B `× D → C ⊑ D
-⊑-×-injectiveᵣ ⊑-refl = ⊑-refl
-⊑-×-injectiveᵣ (⊑-× _ x) = x
+⊑-decidable : Decidable _⊑_
+⊑-decidable (A ⇒ B) (A' ⇒ B')
+  with ⊑-decidable A A' | ⊑-decidable B B'
+... | yes A⊑A' | yes B⊑B' = yes (⊑-⇒ A⊑A' B⊑B')
+... | yes A⊑A' | no ¬B⊑B' = no λ { ⊑-refl → ¬B⊑B' ⊑-refl ; (⊑-⇒ _ x) → ¬B⊑B' x}
+... | no ¬A⊑A' | q = no (λ { ⊑-refl → ¬A⊑A' ⊑-refl ; (⊑-⇒ x _) → ¬A⊑A' x})
+⊑-decidable (_ ⇒ _) (Ref _) = no (λ ())
+⊑-decidable (_ ⇒ _) (_ `× _) = no (λ ())
+⊑-decidable (_ ⇒ _) `ℕ = no (λ ())
+⊑-decidable (_ ⇒ _) Unit = no (λ ())
+⊑-decidable (_ ⇒ _) ⋆ = yes ⊑-dyn
+⊑-decidable (Ref _) (_ ⇒ _) = no (λ ())
+⊑-decidable (Ref A) (Ref B)
+  with ⊑-decidable A B
+... | yes A⊑B = yes (⊑-ref A⊑B)
+... | no ¬A⊑A' = no (λ { ⊑-refl → ¬A⊑A' ⊑-refl ; (⊑-ref x) → ¬A⊑A' x})
+⊑-decidable (Ref _) (_ `× _) = no (λ ())
+⊑-decidable (Ref _) `ℕ = no (λ ())
+⊑-decidable (Ref _) Unit = no (λ ())
+⊑-decidable (Ref _) ⋆ = yes ⊑-dyn
+⊑-decidable (A `× B) (A' `× B')
+  with ⊑-decidable A A' | ⊑-decidable B B'
+... | yes A⊑A' | yes B⊑B' = yes (⊑-× A⊑A' B⊑B')
+... | yes A⊑A' | no ¬B⊑B' = no λ { ⊑-refl → ¬B⊑B' ⊑-refl ; (⊑-× _ x) → ¬B⊑B' x}
+... | no ¬A⊑A' | q = no (λ { ⊑-refl → ¬A⊑A' ⊑-refl ; (⊑-× x _) → ¬A⊑A' x})
+⊑-decidable (_ `× _) (Ref _) = no (λ ())
+⊑-decidable (_ `× _) (_ ⇒ _) = no (λ ())
+⊑-decidable (_ `× _) `ℕ = no (λ ())
+⊑-decidable (_ `× _) Unit = no (λ ())
+⊑-decidable (_ `× _) ⋆ = yes ⊑-dyn
+⊑-decidable `ℕ (_ ⇒ _) = no (λ ())
+⊑-decidable `ℕ (Ref _) = no (λ ())
+⊑-decidable `ℕ (_ `× _) = no (λ ())
+⊑-decidable `ℕ `ℕ = yes ⊑-refl
+⊑-decidable `ℕ Unit = no (λ ())
+⊑-decidable `ℕ ⋆ = yes ⊑-dyn
+⊑-decidable Unit (_ ⇒ _) = no (λ ())
+⊑-decidable Unit (Ref _) = no (λ ())
+⊑-decidable Unit (_ `× _) = no (λ ())
+⊑-decidable Unit `ℕ = no (λ ())
+⊑-decidable Unit Unit = yes ⊑-refl
+⊑-decidable Unit ⋆ = yes ⊑-dyn
+⊑-decidable ⋆ (_ ⇒ _) = no (λ ())
+⊑-decidable ⋆ (Ref _) = no (λ ())
+⊑-decidable ⋆ (_ `× _) = no (λ ())
+⊑-decidable ⋆ `ℕ = no (λ ())
+⊑-decidable ⋆ Unit = no (λ ())
+⊑-decidable ⋆ ⋆ = yes ⊑-refl
 
-∼⊑P : ∀ {T₁ T₂} → T₁ ∼ T₂ → Dec (T₂ ⊑ T₁)
-∼⊑P ∼-ℕ-refl = yes ⊑-refl
-∼⊑P ∼-Unit-refl = yes ⊑-refl
-∼⊑P {T₁ ⇒ T₂} ∼-⋆R = no (λ ())
-∼⊑P {Ref T₁} ∼-⋆R = no (λ ())
-∼⊑P {T₁ `× T₂} ∼-⋆R = no (λ ())
-∼⊑P {`ℕ} ∼-⋆R = no (λ ())
-∼⊑P {Unit} ∼-⋆R = no (λ ())
-∼⊑P {⋆} ∼-⋆R = yes ⊑-refl
-∼⊑P ∼-⋆L = yes ⊑-dyn
-∼⊑P (~-× x y) with ∼⊑P x | ∼⊑P y
-∼⊑P (~-× x y) | yes p | yes p₁ = yes (⊑-× p p₁)
-∼⊑P (~-× x y) | yes p | no ¬p = no λ k → ¬p (⊑-×-injectiveᵣ k)
-∼⊑P (~-× x y) | no ¬p | yes p = no λ k → ¬p (⊑-×-injectiveₗ k)
-∼⊑P (~-× x y) | no ¬p | no ¬p₁ = no λ k → ¬p (⊑-×-injectiveₗ k)
-∼⊑P (~-⇒ x y) with ∼⊑P x | ∼⊑P y
-∼⊑P (~-⇒ x y) | yes p | yes p₁ = yes (⊑-⇒ p p₁)
-∼⊑P (~-⇒ x y) | yes p | no ¬p = no λ k → ¬p (⊑-⇒-injectiveᵣ k)
-∼⊑P (~-⇒ x y) | no ¬p | yes p = no λ k → ¬p (⊑-⇒-injectiveₗ k)
-∼⊑P (~-⇒ x y) | no ¬p | no ¬p₁ = no λ k → ¬p (⊑-⇒-injectiveₗ k)
-∼⊑P (~-ref x) with ∼⊑P x
-∼⊑P (~-ref x) | yes p = yes (⊑-ref p)
-∼⊑P (~-ref x) | no ¬p = no λ k → ¬p (⊑-Ref-injective k)
+⊑-respect-static : ∀ {t t'} → t' ⊑ t → static t → t' ≡ t
+⊑-respect-static ⊑-refl st = refl
+⊑-respect-static ⊑-dyn ()
+⊑-respect-static (⊑-× prec₁ prec₂) (static-× st₁ st₂)
+  with ⊑-respect-static prec₁ st₁ | ⊑-respect-static prec₂ st₂
+... | refl | refl = refl
+⊑-respect-static (⊑-⇒ prec₁ prec₂) (static-⇒ st₁ st₂)
+  with ⊑-respect-static prec₁ st₁ | ⊑-respect-static prec₂ st₂
+... | refl | refl = refl
+⊑-respect-static (⊑-ref prec) (static-ref st) with ⊑-respect-static prec st
+... | refl = refl
 
-∼≡P : ∀ {T₁ T₂} → T₁ ∼ T₂ → Dec (T₁ ≡ T₂)
-∼≡P ∼-ℕ-refl = yes refl
-∼≡P ∼-Unit-refl = yes refl
-∼≡P {T₁ ⇒ T₂} ∼-⋆R = no (λ ())
-∼≡P {Ref T₁} ∼-⋆R = no (λ ())
-∼≡P {T₁ `× T₂} ∼-⋆R = no (λ ())
-∼≡P {`ℕ} ∼-⋆R = no (λ ())
-∼≡P {Unit} ∼-⋆R = no (λ ())
-∼≡P {⋆} ∼-⋆R = yes refl
-∼≡P {T₂ = T₂ ⇒ T₃} ∼-⋆L = no (λ ())
-∼≡P {T₂ = Ref T₂} ∼-⋆L = no (λ ())
-∼≡P {T₂ = T₂ `× T₃} ∼-⋆L = no (λ ())
-∼≡P {T₂ = `ℕ} ∼-⋆L = no (λ ())
-∼≡P {T₂ = Unit} ∼-⋆L = no (λ ())
-∼≡P {T₂ = ⋆} ∼-⋆L = yes refl
-∼≡P (~-× x y) with ∼≡P x | ∼≡P y
-∼≡P (~-× x y) | yes p | yes p₁ = yes (cong₂ _`×_ p p₁)
-∼≡P (~-× x y) | yes refl | no ¬p = no λ {refl → ¬p refl}
-∼≡P (~-× x y) | no ¬p | yes p = no λ {refl → ¬p refl}
-∼≡P (~-× x y) | no ¬p | no ¬p₁ = no λ {refl → ¬p refl}
-∼≡P (~-⇒ x y) with ∼≡P x | ∼≡P y
-∼≡P (~-⇒ x y) | yes p | yes p₁ = yes (cong₂ _⇒_ p p₁)
-∼≡P (~-⇒ x y) | yes p | no ¬p = no λ {refl → ¬p refl}
-∼≡P (~-⇒ x y) | no ¬p | yes p = no λ {refl → ¬p refl}
-∼≡P (~-⇒ x y) | no ¬p | no ¬p₁ = no λ {refl → ¬p refl}
-∼≡P (~-ref x) with ∼≡P x
-∼≡P (~-ref x) | yes refl = yes refl
-∼≡P (~-ref x) | no ¬p = no λ {refl → ¬p refl}
+⊑⇒∼ : ∀ {A B} → A ⊑ B → A ∼ B
+⊑⇒∼ ⊑-refl = ∼-refl
+⊑⇒∼ ⊑-dyn = ∼-⋆R
+⊑⇒∼ (⊑-× x y) = ~-× (⊑⇒∼ x) (⊑⇒∼ y)
+⊑⇒∼ (⊑-⇒ x y) = ~-⇒ (⊑⇒∼ x) (⊑⇒∼ y)
+⊑⇒∼ (⊑-ref x) = ~-ref (⊑⇒∼ x)
 
--- greatest lower bound
+{- greatest lower bound function -}
+
 ⊓ : ∀ {T₁ T₂} → T₁ ∼ T₂ → Type
 ⊓ ∼-ℕ-refl = `ℕ
 ⊓ ∼-Unit-refl = Unit
@@ -160,115 +369,6 @@ data _∼_ : Type → Type → Set where
 ⊓⟹⊑ᵣ-with-≡ : ∀ {T T₁ T₂} → (T₁∼T₂ : T₁ ∼ T₂) → ⊓ T₁∼T₂ ≡ T → T ⊑ T₂
 ⊓⟹⊑ᵣ-with-≡ T₁∼T₂ refl = ⊓⟹⊑ᵣ T₁∼T₂
 
-≡⟹∼ : ∀ {T₁ T₂} → T₁ ≡ T₂ → T₁ ∼ T₂
-≡⟹∼ {T₁} {T₂} refl = ∼-refl
-
-≡⟹⊓∼ : ∀ {A B} → (eq : A ≡ B) → ⊓ (≡⟹∼ eq) ≡ A
-≡⟹⊓∼ eq with ≡⟹∼ eq
-... | consis rewrite eq = helper consis
-  where
-    helper : ∀ {A} → (eq : A ∼ A) → ⊓ eq ≡ A
-    helper ∼-ℕ-refl = refl
-    helper ∼-Unit-refl = refl
-    helper ∼-⋆R = refl
-    helper ∼-⋆L = refl
-    helper (~-× x y) with helper x
-    ... | l rewrite l with helper y
-    ... | r rewrite r = refl
-    helper (~-⇒ x y) with helper x
-    ... | l rewrite l with helper y
-    ... | r rewrite r = refl
-    helper (~-ref x) with helper x
-    ... | w rewrite w = refl
-
-postulate
-  ¬⊑⟹⊑' : ∀ {A B} → (c : A ∼ B) → ¬ B ⊑ A → A ⊑ B
-  -- ¬ (⋆ ⇒ Int) ⊑ (Int ⇒ Int)
-  -- ¬⊑-⇒-injective : ∀ {A B C D : Type} → ¬ ((A ⇒ C) ⊑ (B ⇒ D)) → ((¬ A ⊑ B) × (¬ C ⊑ D)) ⊎ ((¬ A ⊑ B) × (C ⊑ D)) ⊎ ((B ⊑ A) × (¬ C ⊑ D))
-
--- ¬⊑⟹⊑' : ∀ {A B} → (c : A ∼ B) → ¬ B ⊑ A → A ⊑ B
--- ¬⊑⟹⊑' ∼-ℕ-refl x = ⊑-refl
--- ¬⊑⟹⊑' ∼-Unit-refl x = ⊑-refl
--- ¬⊑⟹⊑' ∼-⋆R x = ⊑-dyn
--- ¬⊑⟹⊑' ∼-⋆L x with x ⊑-dyn
--- ... | ()
--- ¬⊑⟹⊑' (~-× c c₁) x = {!!}
--- ¬⊑⟹⊑' (~-⇒ c c₁) x with ¬⊑-⇒-injective x
--- ¬⊑⟹⊑' (~-⇒ c c₁) x | inj₁ (fst , snd) = ⊑-⇒ (¬⊑⟹⊑' c fst) (¬⊑⟹⊑' c₁ snd)
--- ¬⊑⟹⊑' (~-⇒ c c₁) x | inj₂ (inj₁ (fst , ⊑-refl)) = ⊑-⇒ (¬⊑⟹⊑' c fst) ⊑-refl
--- ¬⊑⟹⊑' (~-⇒ c c₁) x | inj₂ (inj₁ (fst , ⊑-dyn)) = {!!}
--- ¬⊑⟹⊑' (~-⇒ c c₁) x | inj₂ (inj₁ (fst , ⊑-× snd snd₁)) = ⊑-⇒ (¬⊑⟹⊑' c fst) {!!}
--- ¬⊑⟹⊑' (~-⇒ c c₁) x | inj₂ (inj₁ (fst , ⊑-⇒ snd snd₁)) = ⊑-⇒ (¬⊑⟹⊑' c fst) {!!}
--- ¬⊑⟹⊑' (~-⇒ c c₁) x | inj₂ (inj₁ (fst , ⊑-ref snd)) = ⊑-⇒ (¬⊑⟹⊑' c fst) {!!}
--- ¬⊑⟹⊑' (~-⇒ c c₁) x | inj₂ (inj₂ y) = {!!}
--- ¬⊑⟹⊑' (~-ref c) x = ⊑-ref (¬⊑⟹⊑' c (λ z → x (⊑-ref z)))
-
-⊑⟹⊓≡ : ∀ {A B} → (c : A ∼ B) → A ⊑ B → ⊓ c ≡ A
-⊑⟹⊓≡ ∼-ℕ-refl y = refl
-⊑⟹⊓≡ ∼-Unit-refl y = refl
-⊑⟹⊓≡ ∼-⋆R y = refl
-⊑⟹⊓≡ ∼-⋆L ⊑-refl = refl
-⊑⟹⊓≡ ∼-⋆L ⊑-dyn = refl
-⊑⟹⊓≡ (~-× x x₁) ⊑-refl with ⊑⟹⊓≡ x ⊑-refl
-... | l rewrite l with ⊑⟹⊓≡ x₁ ⊑-refl
-... | r rewrite r = refl
-⊑⟹⊓≡ (~-× x x₁) (⊑-× y y₁) with ⊑⟹⊓≡ x y 
-... | l rewrite l with ⊑⟹⊓≡ x₁ y₁
-... | r rewrite r = refl
-⊑⟹⊓≡ (~-⇒ x x₁) ⊑-refl with ⊑⟹⊓≡ x ⊑-refl
-... | l rewrite l with ⊑⟹⊓≡ x₁ ⊑-refl
-... | r rewrite r = refl
-⊑⟹⊓≡ (~-⇒ x x₁) (⊑-⇒ y y₁) with ⊑⟹⊓≡ x y 
-... | l rewrite l with ⊑⟹⊓≡ x₁ y₁
-... | r rewrite r = refl
-⊑⟹⊓≡ (~-ref x) ⊑-refl with ⊑⟹⊓≡ x ⊑-refl
-... | w rewrite w = refl
-⊑⟹⊓≡ (~-ref x) (⊑-ref y) with ⊑⟹⊓≡ x y
-... | w rewrite w = refl
-
-¬⊑⟹⊓≡ : ∀ {A B} → (c : A ∼ B) → ¬ B ⊑ A → ⊓ c ≡ A
-¬⊑⟹⊓≡ x y with ¬⊑⟹⊑' x y
-... | w = ⊑⟹⊓≡ x w
-
-≡-Ref-injective : ∀ {A B : Type} → (_≡_ {A = Type} (Ref A) (Ref B)) → A ≡ B
-≡-Ref-injective refl = refl
-
-≡-⇒-injectiveₗ : ∀ {A B C D : Type} → (_≡_ {A = Type} (A ⇒ C) (B ⇒ D)) → A ≡ B
-≡-⇒-injectiveₗ refl = refl
-
-≡-⇒-injectiveᵣ : ∀ {A B C D : Type} → (_≡_ {A = Type} (A ⇒ C) (B ⇒ D)) → C ≡ D
-≡-⇒-injectiveᵣ refl = refl
-
--- TODO: prove these
-postulate
-  ¬≡-⇒-injective : ∀ {A B C D : Type} → ¬ (_≡_ {A = Type} (A ⇒ C) (B ⇒ D)) → (¬ A ≡ B) ⊎ (¬ C ≡ D)
-  ¬≡-×-injective : ∀ {A B C D : Type} → ¬ (_≡_ {A = Type} (A `× C) (B `× D)) → (¬ A ≡ B) ⊎ (¬ C ≡ D)
-
-≡-×-injectiveₗ : ∀ {A B C D : Type} → (_≡_ {A = Type} (A `× C) (B `× D)) → A ≡ B
-≡-×-injectiveₗ refl = refl
-
-≡-×-injectiveᵣ : ∀ {A B C D : Type} → (_≡_ {A = Type} (A `× C) (B `× D)) → C ≡ D
-≡-×-injectiveᵣ refl = refl
-
-¬≡⟹¬⊓∼ : ∀ {A B} → ¬ A ≡ B → B ⊑ A → (c : A ∼ B) → ¬ ⊓ c ≡ A
-¬≡⟹¬⊓∼ x prec ∼-ℕ-refl w = x refl
-¬≡⟹¬⊓∼ x prec ∼-Unit-refl w = x refl
-¬≡⟹¬⊓∼ x ⊑-refl ∼-⋆R w = x refl
-¬≡⟹¬⊓∼ x ⊑-dyn ∼-⋆R w = x refl
-¬≡⟹¬⊓∼ x prec ∼-⋆L w = x (sym w)
-¬≡⟹¬⊓∼ x prec (~-× c c₁) w with ¬≡-×-injective x
-¬≡⟹¬⊓∼ x prec (~-× c c₁) w | inj₁ x₁ with ¬≡⟹¬⊓∼ x₁ (⊑-×-injectiveₗ prec) c
-...| l = l (≡-×-injectiveₗ w)
-¬≡⟹¬⊓∼ x prec (~-× c c₁) w | inj₂ y with ¬≡⟹¬⊓∼ y (⊑-×-injectiveᵣ prec) c₁
-... | r = r (≡-×-injectiveᵣ w)
-¬≡⟹¬⊓∼ x prec (~-⇒ c c₁) w with ¬≡-⇒-injective x
-¬≡⟹¬⊓∼ x prec (~-⇒ c c₁) w | inj₁ x₁ with ¬≡⟹¬⊓∼ x₁ (⊑-⇒-injectiveₗ prec) c
-... | l = l (≡-⇒-injectiveₗ w)
-¬≡⟹¬⊓∼ x prec (~-⇒ c c₁) w | inj₂ y with ¬≡⟹¬⊓∼ y (⊑-⇒-injectiveᵣ prec) c₁
-... | r = r (≡-⇒-injectiveᵣ w)
-¬≡⟹¬⊓∼ x prec (~-ref c) w with ¬≡⟹¬⊓∼ (λ{ refl → x refl}) (⊑-Ref-injective prec) c
-... | g = g (≡-Ref-injective w)
-
 ⊓⟹⊑ₗ : ∀ {T₁ T₂} → (T₁∼T₂ : T₁ ∼ T₂) → ⊓ T₁∼T₂ ⊑ T₁
 ⊓⟹⊑ₗ ∼-ℕ-refl = ⊑-refl
 ⊓⟹⊑ₗ ∼-Unit-refl = ⊑-refl
@@ -278,69 +378,17 @@ postulate
 ⊓⟹⊑ₗ (~-⇒ x x₁) = ⊑-⇒ (⊓⟹⊑ₗ x) (⊓⟹⊑ₗ x₁)
 ⊓⟹⊑ₗ (~-ref x) = ⊑-ref (⊓⟹⊑ₗ x)
 
-∼P : (T₁ T₂ : Type) → Dec (T₁ ∼ T₂)
-∼P (t₁ ⇒ t₃) (t₂ ⇒ t₄) with ∼P t₁ t₂ | ∼P t₃ t₄
-∼P (t₁ ⇒ t₃) (t₂ ⇒ t₄) | yes p | yes p₁ = yes (~-⇒ p p₁)
-∼P (t₁ ⇒ t₃) (t₂ ⇒ t₄) | yes p | no ¬p = no (¬∼⇒ₒ ¬p)
-∼P (t₁ ⇒ t₃) (t₂ ⇒ t₄) | no ¬p | yes p = no (¬∼⇒ᵢ ¬p)
-∼P (t₁ ⇒ t₃) (t₂ ⇒ t₄) | no ¬p | no ¬p₁ = no (¬∼⇒ᵢ ¬p)
-∼P (t₁ ⇒ t₃) (Ref t₂) = no (λ ())
-∼P (t₁ ⇒ t₃) (t₂ `× t₄) = no (λ ())
-∼P (t₁ ⇒ t₃) `ℕ = no (λ ())
-∼P (t₁ ⇒ t₃) Unit = no (λ ())
-∼P (t₁ ⇒ t₃) ⋆ = yes ∼-⋆R
-∼P (Ref t₁) (t₂ ⇒ t₃) = no (λ ())
-∼P (Ref t₁) (Ref t₂) with ∼P t₁ t₂
-∼P (Ref t₁) (Ref t₂) | yes p = yes (~-ref p)
-∼P (Ref t₁) (Ref t₂) | no ¬p = no (¬∼Ref ¬p)
-∼P (Ref t₁) (t₂ `× t₃) = no (λ ())
-∼P (Ref t₁) `ℕ = no (λ ())
-∼P (Ref t₁) Unit = no (λ ())
-∼P (Ref t₁) ⋆ = yes ∼-⋆R
-∼P (t₁ `× t₃) (t₂ ⇒ t₄) = no (λ ())
-∼P (t₁ `× t₃) (Ref t₂) = no (λ ())
-∼P (t₁ `× t₃) (t₂ `× t₄) with ∼P t₁ t₂ | ∼P t₃ t₄
-∼P (t₁ `× t₃) (t₂ `× t₄) | yes p | yes p₁ = yes (~-× p p₁)
-∼P (t₁ `× t₃) (t₂ `× t₄) | yes p | no ¬p = no (¬∼×ᵣ ¬p)
-∼P (t₁ `× t₃) (t₂ `× t₄) | no ¬p | yes p = no (¬∼×ₗ ¬p)
-∼P (t₁ `× t₃) (t₂ `× t₄) | no ¬p | no ¬p₁ = no (¬∼×ₗ ¬p)
-∼P (t₁ `× t₃) `ℕ = no (λ ())
-∼P (t₁ `× t₃) Unit = no (λ ())
-∼P (t₁ `× t₃) ⋆ = yes ∼-⋆R
-∼P `ℕ (t₂ ⇒ t₃) = no (λ ())
-∼P `ℕ (Ref t₂) = no (λ ())
-∼P `ℕ (t₂ `× t₃) = no (λ ())
-∼P `ℕ `ℕ = yes ∼-ℕ-refl
-∼P `ℕ Unit = no (λ ())
-∼P `ℕ ⋆ = yes ∼-⋆R
-∼P Unit (t₂ ⇒ t₃) = no (λ ())
-∼P Unit (Ref t₂) = no (λ ())
-∼P Unit (t₂ `× t₃) = no (λ ())
-∼P Unit `ℕ = no (λ ())
-∼P Unit Unit = yes ∼-Unit-refl
-∼P Unit ⋆ = yes ∼-⋆R
-∼P ⋆ t₂ = yes ∼-⋆L
+¬⌣⇒≢⋆R : ∀ {A B} → ¬ (A ⌣ B) → B ≢ ⋆
+¬⌣⇒≢⋆R ¬p refl = ¬p ⌣-⋆R
 
-⊑-trans : Transitive _⊑_
-⊑-trans ⊑-refl prec2 = prec2
-⊑-trans ⊑-dyn ⊑-refl = ⊑-dyn
-⊑-trans ⊑-dyn ⊑-dyn = ⊑-dyn
-⊑-trans (⊑-× prec1 prec3) ⊑-refl = ⊑-× prec1 prec3
-⊑-trans (⊑-× prec1 prec3) ⊑-dyn = ⊑-dyn
-⊑-trans (⊑-× prec1 prec3) (⊑-× prec2 prec4) = ⊑-× (⊑-trans prec1 prec2) (⊑-trans prec3 prec4)
-⊑-trans (⊑-⇒ prec1 prec3) ⊑-refl = ⊑-⇒ prec1 prec3
-⊑-trans (⊑-⇒ prec1 prec3) ⊑-dyn = ⊑-dyn
-⊑-trans (⊑-⇒ prec1 prec3) (⊑-⇒ prec2 prec4) = ⊑-⇒ (⊑-trans prec1 prec2) (⊑-trans prec3 prec4)
-⊑-trans (⊑-ref prec1) ⊑-refl = ⊑-ref prec1
-⊑-trans (⊑-ref prec1) ⊑-dyn = ⊑-dyn
-⊑-trans (⊑-ref prec1) (⊑-ref prec2) = ⊑-ref (⊑-trans prec1 prec2)
+∼⇒⌣ : ∀ {A B} → A ∼ B → A ⌣ B
+∼⇒⌣ ∼-ℕ-refl = ⌣-ℕ-refl
+∼⇒⌣ ∼-Unit-refl = ⌣-Unit-refl
+∼⇒⌣ ∼-⋆R = ⌣-⋆R
+∼⇒⌣ ∼-⋆L = ⌣-⋆L
+∼⇒⌣ (~-⇒ _ _) = ⌣-⇒
+∼⇒⌣ (~-× _ _) = ⌣-×
+∼⇒⌣ (~-ref _) = ⌣-ref
 
-⊑-respect-static : ∀ {t t'} → t' ⊑ t → static t → t' ≡ t
-⊑-respect-static ⊑-refl st = refl
-⊑-respect-static ⊑-dyn ()
-⊑-respect-static (⊑-× prec₁ prec₂) (static-× st₁ st₂) with ⊑-respect-static prec₁ st₁ | ⊑-respect-static prec₂ st₂
-... | refl | refl = refl
-⊑-respect-static (⊑-⇒ prec₁ prec₂) (static-⇒ st₁ st₂) with ⊑-respect-static prec₁ st₁ | ⊑-respect-static prec₂ st₂
-... | refl | refl = refl
-⊑-respect-static (⊑-ref prec) (static-ref st) with ⊑-respect-static prec st
-... | refl = refl
+¬⌣⇒¬∼ : ∀ {A B} → ¬ (A ⌣ B) → ¬ A ∼ B
+¬⌣⇒¬∼ ¬p x = ¬p (∼⇒⌣ x)

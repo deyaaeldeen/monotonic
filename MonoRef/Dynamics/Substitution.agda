@@ -2,10 +2,10 @@ open import MonoRef.Static.Types
 
 module MonoRef.Dynamics.Substitution
   (_⟹_ : Type → Type → Set)
-  (_! : (A : Type) → A ⟹ ⋆)
+  (Inert : ∀ {A B} → A ⟹ B → Set)
   where
 
-open import MonoRef.Language.TargetWithoutBlame _⟹_ _!
+open import MonoRef.Language.TargetWithoutBlame _⟹_ Inert
 open import MonoRef.Static.Context
 
 

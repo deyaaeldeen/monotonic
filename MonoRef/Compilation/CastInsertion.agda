@@ -2,13 +2,12 @@ open import MonoRef.Static.Types
 
 module MonoRef.Compilation.CastInsertion
   (_⟹_ : Type → Type → Set)
-  (_! : (A : Type) → A ⟹ ⋆)
-  (_`? : (A : Type) → ⋆ ⟹ A)
-  (coerce : (A B : Type) → A ⟹ B)
+  (Inert : ∀ {A B} → A ⟹ B → Set)
+  (make-coercion : (A B : Type) → A ⟹ B)
   where
 
 open import MonoRef.Language.Surface
-open import MonoRef.Language.TargetWithoutBlame _⟹_ _!
+open import MonoRef.Language.TargetWithoutBlame _⟹_ Inert
 open import MonoRef.Static.Context
 open import MonoRef.Static.Types.Relations
 
@@ -35,15 +34,17 @@ data _∣_⊢_⦂_↪_ : (Σ : StoreTyping) → (Γ : Context) → (T : Type)
     → Σ ∣ Γ ⊢ A ⇒ B ⦂ sf ↪ tf
     → Σ ∣ Γ ⊢ A' ⦂ sa ↪ ta
       --------------------------------------------------
-    → Σ ∣ Γ ⊢ B ⦂ (sf · sa) x ↪ tf · (ta < coerce A' A >)
+    → Σ ∣ Γ ⊢ B ⦂ (sf · sa) x ↪ tf · (ta < make-coercion A' A >)
 
   _·ᵤ_ : ∀ {Γ Σ} {A}
            {sf : Γ ⊢ₛ ⋆} {sa : Γ ⊢ₛ A}
            {tf : Σ ∣ Γ ⊢ ⋆} {ta : Σ ∣ Γ ⊢ A}
+           {prj : ⋆ ⟹ (⋆ ⇒ ⋆)} {inj : A ⟹ ⋆}
+    → (A≢⋆ : Injectable A)
     → Σ ∣ Γ ⊢ ⋆ ⦂ sf ↪ tf
     → Σ ∣ Γ ⊢ A ⦂ sa ↪ ta
       ----------------------------------------------------
-    → Σ ∣ Γ ⊢ ⋆ ⦂ sf ·ᵤ sa ↪ tf < (⋆ ⇒ ⋆) `? > · ta < A ! >
+    → Σ ∣ Γ ⊢ ⋆ ⦂ sf ·ᵤ sa ↪ tf < prj > · ta < inj >
 
   `zero : ∀ {Γ Σ}
       --------------------------
@@ -61,12 +62,12 @@ data _∣_⊢_⦂_↪_ : (Σ : StoreTyping) → (Γ : Context) → (T : Type)
       -----------------------------------------------
     → Σ ∣ Γ ⊢ A ⦂ case sn ∼-refl sz ss ↪ case tn tz ts
 
-  caseᵤ : ∀ {Γ Σ A} {sn tn sz tz ss ts}
+  caseᵤ : ∀ {Γ Σ A} {sn tn sz tz ss ts} {prj : ⋆ ⟹ `ℕ}
     → Σ ∣ Γ ⊢ ⋆ ⦂ sn ↪ tn
     → Σ ∣ Γ ⊢ A ⦂ sz ↪ tz
     → Σ ∣ Γ , `ℕ ⊢ A ⦂ ss ↪ ts
       ----------------------------------------------------------
-    → Σ ∣ Γ ⊢ A ⦂ case sn ∼-⋆L sz ss ↪ case (tn < `ℕ `? >) tz ts
+    → Σ ∣ Γ ⊢ A ⦂ case sn ∼-⋆L sz ss ↪ case (tn < prj >) tz ts
 
   ref_ : ∀ {Γ Σ A} {s t}
     → Σ ∣ Γ ⊢ A ⦂ s ↪ t
@@ -84,10 +85,10 @@ data _∣_⊢_⦂_↪_ : (Σ : StoreTyping) → (Γ : Context) → (T : Type)
       --------------------
     → Σ ∣ Γ ⊢ A ⦂ ! s ↪ ! t
 
-  !ᵤ_ : ∀ {Γ Σ} {s t}
+  !ᵤ_ : ∀ {Γ Σ} {s t} {prj : ⋆ ⟹ (Ref ⋆)}
     → Σ ∣ Γ ⊢ ⋆ ⦂ s ↪ t
       --------------------------------------
-    → Σ ∣ Γ ⊢ ⋆ ⦂ !ᵤ s ↪ ! (t < (Ref ⋆) `? >)
+    → Σ ∣ Γ ⊢ ⋆ ⦂ !ᵤ s ↪ ! (t < prj >)
 
   _:=ₛ_ : ∀ {Γ Σ A A'} {sr tr sv tv}
     → Σ ∣ Γ ⊢ Ref A ⦂ sr ↪ tr
@@ -95,20 +96,21 @@ data _∣_⊢_⦂_↪_ : (Σ : StoreTyping) → (Γ : Context) → (T : Type)
     → (x : A ∼ A')
     → (y : static A)
       -------------------------------------------------------------
-    → Σ ∣ Γ ⊢ Unit ⦂ (sr := sv) x ↪ (tr :=ₛ (tv < coerce A' A >)) y
+    → Σ ∣ Γ ⊢ Unit ⦂ (sr := sv) x ↪ (tr :=ₛ (tv < make-coercion A' A >)) y
 
   _:=_ : ∀ {Γ Σ A A'} {sr tr sv tv}
     → Σ ∣ Γ ⊢ Ref A ⦂ sr ↪ tr
     → Σ ∣ Γ ⊢ A' ⦂ sv ↪ tv
     → (p : A ∼ A')
       -------------------------------------------------------
-    → Σ ∣ Γ ⊢ Unit ⦂ (sr := sv) p ↪ tr := (tv < coerce A' A >)
+    → Σ ∣ Γ ⊢ Unit ⦂ (sr := sv) p ↪ tr := (tv < make-coercion A' A >)
 
-  _:=ᵤ_ : ∀ {Γ Σ A} {sr tr sv tv}
+  _:=ᵤ_ : ∀ {Γ Σ A} {sr tr sv tv} {prj : ⋆ ⟹ (Ref ⋆)} {inj : A ⟹ ⋆}
+    → (A≢⋆ : Injectable A)
     → Σ ∣ Γ ⊢ ⋆ ⦂ sr ↪ tr
     → Σ ∣ Γ ⊢ A ⦂ sv ↪ tv
       -------------------------------------------------------------
-    → Σ ∣ Γ ⊢ Unit ⦂ sr :=ᵤ sv ↪ (tr < (Ref ⋆) `? >) := (tv < A ! >)
+    → Σ ∣ Γ ⊢ Unit ⦂ sr :=ᵤ sv ↪ (tr < prj >) := (tv < inj >)
 
   _`×_ : ∀ {Γ Σ A B} {sl sr tl tr}
     → Σ ∣ Γ ⊢ A ⦂ sl ↪ tl
@@ -121,20 +123,20 @@ data _∣_⊢_⦂_↪_ : (Σ : StoreTyping) → (Γ : Context) → (T : Type)
       ------------------------
     → Σ ∣ Γ ⊢ A ⦂ π₁ sp ↪ π₁ tp
 
-  π₁ᵤ_ : ∀ {Γ Σ} {sp tp}
+  π₁ᵤ_ : ∀ {Γ Σ} {sp tp} {prj : ⋆ ⟹ (⋆ `× ⋆)}
     → Σ ∣ Γ ⊢ ⋆ ⦂ sp ↪ tp
       ------------------------------------------
-    → Σ ∣ Γ ⊢ ⋆ ⦂ π₁ᵤ sp ↪ π₁ (tp < (⋆ `× ⋆) `? >)
+    → Σ ∣ Γ ⊢ ⋆ ⦂ π₁ᵤ sp ↪ π₁ (tp < prj >)
 
   π₂_ : ∀ {Γ Σ A B} {sp tp}
     → Σ ∣ Γ ⊢ A `× B ⦂ sp ↪ tp
       ------------------------
     → Σ ∣ Γ ⊢ B ⦂ π₂ sp ↪ π₂ tp
 
-  π₂ᵤ_ : ∀ {Γ Σ} {sp tp}
+  π₂ᵤ_ : ∀ {Γ Σ} {sp tp} {prj : ⋆ ⟹ (⋆ `× ⋆)}
     → Σ ∣ Γ ⊢ ⋆ ⦂ sp ↪ tp
       ------------------------------------------
-    → Σ ∣ Γ ⊢ ⋆ ⦂ π₂ᵤ sp ↪ π₂ (tp < (⋆ `× ⋆) `? >)
+    → Σ ∣ Γ ⊢ ⋆ ⦂ π₂ᵤ sp ↪ π₂ (tp < prj >)
 
   unit : ∀ {Γ Σ}
       -------------------------
