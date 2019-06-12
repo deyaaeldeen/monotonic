@@ -34,11 +34,6 @@ data CastProgress {Γ Σ A} (M : Σ ∣ Γ ⊢ A) (ν : Store Σ) : Set where
       ----------------
     → CastProgress M ν
 
-  error :
-      Error M
-      ----------------
-    → CastProgress M ν
-
 
 ⟶ᵤᵣprogress : ∀ {Γ Σ A B} {e : Σ ∣ Γ ⊢ A}
   → Value e → (c : A ⟹ B) → (ν : Store Σ) → CastProgress (e < c >) ν

@@ -23,12 +23,9 @@ data _⟶ᵤ_ {Γ Σ} : ∀ {A} → Σ ∣ Γ ⊢ A → Σ ∣ Γ ⊢ A → Set 
       --------------------------------------------------------------------
     → (V₁ `× V₂) < final (middle (prod c d)) > ⟶ᵤ (V₁ < c >) `× (V₂ < d >)
 
-  compose-crcn : ∀ {A B C} {V : Σ ∣ Γ ⊢ A}
-    → Value V
-    → (c : NormalFormCoercion A B)
-    → (d : NormalFormCoercion B C)
+  compose-casts : ∀ {A B C} {M : Σ ∣ Γ ⊢ A} {c : NormalFormCoercion A B} {d : NormalFormCoercion B C}
       -----------------------------------
-    → V < c > < d > ⟶ᵤ V < compose c d >
+    → M < c > < d > ⟶ᵤ M < compose c d >
 
   `⊥ : ∀ {A B} {V : Σ ∣ Γ ⊢ A} → Value V
       ------------------------------------

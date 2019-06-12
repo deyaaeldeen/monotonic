@@ -74,7 +74,7 @@ val⟶ᵤᵣ⊥ () (cong (ξ-:=ₗ _) _)
 val⟶ᵤᵣ⊥ () (cong (ξ-:=ᵣ _) _)
 val⟶ᵤᵣ⊥ v (cong (ξ-<> x) red)
   with v
-... | V-cast v' c = val⟶ᵤᵣ⊥ v' red
+... | V-cast v' _ = val⟶ᵤᵣ⊥ v' red
 val⟶ᵤᵣ⊥ () (cong-error (ξ-appₗ _))
 val⟶ᵤᵣ⊥ () (cong-error (ξ-appᵣ _))
 val⟶ᵤᵣ⊥ v (cong-error ξ-suc)

@@ -48,7 +48,8 @@ prefix-weaken-scv : ∀ {Σ Σ' Γ A} {e : Σ ∣ Γ ⊢ A} {cv : CastedValue e}
   → StrongCastedValue (prefix-weaken-cv ext cv)
 
 prefix-weaken-cv ext (v⇑ x) = v⇑ (prefix-weaken-val ext x)
-prefix-weaken-cv ext (cast-val v c) = cast-val (prefix-weaken-val ext v) c
+prefix-weaken-cv ext (cast-val v c) = cast-val (prefix-weaken-sval ext v) c
+prefix-weaken-cv ext (cast-cval v c d) = cast-cval (prefix-weaken-sval ext v) c d
 prefix-weaken-cv ext (cv-pair cv cv₁ p) =
   cv-pair (prefix-weaken-cv ext cv) (prefix-weaken-cv ext cv₁)
     (sum-map (prod-map (prefix-weaken-scv ext) (prefix-weaken-val ext))
@@ -56,7 +57,9 @@ prefix-weaken-cv ext (cv-pair cv cv₁ p) =
                       (prod-map (prefix-weaken-scv ext) (prefix-weaken-scv ext))) p)
 
 prefix-weaken-scv ext (SCV-cast v ac) =
-  SCV-cast (prefix-weaken-val ext v) ac
+  SCV-cast (prefix-weaken-sval ext v) ac
+prefix-weaken-scv ext (SCV-ccast v c d) =
+  SCV-ccast (prefix-weaken-sval ext v) c d
 prefix-weaken-scv ext (SCV-pair cv₁ cv₂ p) =
   SCV-pair (prefix-weaken-cv ext cv₁) (prefix-weaken-cv ext cv₂)
     (sum-map (prod-map (prefix-weaken-scv ext) (prefix-weaken-val ext))

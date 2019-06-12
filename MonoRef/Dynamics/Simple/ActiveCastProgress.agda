@@ -33,11 +33,11 @@ data ActiveCastProgress {Γ Σ A} (M : Σ ∣ Γ ⊢ A) (ν : Store Σ) : Set wh
 ⟶ᵤᵣprogress-active (V-pair v₁ v₂) A-× _ =
   step (pure (`× v₁ v₂))
 ⟶ᵤᵣprogress-active (V-cast _ ()) A-× _
-⟶ᵤᵣprogress-active {Σ = Σ} R@(V-addr _ _) (A-Ref {B = B}) ν
-  with ∼-decidable (store-lookup-rtti/ref R ν) B
+⟶ᵤᵣprogress-active {Σ = Σ} R@(V-addr A∈Σ _) (A-Ref {B = B}) ν
+  with ∼-decidable (store-lookup-rtti A∈Σ ν) B
 ...  | no rtti≁B =
   step (mono (castref3 R rtti≁B))
-...  | yes rtti∼B with ≡Type-decidable (⊓ rtti∼B) (store-lookup-rtti/ref R ν)
+...  | yes rtti∼B with ≡Type-decidable (⊓ rtti∼B) (store-lookup-rtti A∈Σ ν)
 ...      | yes rtti≡B rewrite rtti≡B =
   step (mono (castref2 R rtti∼B rtti≡B))
 ...      | no rtti≢B =

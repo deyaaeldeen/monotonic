@@ -85,25 +85,25 @@ open ParamNormalDecidable scv-decidable public
 ...   | ⟨ _ , ⟨ A∈Σ , cv ⟩ ⟩ = -, ⟨ there A∈Σ , cv ⟩
 ¬NormalStore⇒∃cv {ν = fromCastedValue v@(intro (cast-val cv c) T) All.∷ _} _ =
   -, ⟨ here refl , ⟨ v , intro (SCV-cast cv c) T ⟩ ⟩
+¬NormalStore⇒∃cv {ν = fromCastedValue v@(intro (cast-cval cv c d) T) All.∷ _} _ =
+  -, ⟨ here refl , ⟨ v , intro (SCV-ccast cv c d) T ⟩ ⟩
 ¬NormalStore⇒∃cv {ν = fromCastedValue v@(intro (cv-pair  cv₁ cv₂ p) T) All.∷ _} _ =
   -, ⟨ here refl , ⟨ v , intro (SCV-pair cv₁ cv₂ p) T ⟩ ⟩
 
 private
 
   data Value∧Cast {A B Σ Γ} {e : Σ ∣ Γ ⊢ A} (v : Value e) (c : A ⟹ B) : Set where
-    V∧C-inert : ∀ {e' : Σ ∣ Γ ⊢ B} → Value e' → Value∧Cast v c
-    V∧C-active : ∀ {A'} {e' : Σ ∣ Γ ⊢ A'} {d : A' ⟹ B} → Value e' → Active d → Value∧Cast v c
-  
-  cast-value/compose : ∀ {A B Σ Γ} {e : Σ ∣ Γ ⊢ A}
+    V∧C-inert : ∀ {e' : Σ ∣ Γ ⊢ A} → SimpleValue e' → Inert c → Value∧Cast v c
+    V∧C : ∀ {A'} {e' : Σ ∣ Γ ⊢ A'} → SimpleValue e' → A' ⟹ A → Value∧Cast v c
+    V∧C-active : ∀ {A'} {e' : Σ ∣ Γ ⊢ A'} {d : A' ⟹ B} → SimpleValue e' → Active d → Value∧Cast v c
+
+  cast-value : ∀ {A B Σ Γ} {e : Σ ∣ Γ ⊢ A}
     → (v : Value e) → (c : A ⟹ B) → Value∧Cast v c
-  cast-value/compose (S-Val v) c
+  cast-value (S-Val v) c
     with inertP c
-  ... | yes c-inert = V∧C-inert (V-cast v c-inert)
-  ... | no c-¬inert = V∧C-active (S-Val v) (¬Inert⇒Active c-¬inert)
-  cast-value/compose (V-cast {c = c} sv _) d
-    with inertP (compose c d)
-  ... | yes c-inert = V∧C-inert (V-cast sv c-inert)
-  ... | no c-¬inert = V∧C-active (S-Val sv) (¬Inert⇒Active c-¬inert)
+  ... | yes c-inert = V∧C-inert v c-inert
+  ... | no c-¬inert = V∧C-active v (¬Inert⇒Active c-¬inert)
+  cast-value (V-cast {c = c} sv _) _ = V∧C sv c
 
   {-
 
@@ -118,19 +118,20 @@ private
     → All (λ ty → StoreValue ty Σ') Σ'
   all-⊑ₕ ν Σ'⊑ₕΣ = pw-map' update-type Σ'⊑ₕΣ ν
     where
-  
+
       cast-casted-value : ∀ {A B Σ} {e : Σ ∣ ∅ ⊢ A}
         → B ⊑ A
         → CastedValue e
         → Σ[ e' ∈ Σ ∣ ∅ ⊢ B ] (Value e' ⊎ (Σ[ cv' ∈ CastedValue e' ] StrongCastedValue cv'))
       cast-casted-value _ (v⇑ v)
-        with cast-value/compose v (make-coercion _ _)
-      ... | V∧C-inert v' = -, (inj₁ v')
+        with cast-value v (make-coercion _ _)
+      ... | V∧C-inert v' c = -, (inj₁ (V-cast v' c))
       ... | V∧C-active v' d = -, (inj₂ (-, (SCV-cast v' d)))
-      cast-casted-value _ (cast-val {c = c} v _)
-        with cast-value/compose v (compose c (make-coercion _ _))
-      ... | V∧C-inert  v'   = -, (inj₁ v')
-      ... | V∧C-active v' d = -, (inj₂ (-, (SCV-cast v' d)))
+      ... | V∧C v' c = -, (inj₂ (-, (SCV-ccast v' c (make-coercion _ _))))
+      cast-casted-value _ (cast-val {c = c} v _) =
+        -, (inj₂ (-, (SCV-ccast v c (make-coercion _ _))))
+      cast-casted-value _ (cast-cval v c d) =
+        -, (inj₂ (-, (SCV-ccast v (compose c d) (make-coercion _ _))))
       cast-casted-value ⊑-refl (cv-pair _ _ p) = -, (inj₂ (-, (SCV-pair _ _ p)))
       cast-casted-value (⊑-× ext1 ext2) (cv-pair cv₁ cv₂ p)
         with cast-casted-value ext1 cv₁ | cast-casted-value ext2 cv₂
@@ -139,22 +140,24 @@ private
       ...  | inj₂ ⟨ _ , scv₁' ⟩ | inj₁ v =
         -, (inj₂ (-, (SCV-pair _ (v⇑ v) (inj₁ ⟨ scv₁' , v ⟩))))
       ...  | inj₂ ⟨ _ , scv₁' ⟩ | inj₂ ⟨ _ , scv₂' ⟩ =
-        -, (inj₂ (-, (SCV-pair _ _ (inj₂ (inj₂ ⟨ scv₁' , scv₂' ⟩)))))  
+        -, (inj₂ (-, (SCV-pair _ _ (inj₂ (inj₂ ⟨ scv₁' , scv₂' ⟩)))))
       ...  | inj₁ v₁ | inj₁ v₂ = -, (inj₁ (S-Val (V-pair v₁ v₂)))
       ...  | inj₁ v | inj₂ ⟨ _ , scv₂' ⟩ =
-        -, (inj₂ (-, (SCV-pair (v⇑ v) _ (inj₂ (inj₁ ⟨ v , scv₂' ⟩))))) 
-  
+        -, (inj₂ (-, (SCV-pair (v⇑ v) _ (inj₂ (inj₁ ⟨ v , scv₂' ⟩)))))
+
       update-type : ∀ {A B Σ} → B ⊑ A → StoreValue A Σ → StoreValue B Σ
       update-type _ (fromNormalValue (intro v ty))
-        with cast-value/compose v (make-coercion _ _)
-      ... | V∧C-inert  v'   = fromNormalValue (intro v' (Type⇑ _))
-      ... | V∧C-active v' d = fromCastedValue (intro (cast-val v' d) (Type⇑ _))
-  
+        with cast-value v (make-coercion _ _)
+      ... | V∧C-inert  v' c = fromNormalValue (intro (V-cast v' c) (Type⇑ _))
+      ... | V∧C-active v' c = fromCastedValue (intro (cast-val v' c) (Type⇑ _))
+      ... | V∧C v' c        =
+        fromCastedValue (intro (cast-cval v' c (make-coercion _ _)) (Type⇑ _))
+
       update-type B⊑A (fromCastedValue (intro cv _))
         with cast-casted-value B⊑A cv
       ... | ⟨ _ , inj₁ v           ⟩ = fromNormalValue (intro v   (Type⇑ _))
       ... | ⟨ _ , inj₂ ⟨ cv' , _ ⟩ ⟩ = fromCastedValue (intro cv' (Type⇑ _))
-  
+
       -- a modified version of pw-map where the relation is anti-symmetric and
       -- points left
       pw-map' : ∀ {a ℓ}{A : Set a}{_∼_ : Rel A ℓ} {l m p}{P : A → Set p}
@@ -166,9 +169,11 @@ private
 ν-update/ref : ∀ {A Σ Γ} {r : Σ ∣ Γ ⊢ Ref A}
   → (R : Value r) → Store Σ → ∀ {e : Σ ∣ ∅ ⊢ A} → Value e → Store Σ
 ν-update/ref R ν v
-  with cast-value/compose v (make-coercion _ (ref⟹T R))
-... | V∧C-inert  v'   = μ-update (ref⟹∈ R) ν v'
+  with cast-value v (make-coercion _ (ref⟹T R))
+... | V∧C-inert v' c  = μ-update (ref⟹∈ R) ν (V-cast v' c)
 ... | V∧C-active v' d = ν-update (ref⟹∈ R) ν (cast-val v' d)
+... | V∧C v' d        =
+  ν-update (ref⟹∈ R) ν (cast-cval v' d (make-coercion _ (ref⟹T R)))
 
 {- Re-exported concrete definitions -}
 

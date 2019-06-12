@@ -206,4 +206,3 @@ progress-normal-store (e < c >) ν μ-evd with progress-normal-store e ν μ-evd
   with ⟶ᵤᵣprogress v c ν
 ...  | step s = step (cast-reduce s)
 ...  | done x = done x
-...  | error x = error x

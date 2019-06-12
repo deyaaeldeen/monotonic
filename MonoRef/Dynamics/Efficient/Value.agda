@@ -23,31 +23,30 @@ data SimpleValue : ∀ {Σ Γ A} → Σ ∣ Γ ⊢ A → Set where
     → SimpleValue (ƛ N)
 
   V-zero : ∀ {Γ Σ}
-      -----------------------------
+      -----------------------------------
     → SimpleValue (`zero {Σ = Σ} {Γ = Γ})
 
   V-suc : ∀ {Σ Γ} {V : Σ ∣ Γ ⊢ `ℕ}
     → Value V
-      --------------
+      --------------------
     → SimpleValue (`suc V)
 
   V-unit : ∀ {Σ Γ}
-      ----------------------------
+      ----------------------------------
     → SimpleValue (unit {Σ = Σ} {Γ = Γ})
 
   V-addr : ∀ {A B Σ Γ}
     → (x : A ∈ Σ)
     → (y : A ⊑ B)
-      ------------------------
+      ------------------------------
     → SimpleValue (addr {Γ = Γ} x y)
 
   V-pair : ∀ {Σ Γ A B}
            {V₁ : Σ ∣ Γ ⊢ A} {V₂ : Σ ∣ Γ ⊢ B}
     → Value V₁
     → Value V₂
-      ---------------
+      ---------------------
     → SimpleValue (V₁ `× V₂)
-
 
 data Value where
 
@@ -59,5 +58,5 @@ data Value where
   V-cast : ∀ {Σ Γ A B} {V : Σ ∣ Γ ⊢ A} {c : A ⟹ B}
     → SimpleValue V
     → Inert c
-      -----------------
+      ---------------
     → Value (V < c >)

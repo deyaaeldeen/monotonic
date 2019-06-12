@@ -12,6 +12,8 @@ open import MonoRef.Dynamics.Store.Extension
   _⟹_ Inert
 open import MonoRef.Dynamics.Store.Precision
   _⟹_ Inert
+open import MonoRef.Dynamics.Store.TypingProgress
+  _⟹_ Inert
 open import MonoRef.Language.TargetWithoutBlame
   _⟹_ Inert
 open import MonoRef.Static.Context
@@ -155,3 +157,8 @@ typeprecise-strenthen-frame Σ'⊑ₕΣ (ξ-:=ₛₗ x M) = ξ-:=ₛₗ x (typep
 typeprecise-strenthen-frame Σ'⊑ₕΣ (ξ-:=ₛᵣ x M) = ξ-:=ₛᵣ x (typeprecise-strenthen-expr Σ'⊑ₕΣ M)
 typeprecise-strenthen-frame Σ'⊑ₕΣ (ξ-:=ₗ M) = ξ-:=ₗ (typeprecise-strenthen-expr Σ'⊑ₕΣ M)
 typeprecise-strenthen-frame Σ'⊑ₕΣ (ξ-:=ᵣ M) = ξ-:=ᵣ (typeprecise-strenthen-expr Σ'⊑ₕΣ M)
+
+-- should it be weaken or strenthen?
+weaken-frame : ∀ {Γ Σ Σ' A B} → StoreTypingProgress Σ Σ' → Frame {Γ} {Σ} A B → Frame {Γ} {Σ'} A B
+weaken-frame (from⊑ₕ Σ'⊑ₕΣ) f = typeprecise-strenthen-frame Σ'⊑ₕΣ f 
+weaken-frame (from⊑ₗ Σ⊑Σ') f = prefix-weaken-frame Σ⊑Σ' f

@@ -84,7 +84,7 @@ progress-evolving-store : ∀ {Σ A} {M : Σ ∣ ∅ ⊢ A}
 progress-evolving-store ν ν-¬NS
   with ¬NormalStore⇒∃cv ν-¬NS
 ... | ⟨ A , ⟨ A∈Σ , ⟨ _ , intro scv _ ⟩ ⟩ ⟩
-   with ⟶ᵤᵣprogress-scv scv ν ν-¬NS
+   with ⟶ᵤᵣprogress-scv scv ν
 ... | step (cong ξ red) = progress-evolving-store/cong ν ν-¬NS A∈Σ ξ red scv
 ... | step (mono red) = progress-evolving-store/mono ν ν-¬NS scv A∈Σ red 
 ... | step red@(cong-error _) = step (error ν-¬NS A∈Σ red Err-intro)
