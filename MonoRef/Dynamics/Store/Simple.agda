@@ -112,7 +112,7 @@ private
     → All (λ ty → StoreValue ty Σ') Σ'
   all-⊑ₕ ν prec = pw-map' update-type prec ν
     where
-  
+
       cast-casted-value : ∀ {A B Σ} {cv : Σ ∣ ∅ ⊢ A}
         → B ⊑ A → CastedValue cv → Σ[ e ∈ Σ ∣ ∅ ⊢ B ] (Value e ⊎ (Σ[ cv' ∈ CastedValue e ] StrongCastedValue cv'))
       cast-casted-value _ (v⇑ v)
@@ -131,23 +131,23 @@ private
       ...  | inj₂ ⟨ _ , scv₁' ⟩ | inj₁ v =
         -, (inj₂ (-, (SCV-pair _ (v⇑ v) (inj₁ ⟨ scv₁' , v ⟩))))
       ...  | inj₂ ⟨ _ , scv₁' ⟩ | inj₂ ⟨ _ , scv₂' ⟩ =
-        -, (inj₂ (-, (SCV-pair _ _ (inj₂ (inj₂ ⟨ scv₁' , scv₂' ⟩)))))  
+        -, (inj₂ (-, (SCV-pair _ _ (inj₂ (inj₂ ⟨ scv₁' , scv₂' ⟩)))))
       ...  | inj₁ v₁ | inj₁ v₂ = -, (inj₁ (V-pair v₁ v₂))
       ...  | inj₁ v | inj₂ ⟨ _ , scv₂' ⟩ =
-        -, (inj₂ (-, (SCV-pair (v⇑ v) _ (inj₂ (inj₁ ⟨ v , scv₂' ⟩))))) 
-  
+        -, (inj₂ (-, (SCV-pair (v⇑ v) _ (inj₂ (inj₁ ⟨ v , scv₂' ⟩)))))
+
       update-type : ∀ {A B Σ} → B ⊑ A → StoreValue A Σ → StoreValue B Σ
       update-type _ (fromNormalValue (intro v ty))
         with inertP (make-coercion _ _)
       ... | yes c-Inert = fromNormalValue (intro (V-cast v c-Inert) (Type⇑ _))
       ... | no c-¬Inert =
         fromCastedValue (intro (cast-val v (¬Inert⇒Active c-¬Inert)) (Type⇑ _))
-  
+
       update-type B⊑A (fromCastedValue (intro cv _))
         with cast-casted-value B⊑A cv
       ... | ⟨ _ , inj₁ v           ⟩ = fromNormalValue (intro v   (Type⇑ _))
       ... | ⟨ _ , inj₂ ⟨ cv' , _ ⟩ ⟩ = fromCastedValue (intro cv' (Type⇑ _))
-  
+
       -- a modified version of pw-map where the relation is anti-symmetric and
       -- points left
       pw-map' : ∀ {a ℓ}{A : Set a}{_∼_ : Rel A ℓ} {l m p}{P : A → Set p}

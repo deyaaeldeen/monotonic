@@ -50,7 +50,7 @@ progress-normal-store (e₁ · e₂) ν μ-evd with progress-normal-store e₁ �
 ...   | step (hdrop ¬NS _ _ _ _ _)      = ⊥-elim (¬NS μ-evd)
 progress-normal-store (_ · _) _ μ-evd | done (V-ƛ _) | done v' =
   step (prog-reduce μ-evd (β-pure (β-ƛ v')))
-progress-normal-store (_ · _) _ μ-evd | done v@(V-cast _ I-⇒) | done v' =
+progress-normal-store (_ · _) _ μ-evd | done (V-cast v I-⇒) | done v' =
   step (prog-reduce μ-evd (β-pure (β-ƛₚ v v')))
 ... | error E-error = step (prog-reduce μ-evd (cong-error (ξ-appᵣ e₁)))
 progress-normal-store (.error · e₂) ν μ-evd | error E-error =

@@ -37,7 +37,7 @@ open import MonoRef.Static.Context
 open import MonoRef.Static.Types
 
 
-open ParamReduction Value CastedValue StrongCastedValue ref⟹T ref⟹∈ ref⟹⊑
+open ParamReduction SimpleValue Value CastedValue StrongCastedValue ref⟹T ref⟹∈ ref⟹⊑
 open ParamReduction/ν-cast/ν-update/ref/store/⟶ᵤ ν-cast ν-update/ref store _⟶ᵤ_
 open ParamReflTransClosure Value CastedValue StrongCastedValue
 open ParamReflTransClosure/⟶ₛ _,_⟶ₛ_,_

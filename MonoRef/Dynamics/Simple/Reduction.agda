@@ -58,7 +58,7 @@ module ParamReduction
   open ParamStoreValue Value CastedValue StrongCastedValue
   open ParamStoreDef StoreValue
   open ParamStore Value CastedValue StrongCastedValue ref⟹T ref⟹∈ ref⟹⊑
-  open ParamPureReduction Value public
+  open ParamPureReduction Value Value public
   open ParamMonoCastReduction
     Value CastedValue StrongCastedValue ref⟹T ref⟹∈ ref⟹⊑
   open ParamMonoReduction
@@ -221,14 +221,14 @@ module ParamReduction
           --------------------
         → M , ν ⟶ₛ error , ν'
 
-      hcast : ∀ {T} {e e' : Σ ∣ ∅ ⊢ T} {cv : CastedValue e} {ν' : Store Σ}
+      hcast : ∀ {T} {e e' : Σ ∣ ∅ ⊢ T} {cv : CastedValue e}
         → ¬ NormalStore ν
         → (T∈Σ : T ∈ Σ)
         → (scv : StrongCastedValue cv)
-        → (red : e , ν ⟶ᵤᵣ e' , ν')
+        → (red : e , ν ⟶ᵤᵣ e' , ν)
         → (cv' : CastedValue e')
-          ---------------------------------
-        → M , ν ⟶ₛ M , ν-update T∈Σ ν' cv'
+          --------------------------------
+        → M , ν ⟶ₛ M , ν-update T∈Σ ν cv'
 
       hmcast : ∀ {T A B} {e : Σ ∣ ∅ ⊢ T} {cv : CastedValue e}
         → ¬ NormalStore ν

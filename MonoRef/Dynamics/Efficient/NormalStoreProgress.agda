@@ -29,7 +29,7 @@ open import MonoRef.Static.Context
 open import MonoRef.Static.Types
 
 
-open ParamReduction Value CastedValue StrongCastedValue ref⟹T ref⟹∈ ref⟹⊑
+open ParamReduction SimpleValue Value CastedValue StrongCastedValue ref⟹T ref⟹∈ ref⟹⊑
 open ParamReduction/ν-cast/ν-update/ref/store/⟶ᵤ ν-cast ν-update/ref store _⟶ᵤ_
 
 progress-normal-store : ∀ {Σ A}
@@ -47,7 +47,7 @@ progress-normal-store (e₁ · e₂) ν μ-evd with progress-normal-store e₁ �
 ...   | step-a μ-evd' e₂⟶e₂' = step-d μ-evd' (ξ (ξ-appᵣ e₁) e₂⟶e₂')
 progress-normal-store (_ · _) _ μ-evd | done (S-Val (V-ƛ _)) | done v' =
   step-d μ-evd (β-pure (β-ƛ v'))
-progress-normal-store (_ · _) _ μ-evd | done v@(V-cast _ (I-final (I-middle I-fun))) | done v' =
+progress-normal-store (_ · _) _ μ-evd | done (V-cast v (I-final (I-middle I-fun))) | done v' =
   step-d μ-evd (β-pure (β-ƛₚ v v')
   )
 ... | error E-error = step-d μ-evd (ξ-error (ξ-appᵣ e₁))

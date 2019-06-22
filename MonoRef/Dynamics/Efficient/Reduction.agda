@@ -49,6 +49,7 @@ open import MonoRef.Static.Types.Relations
 
 
 module ParamReduction
+  (SimpleValue       : ∀ {Σ Γ A} → Σ ∣ Γ ⊢ A → Set)
   (Value             : ∀ {Σ Γ A} → Σ ∣ Γ ⊢ A → Set)
   (CastedValue       : ∀ {Σ Γ A} → Σ ∣ Γ ⊢ A → Set)
   (StrongCastedValue : ∀ {Σ Γ A} {e : Σ ∣ Γ ⊢ A} → CastedValue e → Set)
@@ -60,7 +61,7 @@ module ParamReduction
   open ParamStoreValue Value CastedValue StrongCastedValue
   open ParamStoreDef StoreValue
   open ParamStore Value CastedValue StrongCastedValue ref⟹T ref⟹∈ ref⟹⊑
-  open ParamPureReduction Value public
+  open ParamPureReduction SimpleValue Value public
   open ParamMonoCastReduction
     Value CastedValue StrongCastedValue ref⟹T ref⟹∈ ref⟹⊑
   open ParamMonoReduction
@@ -272,14 +273,14 @@ module ParamReduction
           ----------------------
         → M , ν ⟶ₛ error , ν'
 
-      hcast : ∀ {M : Σ ∣ ∅ ⊢ A} {T bc} {e e' : Σ ∣ ∅ ⊢ T} {cv : CastedValue e} {ν ν' : Store Σ}
+      hcast : ∀ {M : Σ ∣ ∅ ⊢ A} {T bc} {e e' : Σ ∣ ∅ ⊢ T} {cv : CastedValue e} {ν : Store Σ}
         → ¬ NormalStore ν
         → (T∈Σ : T ∈ Σ)
         → (scv : StrongCastedValue cv)
-        → (red : bc / e , ν ⟶ᵤᵣ e' , ν')
+        → (red : bc / e , ν ⟶ᵤᵣ e' , ν)
         → (cv' : CastedValue e')
           ---------------------------------
-        → M , ν ⟶ₛ M , ν-update T∈Σ ν' cv'
+        → M , ν ⟶ₛ M , ν-update T∈Σ ν cv'
 
       hmcast : ∀ {M : Σ ∣ ∅ ⊢ A} {T A B bc} {e : Σ ∣ ∅ ⊢ T} {cv : CastedValue e} {ν : Store Σ}
         → ¬ NormalStore ν

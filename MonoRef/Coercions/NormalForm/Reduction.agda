@@ -12,7 +12,7 @@ infix 3 _⟶ᵤ_
 
 data _⟶ᵤ_ {Γ Σ} : ∀ {A} → Σ ∣ Γ ⊢ A → Σ ∣ Γ ⊢ A → Set where
 
-  ι : ∀ {A} {V : Σ ∣ Γ ⊢ A} → Value V
+  ι : ∀ {A} {V : Σ ∣ Γ ⊢ A} → SimpleValue V
       ------------------------------
     → V < final (middle id) > ⟶ᵤ V
 
@@ -27,6 +27,6 @@ data _⟶ᵤ_ {Γ Σ} : ∀ {A} → Σ ∣ Γ ⊢ A → Σ ∣ Γ ⊢ A → Set 
       -----------------------------------
     → M < c > < d > ⟶ᵤ M < compose c d >
 
-  `⊥ : ∀ {A B} {V : Σ ∣ Γ ⊢ A} → Value V
+  `⊥ : ∀ {A B} {V : Σ ∣ Γ ⊢ A} → SimpleValue V
       ------------------------------------
     → V < final (fail {B = B}) > ⟶ᵤ error

@@ -28,7 +28,7 @@ open import MonoRef.Static.Context
 open import MonoRef.Static.Types.Relations
 
 
-open ParamReduction Value CastedValue StrongCastedValue ref⟹T ref⟹∈ ref⟹⊑
+open ParamReduction SimpleValue Value CastedValue StrongCastedValue ref⟹T ref⟹∈ ref⟹⊑
 open ParamReduction/ν-cast/ν-update/ref/store/⟶ᵤ ν-cast ν-update/ref store _⟶ᵤ_
 open ParamMonoStoreProgress Value CastedValue StrongCastedValue ref⟹T ref⟹∈ ref⟹⊑
 open ParamMonoStoreProgress/ν-cast ν-cast public

@@ -18,7 +18,10 @@ open import MonoRef.Language.TargetWithoutBlame _⟹_ Inert
 open import MonoRef.Static.Context
 
 
-module ParamPureReduction (Value : ∀ {Σ Γ A} → Σ ∣ Γ ⊢ A → Set) where
+module ParamPureReduction
+  (SimpleValue : ∀ {Σ Γ A} → Σ ∣ Γ ⊢ A → Set)
+  (Value : ∀ {Σ Γ A} → Σ ∣ Γ ⊢ A → Set)
+  where
 
   infix 3 _⟶_
 
@@ -34,7 +37,7 @@ module ParamPureReduction (Value : ∀ {Σ Γ A} → Σ ∣ Γ ⊢ A → Set) wh
              {V : Σ ∣ Γ ⊢ A ⇒ B}
              {W : Σ ∣ Γ ⊢ A'}
              {c : (A ⇒ B) ⟹ (A' ⇒ B')}
-      → Value (V < c >)
+      → SimpleValue V
       → Value W
         -------------------------------------------------------------------------
       → (V < c >) · W ⟶ (V · (W < make-coercion A' A >)) < make-coercion B B' >

@@ -30,7 +30,7 @@ open import MonoRef.Static.Types
 open import MonoRef.Static.Types.Relations
 
 
-open ParamReduction Value CastedValue StrongCastedValue ref⟹T ref⟹∈ ref⟹⊑
+open ParamReduction SimpleValue Value CastedValue StrongCastedValue ref⟹T ref⟹∈ ref⟹⊑
 open ParamReduction/ν-cast/ν-update/ref/store/⟶ᵤ ν-cast ν-update/ref store _⟶ᵤ_
 
 
@@ -109,7 +109,7 @@ scv⟶ᵤ⟹cv' : ∀ {Σ A} {e : Σ ∣ ∅ ⊢ A} {cv : CastedValue e} {e' : �
   → StrongCastedValue cv
   → e ⟶ᵤ e'
   → CastedValue e' ⊎ Erroneous e'
-scv⟶ᵤ⟹cv' scv (ι v) = inj₁ (v⇑ v)
+scv⟶ᵤ⟹cv' scv (ι v) = inj₁ (v⇑ (S-Val v))
 scv⟶ᵤ⟹cv' _ (`× {c = c} {d = d} (V-cast {c = c'} v₁ _) (S-Val v₂))
   with inertP d
 ... | yes d-inert =
