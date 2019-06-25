@@ -32,63 +32,16 @@ open import MonoRef.Static.Types.Relations
 open ParamReduction Value CastedValue StrongCastedValue ref⟹T ref⟹∈ ref⟹⊑
 open ParamReduction/ν-cast/ν-update/ref/store/⟶ᵤ ν-cast ν-update/ref store _⟶ᵤ_
 
-progress-evolving-store/mono :
-  ∀ {Σ Σ' A B} {M : Σ ∣ ∅ ⊢ A} {e : Σ ∣ ∅ ⊢ B} {cv : CastedValue e} {e' : Σ' ∣ ∅ ⊢ B} {ν' : Store Σ'}
-  → (ν : Store Σ)
-  → ¬ NormalStore ν
-  → StrongCastedValue cv
-  → B ∈ Σ
-  → e , ν ⟶ₘ e' , ν'
-  → Progress M ν
-progress-evolving-store/mono ν ν-¬NS scv B∈Σ red@(castref2 R rtti∼T₂ rtti≡T₂) =
-  step (hcast ν-¬NS B∈Σ scv (mono red) (v⇑ V-addr (ref-ν⟹∈ R ν) (⊓⟹⊑ᵣ-with-≡ rtti∼T₂ rtti≡T₂)))
-progress-evolving-store/mono ν ν-¬NS scv B∈Σ red@(castref3 _ _) =
-  step (error ν-¬NS B∈Σ (mono red) Err-intro)
-
-{-
-  Unrolled the definition of the address value so I can get the refl constructor
-  for decidable equality between the rtti and the type of the pointer in hand
--}
-progress-evolving-store/mono _ _ _ _ (castref1 (V-cast _ c) _ _) =
-  ⊥-elim (Inert⇒¬Ref c)
-progress-evolving-store/mono {B = B} ν ν-¬NS scv B∈Σ red@(castref1 (V-addr {A = A} A∈Σ A⊑T) rtti∼T₂ ⊓rtti∼T₂≢rtti)
-  with ≡Type-decidable B A
-... | yes refl =
-  step (hdrop ν-¬NS A∈Σ scv (⊓⟹⊑ₗ rtti∼T₂) ⊓rtti∼T₂≢rtti (mono red))
-... | no B≢A =
-  step (hmcast ν-¬NS B∈Σ scv A∈Σ (PIE-ptr B≢A A∈Σ) (⊓⟹⊑ₗ rtti∼T₂) (mono red) -- B≢A
-          (v⇑ V-addr (Σ-cast⟹∈ A∈Σ (⊓ rtti∼T₂)) (⊓⟹⊑ᵣ rtti∼T₂)))
-
-progress-evolving-store/cong : ∀ {Σ Σ' T A B} {M : Σ ∣ ∅ ⊢ T} {e : Σ ∣ ∅ ⊢ A} {e' : Σ' ∣ ∅ ⊢ A} {ν' : Store Σ'}
-  → (ν : Store Σ)
-  → ¬ NormalStore ν
-  → B ∈ Σ
-  → (ξ : Frame {∅}{Σ} A B)
-  → {cv : CastedValue (plug e ξ)}
-  → e , ν ⟶ᵤᵣ e' , ν'
-  → StrongCastedValue cv
-  → Progress M ν
-progress-evolving-store/cong ν ν-¬NS A∈Σ ξ red scv
-  with scv⟶ᵤᵣ⟹cv' scv (cong ξ red)
-... | inj₂ err = step (error ν-¬NS A∈Σ (cong ξ red) err)
-... | inj₁ cv'
-   with get-ptr red | progress-store ν A∈Σ (cong ξ red)
-...  | _ | S-no-change = step (hcast ν-¬NS A∈Σ scv (cong ξ red) cv')
-...  | _ | S-cyclic T'⊑T T'≢T =
-  step (hdrop ν-¬NS A∈Σ scv T'⊑T T'≢T (cong ξ red))
-...  | _ | S-acyclic B∈Σ A≢B C⊑B =
-  step (hmcast ν-¬NS A∈Σ scv B∈Σ A≢B C⊑B (cong ξ red) cv')
-
 progress-evolving-store : ∀ {Σ A} {M : Σ ∣ ∅ ⊢ A}
   → (ν : Store Σ) → ¬ NormalStore ν → Progress M ν
 progress-evolving-store ν ν-¬NS
   with ¬NormalStore⇒∃cv ν-¬NS
 ... | ⟨ A , ⟨ A∈Σ , ⟨ _ , intro scv _ ⟩ ⟩ ⟩
    with ⟶ᵤᵣprogress-scv scv ν
-... | step (cong ξ red) = progress-evolving-store/cong ν ν-¬NS A∈Σ ξ red scv
-... | step (mono red) = progress-evolving-store/mono ν ν-¬NS scv A∈Σ red 
-... | step red@(cong-error _) = step (error ν-¬NS A∈Σ red Err-intro)
-... | step red@(pure _)
-  with scv⟶ᵤᵣ⟹cv' scv red
-...  | inj₁ cv' = step (hcast ν-¬NS A∈Σ scv red cv')
-...  | inj₂ err = step (error ν-¬NS A∈Σ red err)
+...  | step R
+    with scv⟶ᵤᵣ⟹cv' scv R
+...   | inj₂ err = step (error ν-¬NS A∈Σ R err)
+...   | inj₁ cv' with get-ptr R | progress-store ν A∈Σ R
+...   | _ | S-no-change = step (hcast ν-¬NS A∈Σ scv R cv')
+...   | _ | S-cyclic T'⊑T T'≢T = step (hdrop ν-¬NS A∈Σ scv T'⊑T T'≢T R)
+...   | _ | S-acyclic B∈Σ A≢B C⊑B = step (hmcast ν-¬NS A∈Σ scv B∈Σ A≢B C⊑B R cv')

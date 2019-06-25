@@ -30,9 +30,9 @@ open ParamReduction/ν-cast/ν-update/ref/store/⟶ᵤ ν-cast ν-update/ref sto
 
 
 val⟶ᵤ⊥ : ∀ {Σ A} {e : Σ ∣ ∅ ⊢ A} {e' : Σ ∣ ∅ ⊢ A} → Value e → ¬ (e ⟶ᵤ e')
-val⟶ᵤ⊥ (V-ƛ N) ()
+val⟶ᵤ⊥ (V-ƛ _) ()
 val⟶ᵤ⊥ V-zero ()
-val⟶ᵤ⊥ (V-suc v) ()
+val⟶ᵤ⊥ (V-suc _) ()
 val⟶ᵤ⊥ V-unit ()
 val⟶ᵤ⊥ (V-addr _ _) ()
 val⟶ᵤ⊥ (V-pair _ _) ()
@@ -45,7 +45,7 @@ val⟶ₘ⊥ : ∀ {Σ Σ' A} {e : Σ ∣ ∅ ⊢ A} {ν : Store Σ} {e' : Σ' �
   → Value e → ¬ (e , ν ⟶ₘ e' , ν')
 val⟶ₘ⊥ (V-cast _ c) (castref1 _ _ _) = Inert⇒¬Ref c
 val⟶ₘ⊥ (V-cast _ c) (castref2 _ _ _) = Inert⇒¬Ref c
-val⟶ₘ⊥ (V-cast _ c) (castref3 _ _) = Inert⇒¬Ref c
+val⟶ₘ⊥ (V-cast _ c) (castref3 _ _  ) = Inert⇒¬Ref c
 
 val⟶ᵤᵣ⊥ : ∀ {Σ Σ' A} {e : Σ ∣ ∅ ⊢ A} {ν : Store Σ} {e' : Σ' ∣ ∅ ⊢ A} {ν' : Store Σ'}
   → Value e → ¬ (e , ν ⟶ᵤᵣ e' , ν')
@@ -72,7 +72,7 @@ val⟶ᵤᵣ⊥ () (cong (ξ-:=ₛₗ _ _) _)
 val⟶ᵤᵣ⊥ () (cong (ξ-:=ₛᵣ _ _) _)
 val⟶ᵤᵣ⊥ () (cong (ξ-:=ₗ _) _)
 val⟶ᵤᵣ⊥ () (cong (ξ-:=ᵣ _) _)
-val⟶ᵤᵣ⊥ v (cong (ξ-<> x) red)
+val⟶ᵤᵣ⊥ v (cong (ξ-<> _) red)
   with v
 ... | V-cast v' _ = val⟶ᵤᵣ⊥ v' red
 val⟶ᵤᵣ⊥ () (cong-error (ξ-appₗ _))

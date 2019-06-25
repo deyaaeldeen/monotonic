@@ -31,15 +31,15 @@ open ParamReduction/ν-cast/ν-update/ref/store/⟶ᵤ ν-cast ν-update/ref sto
   with ⟶ᵤᵣprogress-scv scv ν
 ... | step red = step (cong (ξ-<> c) red)
 ⟶ᵤᵣprogress-scv (SCV-pair _ _ p) ν with p
-⟶ᵤᵣprogress-scv (SCV-pair _ _ _) ν | inj₂ (inj₁ ⟨ v₁ , scv₂ ⟩)
+⟶ᵤᵣprogress-scv (SCV-pair _ _ _) ν | inj₂ (inj₁ ⟨ _ , scv₂ ⟩)
   with ⟶ᵤᵣprogress-scv scv₂ ν
-⟶ᵤᵣprogress-scv (SCV-pair {e₁ = e₁} _ _ _) ν | inj₂ (inj₁ _)  | step scv₂⟶scv₂' =
+⟶ᵤᵣprogress-scv (SCV-pair {e₁ = e₁} _ _ _) _ | _ | step scv₂⟶scv₂' =
   step (cong (ξ-×ᵣ e₁) scv₂⟶scv₂')
-⟶ᵤᵣprogress-scv (SCV-pair {e₂ = e₂} _ _ _) ν | inj₂ (inj₂ ⟨ scv₁ , _ ⟩)
+⟶ᵤᵣprogress-scv (SCV-pair _ _ _) ν | inj₂ (inj₂ ⟨ scv₁ , _ ⟩)
   with ⟶ᵤᵣprogress-scv scv₁ ν
-⟶ᵤᵣprogress-scv (SCV-pair {e₂ = e₂} _ _ _) ν | inj₂ (inj₂ _) | step scv₁⟶scv₁' =
+⟶ᵤᵣprogress-scv (SCV-pair {e₂ = e₂} _ _ _) _ | _ | step scv₁⟶scv₁' =
   step (cong (ξ-×ₗ e₂) scv₁⟶scv₁')
-⟶ᵤᵣprogress-scv (SCV-pair {e₂ = e₂} _ _ _) ν | inj₁ ⟨ scv₁ , _ ⟩
+⟶ᵤᵣprogress-scv (SCV-pair _ _ _) ν | inj₁ ⟨ scv₁ , _ ⟩
   with ⟶ᵤᵣprogress-scv scv₁ ν
-⟶ᵤᵣprogress-scv (SCV-pair {e₂ = e₂} _ _ _) ν | inj₁ _ | step scv₁⟶scv₁' =
+⟶ᵤᵣprogress-scv (SCV-pair {e₂ = e₂} _ _ _) _ | _ | step scv₁⟶scv₁' =
   step (cong (ξ-×ₗ e₂) scv₁⟶scv₁')
