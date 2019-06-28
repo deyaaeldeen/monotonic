@@ -1,4 +1,4 @@
-module MonoRef.Coercions.NormalForm.Size where
+module MonoRef.Coercions.NormalForm.Faithful.Size where
 
 open import Data.Empty using (⊥)
 open import Data.Nat using (ℕ ; _+_ ; _*_ ; _≤_)
@@ -6,7 +6,7 @@ open import Data.Nat.Properties
 open import Relation.Binary.PropositionalEquality using (_≢_)
 open import Relation.Nullary.Negation using (contradiction)
 
-open import MonoRef.Coercions.NormalForm.Syntax
+open import MonoRef.Coercions.NormalForm.Faithful.Syntax
 open import MonoRef.Static.Types
 open import MonoRef.Static.Types.Relations
 
@@ -29,7 +29,8 @@ open import MonoRef.Static.Types.Relations
 ‖ id         ‖ₘ = 1
 ‖ (fun c d)  ‖ₘ = 1 + ‖ c ‖ + ‖ d ‖
 ‖ (prod c d) ‖ₘ = 1 + ‖ c ‖ + ‖ d ‖
-‖ (Ref t)    ‖ₘ = 1 + ‖ t ‖ₜ
+‖ (Ref t _)  ‖ₘ = 1 + ‖ t ‖ₜ
+‖ fail       ‖ₘ = 1
 
 ‖ fail         ‖ᶠ = 1
 ‖ (injSeq B g) ‖ᶠ = 3 + (2 * ‖ B ‖ᵢₜ) + ‖ g ‖ₘ
@@ -52,7 +53,8 @@ size-mcoercion≢0 : ∀{A B} → (mc : MiddleCoercion A B) → ‖ mc ‖ₘ �
 size-mcoercion≢0 id         = λ ()
 size-mcoercion≢0 (fun _ _ ) = λ ()
 size-mcoercion≢0 (prod _ _) = λ ()
-size-mcoercion≢0 (Ref _   ) = λ ()
+size-mcoercion≢0 (Ref _ _ ) = λ ()
+size-mcoercion≢0 fail       = λ ()
 
 ¬size-two-nfcoercions≤0 : ∀{A B C}
   → (nc : NormalFormCoercion A B) → (nd : NormalFormCoercion B C)

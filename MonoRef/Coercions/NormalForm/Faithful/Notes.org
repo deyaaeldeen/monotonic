@@ -1,0 +1,16 @@
+How to prove termination of compose for lazy D semantics
+
+* Updating the termination proof when restricting id coercion on atomic types
+
+c3 * ((2 + c4 * (‖ A ‖ₜ + ‖ B ‖ₜ)) + suc ‖ i ‖ᶠ) ≤ c3 * (2 + (c1 * ‖ A ‖ + ‖ g ‖ₘ + (3 + (c2 * ‖ B ‖ + ‖ i ‖))))
+
+c3 * c4 ≤ c3 * c1
+c3 * c4 ≤ c3 * c2
+
+c1 + 1 ≤ c4
+c2 + 1 ≤ c4
+
+c1 = 1
+c2 = 1
+c3 = 2
+c4 = 2

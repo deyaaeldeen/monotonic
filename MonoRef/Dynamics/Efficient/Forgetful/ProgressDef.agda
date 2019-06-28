@@ -1,18 +1,18 @@
-module MonoRef.Dynamics.Efficient.ProgressDef where
+module MonoRef.Dynamics.Efficient.Forgetful.ProgressDef where
 
-open import MonoRef.Coercions.NormalForm.Compose
-open import MonoRef.Coercions.NormalForm.Reduction
-open import MonoRef.Coercions.NormalForm.Syntax
+open import MonoRef.Coercions.NormalForm.Forgetful.Compose
+open import MonoRef.Coercions.NormalForm.Forgetful.Reduction
+open import MonoRef.Coercions.NormalForm.Forgetful.Syntax
   renaming (NormalFormCoercion to _⟹_ ; InertNormalForm to Inert
            ; ActiveNormalForm to Active ; inert-normalform-decidable to inertP
            ; ¬Inert⇒Active-normform to ¬Inert⇒Active)
-open import MonoRef.Coercions.NormalForm.Make renaming (make-normal-form-coercion to make-coercion)
-open import MonoRef.Dynamics.Efficient.Reduction
-  _⟹_ Inert Active make-coercion Inert⇒¬Ref
+open import MonoRef.Coercions.NormalForm.Forgetful.Make renaming (make-normal-form-coercion to make-coercion)
+open import MonoRef.Dynamics.Efficient.Forgetful.Reduction
+  _⟹_ Inert Active make-coercion
 open import MonoRef.Dynamics.Efficient.Value
   _⟹_ Inert
 open import MonoRef.Dynamics.Store.Efficient
-  _⟹_ Inert Active inertP ¬Inert⇒Active make-coercion Inert⇒¬Ref compose
+  _⟹_ Inert Active inertP ¬Inert⇒Active make-coercion compose
 open import MonoRef.Language.TargetWithoutBlame
   _⟹_ Inert
 open import MonoRef.Dynamics.Error

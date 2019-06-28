@@ -34,7 +34,7 @@ open import Relation.Binary.PropositionalEquality using (refl)
 open import MonoRef.Dynamics.Simple.Value
   _⟹_ Inert
 open import MonoRef.Dynamics.Store.Base
-  _⟹_ Inert Inert⇒¬Ref
+  _⟹_ Inert
 open import MonoRef.Dynamics.Store.Normal
   _⟹_ Inert
 open import MonoRef.Dynamics.Store.Precision
@@ -47,7 +47,7 @@ open import MonoRef.Dynamics.Store.Simple.ExtensionWeakening
 open import MonoRef.Dynamics.Store.Simple.PrecisionStrenthening
   _⟹_ Inert Active public
 open import MonoRef.Dynamics.Store.Store
-  _⟹_ Inert Inert⇒¬Ref
+  _⟹_ Inert
 open import MonoRef.Dynamics.Store.StoreDef
   _⟹_ Inert
 open import MonoRef.Dynamics.Store.Simple.Utilities
@@ -63,7 +63,7 @@ open import MonoRef.Static.Types.Relations
 open ParamStoreValue Value CastedValue StrongCastedValue public
 open ParamStoreDef StoreValue public
 open ParamStore
-  Value CastedValue StrongCastedValue ref⟹T ref⟹∈ ref⟹⊑ public
+  Value Value CastedValue StrongCastedValue ref⟹T ref⟹∈ ref⟹⊑ public
 open ParamNormal
   Value CastedValue StrongCastedValue public
 open ParamNormalDecidable scv-decidable public
@@ -157,7 +157,7 @@ private
 
 {- Re-exported concrete definitions -}
 
-open ParamBase Value CastedValue StrongCastedValue ref⟹T ref⟹∈ ref⟹⊑
+open ParamBase Value Value CastedValue StrongCastedValue ref⟹T ref⟹∈ ref⟹⊑
 open StoreExtend prefix-weaken-val prefix-weaken-cv public
 open Corollary1 typeprecise-strenthen-val typeprecise-strenthen-cv all-⊑ₕ public
 

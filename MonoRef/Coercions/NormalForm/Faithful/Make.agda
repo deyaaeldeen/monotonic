@@ -1,9 +1,9 @@
-module MonoRef.Coercions.NormalForm.Make where
+module MonoRef.Coercions.NormalForm.Faithful.Make where
 
 open import Relation.Binary.PropositionalEquality using (refl)
 open import Relation.Nullary using (yes ; no)
 
-open import MonoRef.Coercions.NormalForm.Syntax
+open import MonoRef.Coercions.NormalForm.Faithful.Syntax
 open import MonoRef.Static.Types
 open import MonoRef.Static.Types.Relations
 
@@ -27,7 +27,7 @@ make-normal-form-coercion (A `× B) (A' `× B') | yes ⌣-×
 make-normal-form-coercion (A ⇒ B) (A' ⇒ B') | yes ⌣-⇒
    with make-normal-form-coercion A' A | make-normal-form-coercion B B'
 ...   | c | d = final (middle (fun c d))
-make-normal-form-coercion .(Ref _) (Ref B) | yes ⌣-ref = final (middle (Ref B))
+make-normal-form-coercion .(Ref _) (Ref B) | yes ⌣-ref = final (middle (Ref B ⊑-refl))
 
 make-final-coercion : ∀ {A B}
   → Injectable A → Injectable B → FinalCoercion A B
@@ -41,6 +41,6 @@ make-final-coercion {A ⇒ B} {A' ⇒ B'} _ _ | yes ⌣-⇒
 make-final-coercion {A `× B} {A' `× B'} _ _ | yes ⌣-×
     with make-normal-form-coercion A A' | make-normal-form-coercion B B'
 ...    | c | d = middle (prod c d)
-make-final-coercion {.(Ref _)} {Ref B} _ _ | yes ⌣-ref = middle (Ref B)
+make-final-coercion {.(Ref _)} {Ref B} _ _ | yes ⌣-ref = middle (Ref B ⊑-refl)
 make-final-coercion () _ | yes ⌣-⋆L
 make-final-coercion _ () | yes ⌣-⋆R

@@ -2,12 +2,11 @@ open import Data.Empty using (⊥ ; ⊥-elim)
 
 open import MonoRef.Static.Types
 
-module MonoRef.Dynamics.Efficient.Reduction
+module MonoRef.Dynamics.Efficient.Forgetful.Reduction
   (_⟹_ : Type → Type → Set)
   (Inert : ∀ {A B} → A ⟹ B → Set)
   (Active : ∀ {A B} → A ⟹ B → Set)
   (make-coercion : ∀ A B → A ⟹ B)
-  (Inert⇒¬Ref : ∀ {A B} {c : A ⟹ Ref B} → Inert c → ⊥)
   where
 
 open import Data.List using (_∷ʳ_)
@@ -22,9 +21,9 @@ open import Data.List.Properties.Extra using (∈-∷ʳ)
 
 open import MonoRef.Dynamics.BypassCast public
 open import MonoRef.Dynamics.Reduction.MonoReduction
-  _⟹_ Inert make-coercion Inert⇒¬Ref
+  _⟹_ Inert make-coercion
 open import MonoRef.Dynamics.Reduction.MonoCastReduction
-  _⟹_ Inert Inert⇒¬Ref
+  _⟹_ Inert
 open import MonoRef.Dynamics.Reduction.PureReduction
   _⟹_ Inert make-coercion
 open import MonoRef.Dynamics.Efficient.Frames
@@ -35,7 +34,7 @@ open import MonoRef.Dynamics.Store.Ptr
 open import MonoRef.Dynamics.Store.Precision
   _⟹_ Inert
 open import MonoRef.Dynamics.Store.Store
-  _⟹_ Inert Inert⇒¬Ref
+  _⟹_ Inert
 open import MonoRef.Dynamics.Store.StoreDef
   _⟹_ Inert
 open import MonoRef.Dynamics.Store.TypingProgress
@@ -53,19 +52,19 @@ module ParamReduction
   (Value             : ∀ {Σ Γ A} → Σ ∣ Γ ⊢ A → Set)
   (CastedValue       : ∀ {Σ Γ A} → Σ ∣ Γ ⊢ A → Set)
   (StrongCastedValue : ∀ {Σ Γ A} {e : Σ ∣ Γ ⊢ A} → CastedValue e → Set)
-  (ref⟹T : ∀ {Σ Γ A} {v : Σ ∣ Γ ⊢ Ref A} → (V : Value v) → Type)
-  (ref⟹∈ : ∀ {Σ Γ A} {v : Σ ∣ Γ ⊢ Ref A} → (V : Value v) → ref⟹T V ∈ Σ)
-  (ref⟹⊑ : ∀ {Σ Γ A} {v : Σ ∣ Γ ⊢ Ref A} → (V : Value v) → ref⟹T V ⊑ A)
+  (ref⟹T : ∀ {Σ Γ A} {v : Σ ∣ Γ ⊢ Ref A} → (V : SimpleValue v) → Type)
+  (ref⟹∈ : ∀ {Σ Γ A} {v : Σ ∣ Γ ⊢ Ref A} → (V : SimpleValue v) → ref⟹T V ∈ Σ)
+  (ref⟹⊑ : ∀ {Σ Γ A} {v : Σ ∣ Γ ⊢ Ref A} → (V : SimpleValue v) → ref⟹T V ⊑ A)
   where
 
   open ParamStoreValue Value CastedValue StrongCastedValue
   open ParamStoreDef StoreValue
-  open ParamStore Value CastedValue StrongCastedValue ref⟹T ref⟹∈ ref⟹⊑
+  open ParamStore SimpleValue Value CastedValue StrongCastedValue ref⟹T ref⟹∈ ref⟹⊑
   open ParamPureReduction SimpleValue Value public
   open ParamMonoCastReduction
-    Value CastedValue StrongCastedValue ref⟹T ref⟹∈ ref⟹⊑
+    SimpleValue Value CastedValue StrongCastedValue ref⟹T ref⟹∈ ref⟹⊑
   open ParamMonoReduction
-    Value CastedValue StrongCastedValue ref⟹T ref⟹∈ ref⟹⊑ public
+    SimpleValue Value CastedValue StrongCastedValue ref⟹T ref⟹∈ ref⟹⊑ public
   open ParamNormal Value CastedValue StrongCastedValue
 
   module ParamReduction/ν-cast/ν-update/ref/store/⟶ᵤ
@@ -75,7 +74,7 @@ module ParamReduction
       → t' ⊑ (store-lookup-rtti T∈Σ ν)
       → Store (Σ-cast T∈Σ t'))
     (ν-update/ref : ∀ {A Σ Γ} {r : Σ ∣ Γ ⊢ Ref A}
-      → (R : Value r)
+      → (R : SimpleValue r)
       → Store Σ
       → ∀ {v : Σ ∣ ∅ ⊢ A}
       → Value v

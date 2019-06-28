@@ -7,12 +7,9 @@
 
 open import MonoRef.Static.Types
 
-open import Data.Empty using (⊥)
-
 module MonoRef.Dynamics.Store.Store
   (_⟹_ : Type → Type → Set)
   (Inert : ∀ {A B} → A ⟹ B → Set)
-  (Inert⇒¬Ref : ∀ {A B} {c : A ⟹ Ref B} → Inert c → ⊥)
   where
 
 open import Data.List.Any using (here; there)
@@ -34,21 +31,22 @@ open import MonoRef.Static.Types.Relations
 
 
 module ParamStore
+  (SimpleValue : ∀ {Σ Γ A} → Σ ∣ Γ ⊢ A → Set)
   (Value : ∀ {Σ Γ A} → Σ ∣ Γ ⊢ A → Set)
   (CastedValue       : ∀ {Σ Γ A} → Σ ∣ Γ ⊢ A → Set)
   (StrongCastedValue : ∀ {Σ Γ A} {e : Σ ∣ Γ ⊢ A} → CastedValue e → Set)
 
   {- These utilities depend on the definition of Value -}
-  (ref⟹T : ∀ {Σ Γ A} {v : Σ ∣ Γ ⊢ Ref A} → (V : Value v) → Type)
-  (ref⟹∈ : ∀ {Σ Γ A} {v : Σ ∣ Γ ⊢ Ref A} → (V : Value v) → ref⟹T V ∈ Σ)
-  (ref⟹⊑ : ∀ {Σ Γ A} {v : Σ ∣ Γ ⊢ Ref A} → (V : Value v) → ref⟹T V ⊑ A)
+  (ref⟹T : ∀ {Σ Γ A} {v : Σ ∣ Γ ⊢ Ref A} → (V : SimpleValue v) → Type)
+  (ref⟹∈ : ∀ {Σ Γ A} {v : Σ ∣ Γ ⊢ Ref A} → (V : SimpleValue v) → ref⟹T V ∈ Σ)
+  (ref⟹⊑ : ∀ {Σ Γ A} {v : Σ ∣ Γ ⊢ Ref A} → (V : SimpleValue v) → ref⟹T V ⊑ A)
   where
 
   open ParamStoreValue Value CastedValue StrongCastedValue
   open ParamStoreDef StoreValue
 
   ref-static-type : ∀ {Σ Γ A} {r : Σ ∣ Γ ⊢ Ref A}
-    → (R : Value r) → static A → ref⟹T R ≡ A
+    → (R : SimpleValue r) → static A → ref⟹T R ≡ A
   ref-static-type R static-A = ⊑-respect-static (ref⟹⊑ R) static-A
 
   lookup-store : ∀ {Σ A} → A ∈ Σ → Store Σ → StoreValue A Σ
@@ -63,7 +61,7 @@ module ParamStore
   ... | fromCastedValue (intro {V = V} _ _) = V
 
   store-lookup-v/ref : ∀ {Σ Γ A} {r : Σ ∣ Γ ⊢ Ref A}
-    → (R : Value r) → Store Σ → Σ ∣ ∅ ⊢ ref⟹T R
+    → (R : SimpleValue r) → Store Σ → Σ ∣ ∅ ⊢ ref⟹T R
   store-lookup-v/ref R ν = store-lookup-v (ref⟹∈ R) ν
 
   store-lookup-rtti : ∀ {Σ A} → A ∈ Σ → Store Σ → Type
@@ -72,17 +70,17 @@ module ParamStore
   ... | fromCastedValue (intro _ ty) = Ty⇓ ty
 
   store-lookup-rtti/ref : ∀ {Σ Γ T} {r : Σ ∣ Γ ⊢ Ref T}
-    → (R : Value r) → Store Σ → Type
+    → (R : SimpleValue r) → Store Σ → Type
   store-lookup-rtti/ref R ν = store-lookup-rtti (ref⟹∈ R) ν
 
   μ-static-lookup : ∀ {Σ Γ A} {r : Σ ∣ Γ ⊢ Ref A}
-    → (R : Value r) → static A → Store Σ → Σ ∣ ∅ ⊢ A
+    → (R : SimpleValue r) → static A → Store Σ → Σ ∣ ∅ ⊢ A
   μ-static-lookup r x ν
     with ref⟹T r | ref-static-type r x | store-lookup-v/ref r ν
   ... | _ | refl | res = res
 
   μ-static-update : ∀ {Σ A} {r : Σ ∣ ∅ ⊢ Ref A}
-    → (R : Value r)
+    → (R : SimpleValue r)
     → static A
     → Store Σ
     → ∀ {v : Σ ∣ ∅ ⊢ A}
@@ -92,7 +90,7 @@ module ParamStore
     update-store (ref⟹∈ R) (subst (λ x₁ → x₁) (helper R x) (toNormalStoreValue v)) μ
      where
        helper : ∀ {Σ Γ B} {r : Σ ∣ Γ ⊢ Ref B}
-         → (R : Value r)
+         → (R : SimpleValue r)
          → static B
          → NormalStoreValue B Σ ≡ NormalStoreValue (ref⟹T R) Σ
        helper r x rewrite ref-static-type r x = refl
@@ -128,15 +126,15 @@ module ParamStore
   ... | fromCastedValue (intro _ _) = refl
 
   ref-rtti-preserves-Σ : ∀ {Σ Γ A} {r : Σ ∣ Γ ⊢ Ref A}
-    → (R : Value r)
+    → (R : SimpleValue r)
     → (ν : Store Σ)
     → (store-lookup-rtti/ref R ν) ≡ (ref⟹T R)
   ref-rtti-preserves-Σ R ν = mem-rtti-preserves-Σ (ref⟹∈ R) ν
 
   ref-ν⟹∈ : ∀ {Σ Γ T} {v : Σ ∣ Γ ⊢ Ref T}
-    → (R : Value v) → (ν : Store Σ) → store-lookup-rtti/ref R ν ∈ Σ
+    → (R : SimpleValue v) → (ν : Store Σ) → store-lookup-rtti/ref R ν ∈ Σ
   ref-ν⟹∈ R ν rewrite (ref-rtti-preserves-Σ R ν) = ref⟹∈ R
 
   ref-ν⟹⊑ : ∀ {Σ Γ T} {v : Σ ∣ Γ ⊢ Ref T}
-    → (R : Value v) → (ν : Store Σ) → store-lookup-rtti/ref R ν ⊑ T
+    → (R : SimpleValue v) → (ν : Store Σ) → store-lookup-rtti/ref R ν ⊑ T
   ref-ν⟹⊑ R ν rewrite (ref-rtti-preserves-Σ R ν) = ref⟹⊑ R

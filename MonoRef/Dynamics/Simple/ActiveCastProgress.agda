@@ -5,7 +5,7 @@ open import Relation.Nullary using (yes ; no)
 open import MonoRef.Coercions.Reduction
 open import MonoRef.Coercions.Syntax
 open import MonoRef.Dynamics.Simple.Reduction
-  _⟹_ Inert make-coercion Inert⇒¬Ref
+  _⟹_ Inert make-coercion
 open import MonoRef.Dynamics.Simple.Value
   _⟹_ Inert
 open import MonoRef.Dynamics.Store.Simple

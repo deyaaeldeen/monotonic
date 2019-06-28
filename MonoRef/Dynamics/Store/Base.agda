@@ -13,7 +13,6 @@ open import Data.Empty using (⊥ ; ⊥-elim)
 module MonoRef.Dynamics.Store.Base
   (_⟹_ : Type → Type → Set)
   (Inert : ∀ {A B} → A ⟹ B → Set)
-  (Inert⇒¬Ref : ∀ {A B} {c : A ⟹ Ref B} → Inert c → ⊥)
   where
 
 open import Data.List using (_∷ʳ_)
@@ -33,7 +32,7 @@ open import MonoRef.Dynamics.Store.Precision
 open import MonoRef.Dynamics.Store.Precision.StoreValStrenthening
   _⟹_ Inert
 open import MonoRef.Dynamics.Store.Store
-  _⟹_ Inert Inert⇒¬Ref
+  _⟹_ Inert
 open import MonoRef.Dynamics.Store.StoreDef
   _⟹_ Inert
 open import MonoRef.Dynamics.Store.Value
@@ -45,19 +44,20 @@ open import MonoRef.Static.Types.Relations
 
 
 module ParamBase
+  (SimpleValue       : ∀ {Σ Γ A} → Σ ∣ Γ ⊢ A → Set)
   (Value             : ∀ {Σ Γ A} → Σ ∣ Γ ⊢ A → Set)
   (CastedValue       : ∀ {Σ Γ A} → Σ ∣ Γ ⊢ A → Set)
   (StrongCastedValue : ∀ {Σ Γ A} {e : Σ ∣ Γ ⊢ A} → CastedValue e → Set)
 
   {- These utilities depend on the definition of Value -}
-  (ref⟹T : ∀ {Σ Γ A} {v : Σ ∣ Γ ⊢ Ref A} → (V : Value v) → Type)
-  (ref⟹∈ : ∀ {Σ Γ A} {v : Σ ∣ Γ ⊢ Ref A} → (V : Value v) → ref⟹T V ∈ Σ)
-  (ref⟹⊑ : ∀ {Σ Γ A} {v : Σ ∣ Γ ⊢ Ref A} → (V : Value v) → ref⟹T V ⊑ A)
+  (ref⟹T : ∀ {Σ Γ A} {v : Σ ∣ Γ ⊢ Ref A} → (V : SimpleValue v) → Type)
+  (ref⟹∈ : ∀ {Σ Γ A} {v : Σ ∣ Γ ⊢ Ref A} → (V : SimpleValue v) → ref⟹T V ∈ Σ)
+  (ref⟹⊑ : ∀ {Σ Γ A} {v : Σ ∣ Γ ⊢ Ref A} → (V : SimpleValue v) → ref⟹T V ⊑ A)
   where
 
   open ParamStoreValue Value CastedValue StrongCastedValue
   open ParamStoreDef StoreValue
-  open ParamStore Value CastedValue StrongCastedValue ref⟹T ref⟹∈ ref⟹⊑
+  open ParamStore SimpleValue Value CastedValue StrongCastedValue ref⟹T ref⟹∈ ref⟹⊑
 
   module StoreExtend
     (prefix-weaken-val : ∀ {Σ Σ' Γ A} {e : Σ ∣ Γ ⊢ A}

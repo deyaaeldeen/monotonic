@@ -7,7 +7,7 @@ open import MonoRef.Coercions.Syntax
 open import MonoRef.Dynamics.Simple.Frames
   _⟹_ Inert
 open import MonoRef.Dynamics.Simple.Reduction
-  _⟹_ Inert make-coercion Inert⇒¬Ref
+  _⟹_ Inert make-coercion
 open import MonoRef.Dynamics.Store.Simple
   _⟹_ Inert Active inertP ¬Inert⇒Active make-coercion Inert⇒¬Ref
 open import MonoRef.Dynamics.Substitution

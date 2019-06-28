@@ -1,26 +1,25 @@
-module MonoRef.Dynamics.Efficient.NormalStoreProgress where
+module MonoRef.Dynamics.Efficient.Faithful.NormalStoreProgress where
 
 open import Data.Empty using (⊥-elim)
 
-open import MonoRef.Coercions.NormalForm.Compose
-open import MonoRef.Coercions.NormalForm.Reduction
-open import MonoRef.Coercions.NormalForm.Syntax
+open import MonoRef.Coercions.NormalForm.Faithful.Compose
+open import MonoRef.Coercions.NormalForm.Faithful.Reduction
+open import MonoRef.Coercions.NormalForm.Faithful.Syntax
   renaming (NormalFormCoercion to _⟹_ ; InertNormalForm to Inert
            ; ActiveNormalForm to Active ; inert-normalform-decidable to inertP
            ; ¬Inert⇒Active-normform to ¬Inert⇒Active)
-open import MonoRef.Coercions.NormalForm.Make renaming (make-normal-form-coercion to make-coercion)
+open import MonoRef.Coercions.NormalForm.Faithful.Make renaming (make-normal-form-coercion to make-coercion)
 open import MonoRef.Dynamics.Efficient.Frames
   _⟹_ Inert
-open import MonoRef.Dynamics.Efficient.Reduction
-  _⟹_ Inert Active make-coercion Inert⇒¬Ref
+open import MonoRef.Dynamics.Efficient.Faithful.Reduction
 open import MonoRef.Dynamics.Store.Efficient
-  _⟹_ Inert Active inertP ¬Inert⇒Active make-coercion Inert⇒¬Ref compose
+  _⟹_ Inert Active inertP ¬Inert⇒Active make-coercion compose
 open import MonoRef.Dynamics.Substitution
   _⟹_ Inert
 open import MonoRef.Language.TargetWithoutBlame
   _⟹_ Inert
-open import MonoRef.Dynamics.Efficient.CastProgress
-open import MonoRef.Dynamics.Efficient.ProgProgressDef
+open import MonoRef.Dynamics.Efficient.Faithful.CastProgress
+open import MonoRef.Dynamics.Efficient.Faithful.ProgProgressDef
 open import MonoRef.Dynamics.Error
   _⟹_ Inert
 open import MonoRef.Dynamics.Efficient.Value
@@ -28,9 +27,6 @@ open import MonoRef.Dynamics.Efficient.Value
 open import MonoRef.Static.Context
 open import MonoRef.Static.Types
 
-
-open ParamReduction SimpleValue Value CastedValue StrongCastedValue ref⟹T ref⟹∈ ref⟹⊑
-open ParamReduction/ν-cast/ν-update/ref/store/⟶ᵤ ν-cast ν-update/ref store _⟶ᵤ_
 
 progress-normal-store : ∀ {Σ A}
   → (e : Σ ∣ ∅ ⊢ A) → (μ : Store Σ) → NormalStore μ → ProgProgress e μ
@@ -106,14 +102,16 @@ progress-normal-store (addr mem Σ'⊑Σ) _ _ = done (S-Val (V-addr mem Σ'⊑Σ
 progress-normal-store ((!ₛ e) A-static) ν μ-evd with progress-normal-store e ν μ-evd
 ... | step-d μ-evd' e⟶e' = step-d μ-evd' (ξ (ξ-!ₛ A-static) (switch e⟶e'))
 ... | step-a μ-evd' e⟶e' = step-d μ-evd' (ξ (ξ-!ₛ A-static) e⟶e')
-... | done v = step-d μ-evd (β-mono (β-!ₛ v))
+... | done (S-Val v) = step-d μ-evd (β-mono (β-!ₛ v))
+... | done (V-cast _ (I-final (I-middle ())))
 ... | error E-error = step-d μ-evd (ξ-error (ξ-!ₛ A-static))
 
 progress-normal-store ((e₁ :=ₛ e₂) A-static) ν μ-evd with progress-normal-store e₁ ν μ-evd
 ... | step-d μ-evd' e⟶e' = step-d μ-evd' (ξ (ξ-:=ₛₗ A-static e₂) (switch e⟶e'))
 ... | step-a μ-evd' e⟶e' = step-d μ-evd' (ξ (ξ-:=ₛₗ A-static e₂) e⟶e')
 ... | error E-error = step-d μ-evd (ξ-error (ξ-:=ₛₗ A-static e₂))
-... | done v₁ with progress-normal-store e₂ ν μ-evd
+... | done (V-cast _ (I-final (I-middle ())))
+... | done (S-Val v₁) with progress-normal-store e₂ ν μ-evd
 ...   | step-d μ-evd' e⟶e' = step-d μ-evd' (ξ (ξ-:=ₛᵣ A-static e₁) (switch e⟶e'))
 ...   | step-a μ-evd' e⟶e' = step-d μ-evd' (ξ (ξ-:=ₛᵣ A-static e₁) e⟶e')
 ...   | done v₂ = step-d μ-evd (β-mono (β-:=ₛ v₁ v₂))
@@ -122,14 +120,16 @@ progress-normal-store ((e₁ :=ₛ e₂) A-static) ν μ-evd with progress-norma
 progress-normal-store (! e) ν μ-evd with progress-normal-store e ν μ-evd
 ... | step-d μ-evd' e⟶e' = step-d μ-evd' (ξ ξ-! (switch e⟶e'))
 ... | step-a μ-evd' e⟶e' = step-d μ-evd' (ξ ξ-! e⟶e')
-... | done v = step-d μ-evd (β-mono (β-! v))
+... | done (V-cast _ (I-final (I-middle ())))
+... | done (S-Val v) = step-d μ-evd (β-mono (β-! v))
 ... | error E-error = step-d μ-evd (ξ-error ξ-!)
 
 progress-normal-store (e₁ := e₂) ν μ-evd with progress-normal-store e₁ ν μ-evd
 ... | step-d μ-evd' e⟶e' = step-d μ-evd' (ξ (ξ-:=ₗ e₂) (switch e⟶e'))
 ... | step-a μ-evd' e⟶e' = step-d μ-evd' (ξ (ξ-:=ₗ e₂) e⟶e')
 ... | error E-error = step-d μ-evd (ξ-error (ξ-:=ₗ e₂))
-... | done v₁ with progress-normal-store e₂ ν μ-evd
+... | done (V-cast _ (I-final (I-middle ())))
+... | done (S-Val v₁) with progress-normal-store e₂ ν μ-evd
 ...   | step-d μ-evd' e⟶e' = step-d μ-evd' (ξ (ξ-:=ᵣ e₁) (switch e⟶e'))
 ...   | step-a μ-evd' e⟶e' = step-d μ-evd' (ξ (ξ-:=ᵣ e₁) e⟶e')
 ...   | done v₂ = step-d μ-evd (β-mono (β-:= v₁ v₂))

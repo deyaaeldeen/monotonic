@@ -19,7 +19,6 @@ module MonoRef.Dynamics.Store.Efficient
   (inertP : ∀ {A B} → (c : A ⟹ B) → Dec (Inert c))
   (¬Inert⇒Active : ∀ {A B} {c : A ⟹ B} → ¬ Inert c → Active c)
   (make-coercion : ∀ A B → A ⟹ B)
-  (Inert⇒¬Ref : ∀ {A B} {c : A ⟹ Ref B} → Inert c → ⊥)
   (compose : ∀ {A B C} → A ⟹ B → B ⟹ C → A ⟹ C)
   where
 
@@ -36,9 +35,9 @@ open import Relation.Binary.PropositionalEquality using (refl)
 open import MonoRef.Dynamics.Efficient.Value
   _⟹_ Inert
 open import MonoRef.Dynamics.Store.Base
-  _⟹_ Inert Inert⇒¬Ref
+  _⟹_ Inert
 open import MonoRef.Dynamics.Store.Efficient.Utilities
-  _⟹_ Inert Inert⇒¬Ref public
+  _⟹_ Inert public
 open import MonoRef.Dynamics.Store.Normal
   _⟹_ Inert
 open import MonoRef.Dynamics.Store.Precision
@@ -51,7 +50,7 @@ open import MonoRef.Dynamics.Store.Efficient.PrecisionStrenthening
   _⟹_ Inert Active public
 open import MonoRef.Dynamics.Store.Ptr public
 open import MonoRef.Dynamics.Store.Store
-  _⟹_ Inert Inert⇒¬Ref
+  _⟹_ Inert
 open import MonoRef.Dynamics.Store.StoreDef
   _⟹_ Inert
 open import MonoRef.Dynamics.Store.Value
@@ -64,7 +63,7 @@ open import MonoRef.Static.Context
 open ParamStoreValue Value CastedValue StrongCastedValue public
 open ParamStoreDef StoreValue public
 open ParamStore
-  Value CastedValue StrongCastedValue ref⟹T ref⟹∈ ref⟹⊑ public
+  SimpleValue Value CastedValue StrongCastedValue ref⟹T ref⟹∈ ref⟹⊑ public
 open ParamNormal Value CastedValue StrongCastedValue public
 open ParamNormalDecidable scv-decidable public
 
@@ -167,7 +166,7 @@ private
 
 
 ν-update/ref : ∀ {A Σ Γ} {r : Σ ∣ Γ ⊢ Ref A}
-  → (R : Value r) → Store Σ → ∀ {e : Σ ∣ ∅ ⊢ A} → Value e → Store Σ
+  → (R : SimpleValue r) → Store Σ → ∀ {e : Σ ∣ ∅ ⊢ A} → Value e → Store Σ
 ν-update/ref R ν v
   with cast-value v (make-coercion _ (ref⟹T R))
 ... | V∧C-inert v' c  = μ-update (ref⟹∈ R) ν (V-cast v' c)
@@ -177,7 +176,7 @@ private
 
 {- Re-exported concrete definitions -}
 
-open ParamBase Value CastedValue StrongCastedValue ref⟹T ref⟹∈ ref⟹⊑
+open ParamBase SimpleValue Value CastedValue StrongCastedValue ref⟹T ref⟹∈ ref⟹⊑
 open StoreExtend prefix-weaken-val prefix-weaken-cv public
 open Corollary1 typeprecise-strenthen-val typeprecise-strenthen-cv all-⊑ₕ public
 

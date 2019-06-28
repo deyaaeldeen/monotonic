@@ -1,4 +1,4 @@
-module MonoRef.Dynamics.Efficient.Properties where
+module MonoRef.Dynamics.Efficient.Faithful.Properties where
 
 open import Data.Empty using (⊥-elim)
 open import Data.List.Membership.Propositional using (_∈_)
@@ -8,21 +8,20 @@ open import Data.Sum using (_⊎_ ; inj₁ ; inj₂)
 open import Relation.Binary.PropositionalEquality using (_≢_ ; refl)
 open import Relation.Nullary using (yes ; no ; ¬_)
 
-open import MonoRef.Coercions.NormalForm.Compose
-open import MonoRef.Coercions.NormalForm.Reduction
-open import MonoRef.Coercions.NormalForm.Syntax
+open import MonoRef.Coercions.NormalForm.Faithful.Compose
+open import MonoRef.Coercions.NormalForm.Faithful.Reduction
+open import MonoRef.Coercions.NormalForm.Faithful.Syntax
   renaming (NormalFormCoercion to _⟹_ ; InertNormalForm to Inert
            ; ActiveNormalForm to Active ; inert-normalform-decidable to inertP
            ; ¬Inert⇒Active-normform to ¬Inert⇒Active)
-open import MonoRef.Coercions.NormalForm.Make renaming (make-normal-form-coercion to make-coercion)
+open import MonoRef.Coercions.NormalForm.Faithful.Make renaming (make-normal-form-coercion to make-coercion)
 open import MonoRef.Dynamics.Efficient.Frames
   _⟹_ Inert
-open import MonoRef.Dynamics.Efficient.Reduction
-  _⟹_ Inert Active make-coercion Inert⇒¬Ref
+open import MonoRef.Dynamics.Efficient.Faithful.Reduction
 open import MonoRef.Dynamics.Efficient.Value
   _⟹_ Inert
 open import MonoRef.Dynamics.Store.Efficient
-  _⟹_ Inert Active inertP ¬Inert⇒Active make-coercion Inert⇒¬Ref compose
+  _⟹_ Inert Active inertP ¬Inert⇒Active make-coercion compose
 open import MonoRef.Language.TargetWithoutBlame
   _⟹_ Inert
 open import MonoRef.Static.Context
@@ -30,13 +29,10 @@ open import MonoRef.Static.Types
 open import MonoRef.Static.Types.Relations
 
 
-open ParamReduction SimpleValue Value CastedValue StrongCastedValue ref⟹T ref⟹∈ ref⟹⊑
-open ParamReduction/ν-cast/ν-update/ref/store/⟶ᵤ ν-cast ν-update/ref store _⟶ᵤ_
-
-
 sval∧Inert⇒¬⟶ᵤ : ∀ {Σ A B} {e : Σ ∣ ∅ ⊢ A} {e' : Σ ∣ ∅ ⊢ B} {c : A ⟹ B}
   → SimpleValue e → Inert c → ¬ (e < c > ⟶ᵤ e')
 sval∧Inert⇒¬⟶ᵤ _ (I-final ()) (`⊥ _)
+sval∧Inert⇒¬⟶ᵤ _ (I-final (I-middle ())) (⊥ₘ _)
 sval∧Inert⇒¬⟶ᵤ _ (I-final (I-middle ())) (`× _ _)
 sval∧Inert⇒¬⟶ᵤ _ (I-final (I-middle ())) (ι _)
 sval∧Inert⇒¬⟶ᵤ () _ compose-casts
@@ -69,6 +65,7 @@ sval⟶ᵤ⊥ (V-pair _ _) ()
 val⟶ᵤ⊥ : ∀ {Σ A} {e : Σ ∣ ∅ ⊢ A} {e' : Σ ∣ ∅ ⊢ A} → Value e → ¬ (e ⟶ᵤ e')
 val⟶ᵤ⊥ (S-Val sv) red = sval⟶ᵤ⊥ sv red
 val⟶ᵤ⊥ (V-cast _ (I-final ())) (`⊥ _)
+val⟶ᵤ⊥ (V-cast _ (I-final (I-middle ()))) (⊥ₘ _)
 val⟶ᵤ⊥ (V-cast () _) compose-casts
 val⟶ᵤ⊥ (V-cast _ (I-final (I-middle ()))) (ι _)
 val⟶ᵤ⊥ (V-cast _ (I-final (I-middle ()))) (`× _ _)
@@ -149,16 +146,17 @@ scv⟶ᵤ⟹cv' (SCV-ccast v c d) compose-casts
 ... | yes cd-inert = inj₁ (v⇑ (V-cast v cd-inert))
 ... | no cd-¬inert = inj₁ (cast-val v (¬Inert⇒Active cd-¬inert))
 scv⟶ᵤ⟹cv' _ (`⊥ _) = inj₂ Err-intro
+scv⟶ᵤ⟹cv' _ (⊥ₘ _) = inj₂ Err-intro
 
 scv⟶ₘ⟹cv' : ∀ {Σ Σ' A} {e : Σ ∣ ∅ ⊢ A} {cv : CastedValue e} {ν : Store Σ}
   {e' : Σ' ∣ ∅ ⊢ A} {ν' : Store Σ'}
   → StrongCastedValue cv
   → e , ν ⟶ₘ e' , ν'
   → CastedValue e' ⊎ Erroneous e'
-scv⟶ₘ⟹cv' scv (castref1 R rtti∼T₂ x) =
-  inj₁ (v⇑ (S-Val (V-addr (Σ-cast⟹∈ (ref⟹∈ R) (⊓ rtti∼T₂)) (⊓⟹⊑ᵣ rtti∼T₂))))
-scv⟶ₘ⟹cv' _ (castref2 {ν = ν} R rtti∼T₂ eq) =
-  inj₁ (v⇑ (S-Val (V-addr (ref-ν⟹∈ R ν) (⊓⟹⊑ᵣ-with-≡ rtti∼T₂ eq))))
+scv⟶ₘ⟹cv' scv (castref1 {T₂⊑A = T₂⊑A} R rtti∼T₂ x) =
+  inj₁ (v⇑ (S-Val (V-addr (Σ-cast⟹∈ (ref⟹∈ R) (⊓ rtti∼T₂)) (⊑-trans (⊓⟹⊑ᵣ rtti∼T₂) T₂⊑A))))
+scv⟶ₘ⟹cv' _ (castref2 {ν = ν} {T₂⊑A = T₂⊑A} R rtti∼T₂ eq) =
+  inj₁ (v⇑ (S-Val (V-addr (ref-ν⟹∈ R ν) (⊑-trans (⊓⟹⊑ᵣ-with-≡ rtti∼T₂ eq) T₂⊑A))))
 scv⟶ₘ⟹cv' _ (castref3 _ _) = inj₂ Err-intro
 
 scv⟶ᵤᵣ⟹cv' : ∀ {Σ Σ' A bc} {e : Σ ∣ ∅ ⊢ A} {cv : CastedValue e} {ν : Store Σ}

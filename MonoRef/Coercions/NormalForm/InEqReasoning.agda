@@ -211,6 +211,20 @@ open +-*-Solver
     4 + (c + suc (c + 0))
   ∎
 
+3+a+b+c+d≤3+a+c+3+b+d : ∀ {a b c d} → 3 + (a + b + (c + d)) ≤ 3 + (a + c + (3 + (b + d)))
+3+a+b+c+d≤3+a+c+3+b+d {a}{b}{c}{d} =
+  begin
+    3 + (a + b + (c + d))
+      ≡⟨ solve 4 (λ a b c d → con 3 :+ (a :+ b :+ (c :+ d))
+                          :=
+                        (a :+ c :+ (con 3 :+ (b :+ d))))
+               refl a b c d ⟩
+    a + c + (3 + (b + d))
+      ≤⟨ n≤m+n 3 _ ⟩
+    3 + (a + c + (3 + (b + d)))
+  ∎
+
+
 a+c+1+b+d≤n⇒a+b≤n : ∀ {a b c d n} → a + c + (1 + b + d) ≤ n → a + b ≤ n
 a+c+1+b+d≤n⇒a+b≤n {a}{b}{c}{d}{n} m =
   begin

@@ -10,9 +10,9 @@ open import Relation.Nullary using (yes ; no)
 open import MonoRef.Coercions.Reduction
 open import MonoRef.Coercions.Syntax
 open import MonoRef.Dynamics.MonoStoreProgress
-  _⟹_ Inert Inert⇒¬Ref
+  _⟹_ Inert
 open import MonoRef.Dynamics.Simple.Reduction
-  _⟹_ Inert make-coercion Inert⇒¬Ref
+  _⟹_ Inert make-coercion
 open import MonoRef.Dynamics.Simple.Value
   _⟹_ Inert
 open import MonoRef.Dynamics.Store.Simple
@@ -25,7 +25,7 @@ open import MonoRef.Static.Types.Relations
 
 open ParamReduction Value CastedValue StrongCastedValue ref⟹T ref⟹∈ ref⟹⊑
 open ParamReduction/ν-cast/ν-update/ref/store/⟶ᵤ ν-cast ν-update/ref store _⟶ᵤ_
-open ParamMonoStoreProgress Value CastedValue StrongCastedValue ref⟹T ref⟹∈ ref⟹⊑
+open ParamMonoStoreProgress Value Value CastedValue StrongCastedValue ref⟹T ref⟹∈ ref⟹⊑
 open ParamMonoStoreProgress/ν-cast ν-cast public
 
 get-ptr : ∀ {Σ Σ' A} {e : Σ ∣ ∅ ⊢ A} {e' : Σ' ∣ ∅ ⊢ A} {ν : Store Σ} {ν' : Store Σ'}

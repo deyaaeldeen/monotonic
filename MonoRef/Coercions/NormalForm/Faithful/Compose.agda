@@ -1,4 +1,4 @@
-module MonoRef.Coercions.NormalForm.Compose where
+module MonoRef.Coercions.NormalForm.Faithful.Compose where
 
 open import Data.Empty using (⊥; ⊥-elim)
 open import Data.Nat using (ℕ ; suc ; _+_ ; _*_ ; _≤_ ; s≤s ; z≤n)
@@ -8,9 +8,9 @@ open import Relation.Binary.PropositionalEquality using (refl ; sym ; cong₂)
 open import Relation.Nullary using (yes ; no)
 
 open import MonoRef.Coercions.NormalForm.InEqReasoning
-open import MonoRef.Coercions.NormalForm.Make
-open import MonoRef.Coercions.NormalForm.Size
-open import MonoRef.Coercions.NormalForm.Syntax
+open import MonoRef.Coercions.NormalForm.Faithful.Make
+open import MonoRef.Coercions.NormalForm.Faithful.Size
+open import MonoRef.Coercions.NormalForm.Faithful.Syntax
 open import MonoRef.Static.Types
 open import MonoRef.Static.Types.Relations
 
@@ -57,14 +57,22 @@ private
        | compose-normal-form d d' {n} {c+a+1+d+b≤n⇒a+b≤n{‖ d ‖} m}
   ...  | c⨟c' | d⨟d' = prod c⨟c' d⨟d'
 
-  compose-middle (Ref _)    (Ref B)      {suc n} = Ref B
+  compose-middle (Ref A x) (Ref B y) {suc n}
+    with ∼-decidable A B
+  ... | yes p = Ref (⊓ p) (⊑-trans (⊓⟹⊑ᵣ p) y)
+  ... | no _ = fail
 
   {- id cases -}
 
   compose-middle id           c  {suc n} = c
   compose-middle c@(fun _ _)  id {suc n} = c
-  compose-middle c@(Ref _)    id {suc n} = c
+  compose-middle c@(Ref _ _)  id {suc n} = c
   compose-middle c@(prod _ _) id {suc n} = c
+
+  compose-middle fail       _    {suc n} = fail
+  compose-middle (fun _ _)  fail {suc n} = fail
+  compose-middle (Ref _ _)  fail {suc n} = fail
+  compose-middle (prod _ _) fail {suc n} = fail
 
 
   {- Composing final coercions -}
@@ -89,13 +97,16 @@ private
   -- this case forces me to return a normal form coercion because this is id on
   -- ⋆
   compose-final (middle id) i@(prjSeq _ _) {suc _} = i
+  compose-final (middle fail) (prjSeq _ _) {suc _} = final fail
   compose-final i@(injSeq _ _) (final (middle id)) {suc _} = final i
+  compose-final (injSeq _ _) (final (middle fail)) {suc _} = final fail
 
   {- Failure cases -}
 
   compose-final fail         _            {suc _} = final fail
   compose-final (injSeq _ _) (final fail) {suc _} = final fail
   compose-final (middle _)   (final fail) {suc _} = final fail
+  compose-final (injSeq _ _) (final (injSeq _ fail)) {suc _} = final fail
   compose-final (injSeq _ _) (final (injSeq () id)) {suc _}
 
 
@@ -231,6 +242,39 @@ private
       suc (‖ c ‖ᶠ + ‖ d ‖)
     ∎
 
+  A⊓B≤A+B : ∀ {A B} → (A∼B : A ∼ B) → ‖ ⊓ A∼B ‖ₜ ≤ ‖ A ‖ₜ + ‖ B ‖ₜ
+  A⊓B≤A+B ∼-ℕ-refl = s≤s z≤n
+  A⊓B≤A+B ∼-Unit-refl = s≤s z≤n
+  A⊓B≤A+B ∼-⋆R = m≤m+n _ _
+  A⊓B≤A+B ∼-⋆L = n≤1+n _
+  A⊓B≤A+B {A ⇒ B} {A' ⇒ B'} (~-⇒ x y)
+    with A⊓B≤A+B x | A⊓B≤A+B y
+  ... | l | r =
+    begin
+      3 + (‖ ⊓ x ‖ₜ + ‖ ⊓ y ‖ₜ)
+        ≤⟨ +-monoʳ-≤ 3 (+-mono-≤ l r) ⟩
+      3 + (‖ A ‖ₜ + ‖ A' ‖ₜ + (‖ B ‖ₜ + ‖ B' ‖ₜ))
+        ≤⟨ 3+a+b+c+d≤3+a+c+3+b+d{‖ A ‖ₜ} ⟩
+      3 + (‖ A ‖ₜ + ‖ B ‖ₜ + (3 + (‖ A' ‖ₜ + ‖ B' ‖ₜ)))
+    ∎
+  A⊓B≤A+B {A `× B} {A' `× B'} (~-× x y)
+    with A⊓B≤A+B x | A⊓B≤A+B y
+  ... | l | r =
+    begin
+      3 + (‖ ⊓ x ‖ₜ + ‖ ⊓ y ‖ₜ)
+        ≤⟨ +-monoʳ-≤ 3 (+-mono-≤ l r) ⟩
+      3 + (‖ A ‖ₜ + ‖ A' ‖ₜ + (‖ B ‖ₜ + ‖ B' ‖ₜ))
+        ≤⟨ 3+a+b+c+d≤3+a+c+3+b+d{‖ A ‖ₜ} ⟩
+      3 + (‖ A ‖ₜ + ‖ B ‖ₜ + (3 + (‖ A' ‖ₜ + ‖ B' ‖ₜ)))
+    ∎
+  A⊓B≤A+B {Ref A}{Ref B} (~-ref p) with A⊓B≤A+B p
+  ... | w =
+    begin
+      suc ‖ ⊓ p ‖ₜ           ≤⟨ +-monoʳ-≤ 1 w ⟩
+      suc (‖ A ‖ₜ + ‖ B ‖ₜ) ≤⟨ +-monoʳ-≤ 1 (+-monoʳ-≤ _ (n≤1+n _)) ⟩
+      suc (‖ A ‖ₜ + suc ‖ B ‖ₜ)
+    ∎
+
   compose-middle-size c d {0} {m} = ⊥-elim (¬size-two-mcoercions≤0 c d m)
 
   compose-middle-size (fun c d) (fun c' d') {suc n} {s≤s m}
@@ -261,19 +305,29 @@ private
       suc (‖ c ‖ + ‖ d ‖ + suc (‖ c' ‖ + ‖ d' ‖))
     ∎
 
-  compose-middle-size (Ref A) (Ref B) {suc n} {s≤s m} =
-    begin
-      suc ‖ B ‖ₜ           ≤⟨ +-monoʳ-≤ 1 (n≤m+n ‖ A ‖ₜ ‖ B ‖ₜ) ⟩
-      suc (‖ A ‖ₜ + ‖ B ‖ₜ) ≤⟨ +-monoʳ-≤ 1 (+-monoʳ-≤ _ (n≤1+n _)) ⟩
-      suc (‖ A ‖ₜ + suc ‖ B ‖ₜ)
-    ∎
+  compose-middle-size (Ref A _) (Ref B _) {suc n}
+    with ∼-decidable A B
+  ... | yes p = s≤s
+    (begin
+      ‖ ⊓ p ‖ₜ           ≤⟨ A⊓B≤A+B p ⟩
+      ‖ A ‖ₜ + ‖ B ‖ₜ    ≤⟨ +-monoʳ-≤ ‖ A ‖ₜ (n≤1+n _) ⟩
+      (‖ A ‖ₜ + suc ‖ B ‖ₜ)
+    ∎)
+  ... | no  _ = s≤s z≤n
+
+  {- Composing with failure -}
+
+  compose-middle-size fail _          {suc _} = m≤m+n _ _
+  compose-middle-size (fun _ _)  fail {suc _} = m≤m+n _ _
+  compose-middle-size (prod _ _) fail {suc _} = m≤m+n _ _
+  compose-middle-size (Ref _ _)  fail {suc _} = m≤m+n _ _
 
   {- Composing with id -}
 
   compose-middle-size id         d  {suc _} = n≤1+n ‖ d ‖ₘ
   compose-middle-size (fun _ _)  id {suc _} = m≤m+n _ 1
   compose-middle-size (prod _ _) id {suc _} = m≤m+n _ 1
-  compose-middle-size (Ref _)    id {suc _} = m≤m+n _ 1
+  compose-middle-size (Ref _ _)  id {suc _} = m≤m+n _ 1
 
 
   compose-final-size c d {0} {m} = ⊥-elim (¬size-two-nf&fcoercions≤0 c d m)
@@ -327,14 +381,18 @@ private
   compose-final-size (injSeq B≢⋆ _) (final (middle id)) {suc _} =
     4+2*a+b≤3+2*a+b+3{‖ B≢⋆ ‖ᵢₜ}
 
+  compose-final-size (injSeq _ _) (final (middle fail)) {suc _} = +-monoʳ-≤ 2 z≤n
+
   compose-final-size (middle id)    (prjSeq _ _)        {suc _} = n≤m+n 2 _
 
   {- Failure cases -}
 
+  compose-final-size (middle fail)    (prjSeq _ _)        {suc _} = +-monoʳ-≤ 2 z≤n
   compose-final-size fail         (prjSeq _ _) {suc _} = +-monoʳ-≤ 2 z≤n
   compose-final-size fail         (final _)    {suc _} = +-monoʳ-≤ 2 z≤n
   compose-final-size (injSeq _ _) (final fail) {suc _} = m≤m+n 2 _
   compose-final-size (middle _)   (final fail) {suc _} = 2≤1+a+2
+  compose-final-size (injSeq _ _) (final (injSeq B≢⋆ fail)) {suc _} = +-monoʳ-≤ 2 z≤n
   compose-final-size (injSeq _ _) (final (injSeq B≢⋆ id)) {suc _} =
     ⊥-elim (Injectable⋆⇒⊥ B≢⋆)
 

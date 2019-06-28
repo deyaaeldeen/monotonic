@@ -1,36 +1,36 @@
 {-
 
-  MonoRef.Dynamics.Efficient.TypeSafety assembles a proof of progress and provides
-  the full type safety proof.
+  MonoRef.Dynamics.Efficient.Forgetful.TypeSafety assembles a proof of progress
+  and provides the full type safety proof.
 
 -}
 
-module MonoRef.Dynamics.Efficient.TypeSafety where
+module MonoRef.Dynamics.Efficient.Forgetful.TypeSafety where
 
 open import Data.Nat using (ℕ ; suc)
 open import Relation.Nullary using (yes ; no)
 
-open import MonoRef.Coercions.NormalForm.Compose
-open import MonoRef.Coercions.NormalForm.Reduction
-open import MonoRef.Coercions.NormalForm.Syntax
+open import MonoRef.Coercions.NormalForm.Forgetful.Compose
+open import MonoRef.Coercions.NormalForm.Forgetful.Reduction
+open import MonoRef.Coercions.NormalForm.Forgetful.Syntax
   renaming (NormalFormCoercion to _⟹_ ; InertNormalForm to Inert
            ; ActiveNormalForm to Active ; inert-normalform-decidable to inertP
            ; ¬Inert⇒Active-normform to ¬Inert⇒Active)
-open import MonoRef.Coercions.NormalForm.Make renaming (make-normal-form-coercion to make-coercion)
+open import MonoRef.Coercions.NormalForm.Forgetful.Make renaming (make-normal-form-coercion to make-coercion)
 open import MonoRef.Dynamics.Error
   _⟹_ Inert
 open import MonoRef.Dynamics.Reduction.ReflTransClosure
   _⟹_ Inert
-open import MonoRef.Dynamics.Efficient.Reduction
-  _⟹_ Inert Active make-coercion Inert⇒¬Ref
+open import MonoRef.Dynamics.Efficient.Forgetful.Reduction
+  _⟹_ Inert Active make-coercion
 open import MonoRef.Dynamics.Store.Efficient
-  _⟹_ Inert Active inertP ¬Inert⇒Active make-coercion Inert⇒¬Ref compose
+  _⟹_ Inert Active inertP ¬Inert⇒Active make-coercion compose
 open import MonoRef.Language.TargetWithoutBlame
   _⟹_ Inert
-open import MonoRef.Dynamics.Efficient.EvolvingStoreProgress
-open import MonoRef.Dynamics.Efficient.NormalStoreProgress
-open import MonoRef.Dynamics.Efficient.ProgressDef
-open import MonoRef.Dynamics.Efficient.ProgProgressDef
+open import MonoRef.Dynamics.Efficient.Forgetful.EvolvingStoreProgress
+open import MonoRef.Dynamics.Efficient.Forgetful.NormalStoreProgress
+open import MonoRef.Dynamics.Efficient.Forgetful.ProgressDef
+open import MonoRef.Dynamics.Efficient.Forgetful.ProgProgressDef
 open import MonoRef.Dynamics.Efficient.Value
   _⟹_ Inert
 open import MonoRef.Static.Context

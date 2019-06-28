@@ -6,7 +6,6 @@ module MonoRef.Dynamics.Simple.Reduction
   (_⟹_ : Type → Type → Set)
   (Inert : ∀ {A B} → A ⟹ B → Set)
   (make-coercion : ∀ A B → A ⟹ B)
-  (Inert⇒¬Ref : ∀ {A B} {c : A ⟹ Ref B} → Inert c → ⊥)
   where
 
 open import Data.List using (_∷ʳ_)
@@ -20,9 +19,9 @@ open import Data.List.Prefix renaming (_⊑_ to _⊑ₗ_ ; ⊑-refl to ⊑ₗ-re
 open import Data.List.Properties.Extra using (∈-∷ʳ)
 
 open import MonoRef.Dynamics.Reduction.MonoReduction
-  _⟹_ Inert make-coercion Inert⇒¬Ref
+  _⟹_ Inert make-coercion
 open import MonoRef.Dynamics.Reduction.MonoCastReduction
-  _⟹_ Inert Inert⇒¬Ref
+  _⟹_ Inert
 open import MonoRef.Dynamics.Reduction.PureReduction
   _⟹_ Inert make-coercion
 open import MonoRef.Dynamics.Simple.Frames
@@ -33,7 +32,7 @@ open import MonoRef.Dynamics.Store.Ptr
 open import MonoRef.Dynamics.Store.Precision
   _⟹_ Inert
 open import MonoRef.Dynamics.Store.Store
-  _⟹_ Inert Inert⇒¬Ref
+  _⟹_ Inert
 open import MonoRef.Dynamics.Store.StoreDef
   _⟹_ Inert
 open import MonoRef.Dynamics.Store.TypingProgress
@@ -57,12 +56,12 @@ module ParamReduction
 
   open ParamStoreValue Value CastedValue StrongCastedValue
   open ParamStoreDef StoreValue
-  open ParamStore Value CastedValue StrongCastedValue ref⟹T ref⟹∈ ref⟹⊑
+  open ParamStore Value Value CastedValue StrongCastedValue ref⟹T ref⟹∈ ref⟹⊑
   open ParamPureReduction Value Value public
   open ParamMonoCastReduction
-    Value CastedValue StrongCastedValue ref⟹T ref⟹∈ ref⟹⊑
+    Value Value CastedValue StrongCastedValue ref⟹T ref⟹∈ ref⟹⊑
   open ParamMonoReduction
-    Value CastedValue StrongCastedValue ref⟹T ref⟹∈ ref⟹⊑ public
+    Value Value CastedValue StrongCastedValue ref⟹T ref⟹∈ ref⟹⊑ public
   open ParamNormal Value CastedValue StrongCastedValue
 
   module ParamReduction/ν-cast/ν-update/ref/store/⟶ᵤ

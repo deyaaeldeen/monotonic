@@ -1,4 +1,4 @@
-module MonoRef.Coercions.NormalForm.Syntax where
+module MonoRef.Coercions.NormalForm.Forgetful.Syntax where
 
 open import Data.Empty using (⊥ ; ⊥-elim)
 open import Relation.Nullary using (Dec ; yes ; no ; ¬_)

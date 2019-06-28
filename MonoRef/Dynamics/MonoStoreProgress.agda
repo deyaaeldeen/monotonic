@@ -5,7 +5,6 @@ open import MonoRef.Static.Types
 module MonoRef.Dynamics.MonoStoreProgress
   (_⟹_ : Type → Type → Set)
   (Inert : ∀ {A B} → A ⟹ B → Set)
-  (Inert⇒¬Ref : ∀ {A B} {c : A ⟹ Ref B} → Inert c → ⊥)
   where
 
 open import Data.Empty using (⊥-elim)
@@ -15,12 +14,12 @@ open import Data.Product using (∃ ; ∃-syntax ; -,_)
 open import Relation.Binary.PropositionalEquality using (_≢_)
 
 open import MonoRef.Dynamics.Reduction.MonoCastReduction
-  _⟹_ Inert Inert⇒¬Ref
+  _⟹_ Inert
 open import MonoRef.Dynamics.Store.Precision
   _⟹_ Inert
 open import MonoRef.Dynamics.Store.Ptr
 open import MonoRef.Dynamics.Store.Store
-  _⟹_ Inert Inert⇒¬Ref
+  _⟹_ Inert
 open import MonoRef.Dynamics.Store.StoreDef
   _⟹_ Inert
 open import MonoRef.Dynamics.Store.Value
@@ -32,18 +31,19 @@ open import MonoRef.Static.Types.Relations
 
 
 module ParamMonoStoreProgress
+  (SimpleValue       : ∀ {Σ Γ A} → Σ ∣ Γ ⊢ A → Set)
   (Value             : ∀ {Σ Γ A} → Σ ∣ Γ ⊢ A → Set)
   (CastedValue       : ∀ {Σ Γ A} → Σ ∣ Γ ⊢ A → Set)
   (StrongCastedValue : ∀ {Σ Γ A} {e : Σ ∣ Γ ⊢ A} → CastedValue e → Set)
-  (ref⟹T : ∀ {Σ Γ A} {v : Σ ∣ Γ ⊢ Ref A} → (V : Value v) → Type)
-  (ref⟹∈ : ∀ {Σ Γ A} {v : Σ ∣ Γ ⊢ Ref A} → (V : Value v) → ref⟹T V ∈ Σ)
-  (ref⟹⊑ : ∀ {Σ Γ A} {v : Σ ∣ Γ ⊢ Ref A} → (V : Value v) → ref⟹T V ⊑ A)
+  (ref⟹T : ∀ {Σ Γ A} {v : Σ ∣ Γ ⊢ Ref A} → (V : SimpleValue v) → Type)
+  (ref⟹∈ : ∀ {Σ Γ A} {v : Σ ∣ Γ ⊢ Ref A} → (V : SimpleValue v) → ref⟹T V ∈ Σ)
+  (ref⟹⊑ : ∀ {Σ Γ A} {v : Σ ∣ Γ ⊢ Ref A} → (V : SimpleValue v) → ref⟹T V ⊑ A)
   where
 
   open ParamStoreValue Value CastedValue StrongCastedValue
   open ParamStoreDef StoreValue
-  open ParamStore Value CastedValue StrongCastedValue ref⟹T ref⟹∈ ref⟹⊑
-  open ParamMonoCastReduction Value CastedValue StrongCastedValue ref⟹T ref⟹∈ ref⟹⊑
+  open ParamStore SimpleValue Value CastedValue StrongCastedValue ref⟹T ref⟹∈ ref⟹⊑
+  open ParamMonoCastReduction SimpleValue Value CastedValue StrongCastedValue ref⟹T ref⟹∈ ref⟹⊑
 
   module ParamMonoStoreProgress/ν-cast
     (ν-cast : ∀ {Σ T t'}

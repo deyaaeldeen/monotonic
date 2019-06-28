@@ -1,7 +1,7 @@
-module MonoRef.Coercions.NormalForm.Reduction where
+module MonoRef.Coercions.NormalForm.Forgetful.Reduction where
 
-open import MonoRef.Coercions.NormalForm.Compose
-open import MonoRef.Coercions.NormalForm.Syntax
+open import MonoRef.Coercions.NormalForm.Forgetful.Compose
+open import MonoRef.Coercions.NormalForm.Forgetful.Syntax
 open import MonoRef.Dynamics.Efficient.Value
   NormalFormCoercion InertNormalForm
 open import MonoRef.Language.TargetWithoutBlame
