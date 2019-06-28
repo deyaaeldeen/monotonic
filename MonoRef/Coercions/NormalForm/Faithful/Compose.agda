@@ -317,7 +317,7 @@ private
 
   {- Composing with failure -}
 
-  compose-middle-size fail _          {suc _} = m≤m+n _ _
+  compose-middle-size fail       _    {suc _} = m≤m+n _ _
   compose-middle-size (fun _ _)  fail {suc _} = m≤m+n _ _
   compose-middle-size (prod _ _) fail {suc _} = m≤m+n _ _
   compose-middle-size (Ref _ _)  fail {suc _} = m≤m+n _ _
@@ -387,13 +387,13 @@ private
 
   {- Failure cases -}
 
-  compose-final-size (middle fail)    (prjSeq _ _)        {suc _} = +-monoʳ-≤ 2 z≤n
-  compose-final-size fail         (prjSeq _ _) {suc _} = +-monoʳ-≤ 2 z≤n
-  compose-final-size fail         (final _)    {suc _} = +-monoʳ-≤ 2 z≤n
-  compose-final-size (injSeq _ _) (final fail) {suc _} = m≤m+n 2 _
-  compose-final-size (middle _)   (final fail) {suc _} = 2≤1+a+2
-  compose-final-size (injSeq _ _) (final (injSeq B≢⋆ fail)) {suc _} = +-monoʳ-≤ 2 z≤n
-  compose-final-size (injSeq _ _) (final (injSeq B≢⋆ id)) {suc _} =
+  compose-final-size (middle fail) (prjSeq _ _) {suc _} = +-monoʳ-≤ 2 z≤n
+  compose-final-size fail          (prjSeq _ _) {suc _} = +-monoʳ-≤ 2 z≤n
+  compose-final-size fail          (final _)    {suc _} = +-monoʳ-≤ 2 z≤n
+  compose-final-size (injSeq _ _)  (final fail) {suc _} = m≤m+n 2 _
+  compose-final-size (middle _)    (final fail) {suc _} = 2≤1+a+2
+  compose-final-size (injSeq _ _)  (final (injSeq B≢⋆ fail)) {suc _} = +-monoʳ-≤ 2 z≤n
+  compose-final-size (injSeq _ _)  (final (injSeq B≢⋆ id)) {suc _} =
     ⊥-elim (Injectable⋆⇒⊥ B≢⋆)
 
   injPrj≤n {B≢⋆ = B≢⋆}{C≢⋆} g i n m m' =
