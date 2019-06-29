@@ -40,8 +40,6 @@ get-ptr (pure _) = nothing
 get-ptr (mono red) = get-ptr/mono red
 get-ptr (ξ-×ₗ red) = get-ptr red
 get-ptr (ξ-×ᵣ red) = get-ptr red
-get-ptr ξ-×ₗ-error = nothing
-get-ptr ξ-×ᵣ-error = nothing
 
 progress-store/mono : ∀ {Σ Σ' A T} {e : Σ ∣ ∅ ⊢ A} {e' : Σ' ∣ ∅ ⊢ A} {ν' : Store Σ'}
   → (ν : Store Σ)
@@ -65,7 +63,5 @@ progress-store : ∀ {Σ Σ' A T} {e : Σ ∣ ∅ ⊢ A} {e' : Σ' ∣ ∅ ⊢ A
   → StoreProgress ν T∈Σ (get-ptr red) ν'
 progress-store ν T∈Σ (ξ-×ₗ red) = progress-store ν T∈Σ red
 progress-store ν T∈Σ (ξ-×ᵣ red) = progress-store ν T∈Σ red
-progress-store _ _ ξ-×ₗ-error = S-no-change
-progress-store _ _ ξ-×ᵣ-error = S-no-change
 progress-store ν A∈Σ (mono red) = progress-store/mono ν A∈Σ red
 progress-store _ _ (pure _) = S-no-change
