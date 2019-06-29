@@ -22,13 +22,8 @@ open import MonoRef.Dynamics.Efficient.Faithful.ActiveCastProgress
 
 data StrongCastedValueProgress {Γ Σ A} (M : Σ ∣ Γ ⊢ A) (ν : Store Σ) : Set where
 
-  step-a : ∀ {Σ'} {ν' : Store Σ'} {N : Σ' ∣ Γ ⊢ A}
-    → allow / M , ν ⟶ᵤᵣ N , ν'
-      -----------------------------
-    → StrongCastedValueProgress M ν
-
-  step-d : ∀ {Σ'} {ν' : Store Σ'} {N : Σ' ∣ Γ ⊢ A}
-    → disallow / M , ν ⟶ᵤᵣ N , ν'
+  step : ∀ {Σ'} {ν' : Store Σ'} {N : Σ' ∣ Γ ⊢ A}
+    → M , ν ⟶ᵤᵣ N , ν'
       -----------------------------
     → StrongCastedValueProgress M ν
 
@@ -36,19 +31,16 @@ data StrongCastedValueProgress {Γ Σ A} (M : Σ ∣ Γ ⊢ A) (ν : Store Σ) :
   → StrongCastedValue cv → (ν : Store Σ) → StrongCastedValueProgress e ν
 ⟶ᵤᵣprogress-scv (SCV-cast v ac) ν
   with ⟶ᵤᵣprogress-active/sv v ac ν
-... | step-pure R = step-d (pure R)
-... | step-mono R = step-d (mono R)
+... | step-pure R = step (pure R)
+... | step-mono R = step (mono R)
 ⟶ᵤᵣprogress-scv (SCV-pair _ _ p) ν
   with p
 ... | inj₂ (inj₁ ⟨ v₁ , scv₂ ⟩)
    with ⟶ᵤᵣprogress-scv scv₂ ν
-...  | step-d scv₂⟶scv₂' = step-d (ξ-×ᵣ (switch scv₂⟶scv₂'))
-...  | step-a scv₂⟶scv₂' = step-d (ξ-×ᵣ scv₂⟶scv₂')
+...  | step scv₂⟶scv₂' = step (ξ-×ᵣ scv₂⟶scv₂')
 ⟶ᵤᵣprogress-scv (SCV-pair {e₂ = e₂} _ _ _) ν | inj₂ (inj₂ ⟨ scv₁ , _ ⟩)
    with ⟶ᵤᵣprogress-scv scv₁ ν
-...  | step-d scv₁⟶scv₁' = step-d (ξ-×ₗ (switch scv₁⟶scv₁'))
-...  | step-a scv₁⟶scv₁' = step-d (ξ-×ₗ scv₁⟶scv₁')
+...  | step scv₁⟶scv₁' = step (ξ-×ₗ scv₁⟶scv₁')
 ⟶ᵤᵣprogress-scv (SCV-pair {e₂ = e₂} _ _ _) ν | inj₁ ⟨ scv₁ , _ ⟩
    with ⟶ᵤᵣprogress-scv scv₁ ν
-...  | step-d scv₁⟶scv₁' = step-d (ξ-×ₗ (switch scv₁⟶scv₁'))
-...  | step-a scv₁⟶scv₁' = step-d (ξ-×ₗ scv₁⟶scv₁')
+...  | step scv₁⟶scv₁' = step (ξ-×ₗ scv₁⟶scv₁')

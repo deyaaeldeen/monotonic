@@ -50,16 +50,13 @@ sval∧Inert⇒¬⟶ₘ _ (I-final (I-middle ())) (castref1 _ _ _)
 sval∧Inert⇒¬⟶ₘ _ (I-final (I-middle ())) (castref2 _ _ _)
 sval∧Inert⇒¬⟶ₘ _ (I-final (I-middle ())) (castref3 _ _)
 
-sval⟶ᵤᵣ⊥ : ∀ {Σ Σ' A bc} {e : Σ ∣ ∅ ⊢ A} {ν : Store Σ} {e' : Σ' ∣ ∅ ⊢ A} {ν' : Store Σ'}
-  → SimpleValue e → ¬ (bc / e , ν ⟶ᵤᵣ e' , ν')
+sval⟶ᵤᵣ⊥ : ∀ {Σ Σ' A} {e : Σ ∣ ∅ ⊢ A} {ν : Store Σ} {e' : Σ' ∣ ∅ ⊢ A} {ν' : Store Σ'}
+  → SimpleValue e → ¬ (e , ν ⟶ᵤᵣ e' , ν')
 
-sval∧Inert⇒¬⟶ᵤᵣ : ∀ {Σ Σ' A B bc} {e : Σ ∣ ∅ ⊢ A} {ν : Store Σ} {e' : Σ' ∣ ∅ ⊢ B} {ν' : Store Σ'} {c : A ⟹ B}
-  → SimpleValue e → Inert c → ¬ (bc / e < c > , ν ⟶ᵤᵣ e' , ν')
-sval∧Inert⇒¬⟶ᵤᵣ sv c (switch red) = sval∧Inert⇒¬⟶ᵤᵣ sv c red
+sval∧Inert⇒¬⟶ᵤᵣ : ∀ {Σ Σ' A B} {e : Σ ∣ ∅ ⊢ A} {ν : Store Σ} {e' : Σ' ∣ ∅ ⊢ B} {ν' : Store Σ'} {c : A ⟹ B}
+  → SimpleValue e → Inert c → ¬ (e < c > , ν ⟶ᵤᵣ e' , ν')
 sval∧Inert⇒¬⟶ᵤᵣ sv c (pure red) = sval∧Inert⇒¬⟶ᵤᶜᵛ sv c red
 sval∧Inert⇒¬⟶ᵤᵣ sv c (mono red) = sval∧Inert⇒¬⟶ₘ sv c red
-sval∧Inert⇒¬⟶ᵤᵣ sv c (ξ-cast red) = sval⟶ᵤᵣ⊥ sv red
-sval∧Inert⇒¬⟶ᵤᵣ () c ξ-cast-error
 
 sval⟶ᵤᶜᵛ⊥ : ∀ {Σ A} {e : Σ ∣ ∅ ⊢ A} {e' : Σ ∣ ∅ ⊢ A} → SimpleValue e → ¬ (e ⟶ᵤᶜᵛ e')
 sval⟶ᵤᶜᵛ⊥ (V-ƛ N) ()
@@ -94,18 +91,15 @@ val⟶ₘ⊥ (V-cast _ c) (castref3 _ _) = Inert⇒¬Ref c
 val-error⇒⊥ : ∀ {Γ Σ A} → ¬ Value (error {Σ}{Γ}{A})
 val-error⇒⊥ (S-Val ())
 
-val⟶ᵤᵣ⊥ : ∀ {Σ Σ' A bc} {e : Σ ∣ ∅ ⊢ A} {ν : Store Σ} {e' : Σ' ∣ ∅ ⊢ A} {ν' : Store Σ'}
-  → Value e → ¬ (bc / e , ν ⟶ᵤᵣ e' , ν')
+val⟶ᵤᵣ⊥ : ∀ {Σ Σ' A} {e : Σ ∣ ∅ ⊢ A} {ν : Store Σ} {e' : Σ' ∣ ∅ ⊢ A} {ν' : Store Σ'}
+  → Value e → ¬ (e , ν ⟶ᵤᵣ e' , ν')
 
-sval⟶ᵤᵣ⊥ sv (switch red) = sval⟶ᵤᵣ⊥ sv red
 sval⟶ᵤᵣ⊥ sv (pure red) = sval⟶ᵤᶜᵛ⊥ sv red
 sval⟶ᵤᵣ⊥ sv (mono red) = sval⟶ₘ⊥ sv red
 sval⟶ᵤᵣ⊥ (V-pair v _) (ξ-×ₗ red) = val⟶ᵤᵣ⊥ v red
 sval⟶ᵤᵣ⊥ (V-pair _ v) (ξ-×ᵣ red) = val⟶ᵤᵣ⊥ v red
-sval⟶ᵤᵣ⊥ () (ξ-cast _)
 sval⟶ᵤᵣ⊥ (V-pair v _) ξ-×ₗ-error = val-error⇒⊥ v
 sval⟶ᵤᵣ⊥ (V-pair _ v) ξ-×ᵣ-error = val-error⇒⊥ v
-sval⟶ᵤᵣ⊥ () ξ-cast-error
 
 val⟶ᵤᵣ⊥ (S-Val sv) red = sval⟶ᵤᵣ⊥ sv red
 val⟶ᵤᵣ⊥ (V-cast sv c) red = sval∧Inert⇒¬⟶ᵤᵣ sv c red
@@ -180,12 +174,11 @@ scv⟶ₘ⟹cv' _ (castref2 {ν = ν} R rtti∼T₂ eq) =
   inj₁ (v⇑ (S-Val (V-addr (ref-ν⟹∈ R ν) (⊓⟹⊑ᵣ-with-≡ rtti∼T₂ eq))))
 scv⟶ₘ⟹cv' _ (castref3 _ _) = inj₂ Err-intro
 
-scv⟶ᵤᵣ⟹cv' : ∀ {Σ Σ' A bc} {e : Σ ∣ ∅ ⊢ A} {cv : CastedValue e} {ν : Store Σ}
+scv⟶ᵤᵣ⟹cv' : ∀ {Σ Σ' A} {e : Σ ∣ ∅ ⊢ A} {cv : CastedValue e} {ν : Store Σ}
   {e' : Σ' ∣ ∅ ⊢ A} {ν' : Store Σ'}
   → StrongCastedValue cv
-  → bc / e , ν ⟶ᵤᵣ e' , ν'
+  → e , ν ⟶ᵤᵣ e' , ν'
   → CastedValue e' ⊎ Erroneous e'
-scv⟶ᵤᵣ⟹cv' scv (switch red) = scv⟶ᵤᵣ⟹cv' scv red
 scv⟶ᵤᵣ⟹cv' scv (pure red) = scv⟶ᵤᶜᵛ⟹cv' scv red
 scv⟶ᵤᵣ⟹cv' scv (mono red) = scv⟶ₘ⟹cv' scv red
 scv⟶ᵤᵣ⟹cv' (SCV-pair _ _ p) (ξ-×ₗ red)
@@ -256,7 +249,5 @@ scv⟶ᵤᵣ⟹cv' (SCV-pair cv₁ _ _) (ξ-×ᵣ red) | inj₂ (inj₂ ⟨ scv�
                       , (¬scv⇒Value ¬scv₂') ⟩))
 scv⟶ᵤᵣ⟹cv' (SCV-pair _ _ _) (ξ-×ᵣ {e₁ = e₁} red) | inj₂ (inj₂ _) | inj₂ err =
   inj₂ (Err-plugged err (ξ-×ᵣ (typeprecise-strenthen-expr (⟶ᵤᵣ⟹⊑ₕ red) e₁)))
-scv⟶ᵤᵣ⟹cv' (SCV-cast v _) (ξ-cast red) = ⊥-elim (sval⟶ᵤᵣ⊥ v red)
 scv⟶ᵤᵣ⟹cv' _ ξ-×ₗ-error = inj₂ Err-intro
 scv⟶ᵤᵣ⟹cv' _ ξ-×ᵣ-error = inj₂ Err-intro
-scv⟶ᵤᵣ⟹cv' _ ξ-cast-error = inj₂ Err-intro

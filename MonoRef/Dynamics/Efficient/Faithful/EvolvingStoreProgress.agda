@@ -33,20 +33,16 @@ open import MonoRef.Static.Types
 open import MonoRef.Static.Types.Relations
 
 
-proof : ∀ {Σ Σ' A B bc} {M : Σ ∣ ∅ ⊢ B} {e : Σ ∣ ∅ ⊢ A} {cv : CastedValue e} {e' : Σ' ∣ ∅ ⊢ A} {ν' : Store Σ'}
-  → A ∈ Σ → (ν : Store Σ) → ¬ NormalStore ν → StrongCastedValue cv → bc / e , ν ⟶ᵤᵣ e' , ν' → Progress M ν
-proof A∈Σ ν ν-¬NS scv R with scv⟶ᵤᵣ⟹cv' scv R
-...   | inj₂ err = step (error ν-¬NS A∈Σ R err)
-...   | inj₁ cv' with get-ptr R | progress-store ν A∈Σ R
-...   | _ | S-no-change = step (hcast ν-¬NS A∈Σ scv R cv')
-...   | _ | S-cyclic T'⊑T T'≢T = step (hdrop ν-¬NS A∈Σ scv T'⊑T T'≢T R)
-...   | _ | S-acyclic B∈Σ A≢B C⊑B = step (hmcast ν-¬NS A∈Σ scv B∈Σ A≢B C⊑B R cv')
-
 progress-evolving-store : ∀ {Σ A} {M : Σ ∣ ∅ ⊢ A}
   → (ν : Store Σ) → ¬ NormalStore ν → Progress M ν
 progress-evolving-store ν ν-¬NS
   with ¬NormalStore⇒∃cv ν-¬NS
 ... | ⟨ A , ⟨ A∈Σ , ⟨ _ , intro scv _ ⟩ ⟩ ⟩
    with ⟶ᵤᵣprogress-scv scv ν
-...  | step-d R = proof A∈Σ ν ν-¬NS scv R
-...  | step-a R = proof A∈Σ ν ν-¬NS scv R
+...  | step R
+    with scv⟶ᵤᵣ⟹cv' scv R
+...   | inj₂ err = step (error ν-¬NS A∈Σ R err)
+...   | inj₁ cv' with get-ptr R | progress-store ν A∈Σ R
+...   | _ | S-no-change = step (hcast ν-¬NS A∈Σ scv R cv')
+...   | _ | S-cyclic T'⊑T T'≢T = step (hdrop ν-¬NS A∈Σ scv T'⊑T T'≢T R)
+...   | _ | S-acyclic B∈Σ A≢B C⊑B = step (hmcast ν-¬NS A∈Σ scv B∈Σ A≢B C⊑B R cv')

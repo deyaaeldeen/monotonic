@@ -44,75 +44,57 @@ open ParamMonoReduction
 open ParamMonoReduction/ν-update/ref/store ν-update/ref store public
 
 infix 3  _/_,_,_⟶ₑ_,_
-infix 3  _/_,_⟶ᵤᵣ_,_
+infix 3  _,_⟶ᵤᵣ_,_
 infix 3  _,_⟶ₛ_,_
 
 {- Cast Reduction Rules -}
 
 
-data _/_,_⟶ᵤᵣ_,_ {Γ Σ} : ∀ {Σ' A}
-  → BypassCast
+data _,_⟶ᵤᵣ_,_ {Γ Σ} : ∀ {Σ' A}
   → Σ  ∣ Γ ⊢ A → (ν  : Store Σ )
   → Σ' ∣ Γ ⊢ A → (ν' : Store Σ')
   → Set
 
-⟶ᵤᵣ⟹⊑ₕ : ∀ {Γ Σ Σ' A} {M : Σ ∣ Γ ⊢ A} {ν : Store Σ} {M' : Σ' ∣ Γ ⊢ A} {ν' : Store Σ'} {bc : BypassCast}
-  → bc / M , ν ⟶ᵤᵣ M' , ν'
+⟶ᵤᵣ⟹⊑ₕ : ∀ {Γ Σ Σ' A} {M : Σ ∣ Γ ⊢ A} {ν : Store Σ} {M' : Σ' ∣ Γ ⊢ A} {ν' : Store Σ'}
+  → M , ν ⟶ᵤᵣ M' , ν'
   → Σ' ⊑ₕ Σ
 
-data _/_,_⟶ᵤᵣ_,_ {Γ Σ} where
-
-  switch : ∀ {Σ' A} {ν : Store Σ} {ν' : Store Σ'} {M : Σ ∣ Γ ⊢ A} {M' : Σ' ∣ Γ ⊢ A}
-    → disallow / M , ν ⟶ᵤᵣ M' , ν'
-      ----------------------------
-    → allow / M , ν ⟶ᵤᵣ M' , ν'
+data _,_⟶ᵤᵣ_,_ {Γ Σ} where
 
   pure : ∀ {A} {ν : Store Σ} {M' M : Σ ∣ Γ ⊢ A}
     → M ⟶ᵤᶜᵛ M'
-      -------------------------
-    → disallow / M , ν ⟶ᵤᵣ M' , ν
+      -----------------
+    → M , ν ⟶ᵤᵣ M' , ν
 
   mono : ∀ {Σ' A} {ν : Store Σ} {ν' : Store Σ'} {M : Σ ∣ Γ ⊢ A} {M' : Σ' ∣ Γ ⊢ A}
     → M , ν ⟶ₘ M' , ν'
-      -------------------------
-    → disallow / M , ν ⟶ᵤᵣ M' , ν'
+      ------------------
+    → M , ν ⟶ᵤᵣ M' , ν'
 
   ξ-×ₗ : ∀ {Σ' A B} {ν : Store Σ} {ν' : Store Σ'} {e₁ : Σ ∣ Γ ⊢ A} {e₁' : Σ' ∣ Γ ⊢ A} {e₂ : Σ ∣ Γ ⊢ B}
-    → (red : allow / e₁ , ν ⟶ᵤᵣ e₁' , ν')
+    → (red : e₁ , ν ⟶ᵤᵣ e₁' , ν')
       -----------------------------------------------------------------------------------------
-    → disallow / _`×_ e₁ e₂ , ν ⟶ᵤᵣ _`×_ e₁' (typeprecise-strenthen-expr (⟶ᵤᵣ⟹⊑ₕ red) e₂) , ν'
+    → _`×_ e₁ e₂ , ν ⟶ᵤᵣ _`×_ e₁' (typeprecise-strenthen-expr (⟶ᵤᵣ⟹⊑ₕ red) e₂) , ν'
 
   ξ-×ᵣ : ∀ {Σ' A B} {ν : Store Σ} {ν' : Store Σ'} {e₁ : Σ ∣ Γ ⊢ A} {e₂ : Σ ∣ Γ ⊢ B} {e₂' : Σ' ∣ Γ ⊢ B}
-    → (red : allow / e₂ , ν ⟶ᵤᵣ e₂' , ν')
+    → (red : e₂ , ν ⟶ᵤᵣ e₂' , ν')
       -----------------------------------------------------------------------------------------
-    → disallow / _`×_ e₁ e₂ , ν ⟶ᵤᵣ _`×_ (typeprecise-strenthen-expr (⟶ᵤᵣ⟹⊑ₕ red) e₁) e₂' , ν'
-
-  ξ-cast : ∀ {Σ' A B} {ν : Store Σ} {ν' : Store Σ'} {M : Σ ∣ Γ ⊢ A} {M' : Σ' ∣ Γ ⊢ A} {c : A ⟹ B}
-    → disallow / M , ν ⟶ᵤᵣ M' , ν'
-      -------------------------------------
-    → allow / M < c > , ν ⟶ᵤᵣ M' < c > , ν'
+    → _`×_ e₁ e₂ , ν ⟶ᵤᵣ _`×_ (typeprecise-strenthen-expr (⟶ᵤᵣ⟹⊑ₕ red) e₁) e₂' , ν'
 
   ξ-×ₗ-error : ∀ {A B} {ν : Store Σ} {M : Σ ∣ Γ ⊢ B}
-      -----------------------------------------------------
-    → disallow / _`×_ (error {A = A})  M , ν ⟶ᵤᵣ error , ν
+      ------------------------------------------
+    → _`×_ (error {A = A})  M , ν ⟶ᵤᵣ error , ν
 
   ξ-×ᵣ-error : ∀ {A B} {ν : Store Σ} {M : Σ ∣ Γ ⊢ A}
-      ----------------------------------------------------
-    → disallow / _`×_ M (error {A = B}) , ν ⟶ᵤᵣ error , ν
+      -----------------------------------------
+    → _`×_ M (error {A = B}) , ν ⟶ᵤᵣ error , ν
 
-  ξ-cast-error : ∀ {A B} {ν : Store Σ} {c : A ⟹ B}
-      --------------------------------------
-    → allow / error < c > , ν ⟶ᵤᵣ error , ν
-
-⟶ᵤᵣ⟹⊑ₕ (switch red) = ⟶ᵤᵣ⟹⊑ₕ red
 ⟶ᵤᵣ⟹⊑ₕ (pure _) = ⊑ₕ-refl
 ⟶ᵤᵣ⟹⊑ₕ (mono red) = ⟶ₘ⟹⊑ₕ red
 ⟶ᵤᵣ⟹⊑ₕ (ξ-×ₗ red) = ⟶ᵤᵣ⟹⊑ₕ red
 ⟶ᵤᵣ⟹⊑ₕ (ξ-×ᵣ red) = ⟶ᵤᵣ⟹⊑ₕ red
-⟶ᵤᵣ⟹⊑ₕ (ξ-cast red) = ⟶ᵤᵣ⟹⊑ₕ red
 ⟶ᵤᵣ⟹⊑ₕ ξ-×ₗ-error = ⊑ₕ-refl
 ⟶ᵤᵣ⟹⊑ₕ ξ-×ᵣ-error = ⊑ₕ-refl
-⟶ᵤᵣ⟹⊑ₕ ξ-cast-error = ⊑ₕ-refl
 
 data _/_,_,_⟶ₑ_,_ {Σ} : ∀ {Σ' A}
   → BypassCast
@@ -220,24 +202,24 @@ data _,_⟶ₛ_,_ {Σ A} :
       ------------------------------
     → M , ν ⟶ₛ M' , ν'
 
-  error :  ∀ {M : Σ ∣ ∅ ⊢ A} {Σ' T bc} {e : Σ ∣ ∅ ⊢ T} {e' : Σ' ∣ ∅ ⊢ T} {ν : Store Σ} {ν' : Store Σ'}
+  error :  ∀ {M : Σ ∣ ∅ ⊢ A} {Σ' T} {e : Σ ∣ ∅ ⊢ T} {e' : Σ' ∣ ∅ ⊢ T} {ν : Store Σ} {ν' : Store Σ'}
     → ¬ NormalStore ν
     → (mem : T ∈ Σ)
-    → bc / e , ν ⟶ᵤᵣ e' , ν'
+    → e , ν ⟶ᵤᵣ e' , ν'
     → Erroneous e'
       ----------------------
     → M , ν ⟶ₛ error , ν'
 
-  hcast : ∀ {M : Σ ∣ ∅ ⊢ A} {T bc} {e e' : Σ ∣ ∅ ⊢ T} {cv : CastedValue e} {ν : Store Σ}
+  hcast : ∀ {M : Σ ∣ ∅ ⊢ A} {T} {e e' : Σ ∣ ∅ ⊢ T} {cv : CastedValue e} {ν : Store Σ}
     → ¬ NormalStore ν
     → (T∈Σ : T ∈ Σ)
     → (scv : StrongCastedValue cv)
-    → (red : bc / e , ν ⟶ᵤᵣ e' , ν)
+    → (red : e , ν ⟶ᵤᵣ e' , ν)
     → (cv' : CastedValue e')
       ---------------------------------
     → M , ν ⟶ₛ M , ν-update T∈Σ ν cv'
 
-  hmcast : ∀ {M : Σ ∣ ∅ ⊢ A} {T A B bc} {e : Σ ∣ ∅ ⊢ T} {cv : CastedValue e} {ν : Store Σ}
+  hmcast : ∀ {M : Σ ∣ ∅ ⊢ A} {T A B} {e : Σ ∣ ∅ ⊢ T} {cv : CastedValue e} {ν : Store Σ}
     → ¬ NormalStore ν
     → (T∈Σ : T ∈ Σ)
     → (scv : StrongCastedValue cv)
@@ -245,20 +227,20 @@ data _,_⟶ₛ_,_ {Σ A} :
     → (T∈Σ≢A∈Σ : PtrInEquality T∈Σ A∈Σ)
     → (B⊑A : B ⊑ store-lookup-rtti A∈Σ ν)
     → {e' : Σ-cast A∈Σ B ∣ ∅ ⊢ T}
-    → (red : bc / e , ν ⟶ᵤᵣ e' , ν-cast A∈Σ ν B⊑A)
+    → (red : e , ν ⟶ᵤᵣ e' , ν-cast A∈Σ ν B⊑A)
     → (cv' : CastedValue e')
       --------------------------------------------------------------------------------------------------------------
     →    M                                   , ν
     ⟶ₛ typeprecise-strenthen-expr (⟶ᵤᵣ⟹⊑ₕ red) M , ν-update (weaken-ptr T∈Σ B A∈Σ T∈Σ≢A∈Σ) (ν-cast A∈Σ ν B⊑A) cv'
 
-  hdrop : ∀ {M : Σ ∣ ∅ ⊢ A} {T T' bc} {e : Σ ∣ ∅ ⊢ T} {cv : CastedValue e} {ν : Store Σ}
+  hdrop : ∀ {M : Σ ∣ ∅ ⊢ A} {T T'} {e : Σ ∣ ∅ ⊢ T} {cv : CastedValue e} {ν : Store Σ}
     → ¬ NormalStore ν
     → (T∈Σ : T ∈ Σ)
     → (scv : StrongCastedValue cv)
     → {e' : Σ-cast T∈Σ T' ∣ ∅ ⊢ T}
     → (T'⊑T : T' ⊑ store-lookup-rtti T∈Σ ν)
     → T' ≢ store-lookup-rtti T∈Σ ν
-    → (red : bc / e , ν ⟶ᵤᵣ e' , ν-cast T∈Σ ν T'⊑T)
+    → (red : e , ν ⟶ᵤᵣ e' , ν-cast T∈Σ ν T'⊑T)
       -----------------------------------------------------------------
     →    M                                   , ν
     ⟶ₛ typeprecise-strenthen-expr (⟶ᵤᵣ⟹⊑ₕ red) M , ν-cast T∈Σ ν T'⊑T

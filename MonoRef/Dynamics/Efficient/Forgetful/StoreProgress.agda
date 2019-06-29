@@ -34,17 +34,14 @@ open ParamReduction/ν-cast/ν-update/ref/store/⟶ᵤ/⟶ᵤᶜᵛ ν-cast ν-u
 open ParamMonoStoreProgress SimpleValue Value CastedValue StrongCastedValue ref⟹T ref⟹∈ ref⟹⊑
 open ParamMonoStoreProgress/ν-cast ν-cast public
 
-get-ptr : ∀ {Σ Σ' A bc} {e : Σ ∣ ∅ ⊢ A} {e' : Σ' ∣ ∅ ⊢ A} {ν : Store Σ} {ν' : Store Σ'}
-  → (red : bc / e , ν ⟶ᵤᵣ e' , ν') → Maybe (∃[ B ] (B ∈ Σ))
+get-ptr : ∀ {Σ Σ' A} {e : Σ ∣ ∅ ⊢ A} {e' : Σ' ∣ ∅ ⊢ A} {ν : Store Σ} {ν' : Store Σ'}
+  → (red : e , ν ⟶ᵤᵣ e' , ν') → Maybe (∃[ B ] (B ∈ Σ))
 get-ptr (pure _) = nothing
 get-ptr (mono red) = get-ptr/mono red
 get-ptr (ξ-×ₗ red) = get-ptr red
 get-ptr (ξ-×ᵣ red) = get-ptr red
 get-ptr ξ-×ₗ-error = nothing
 get-ptr ξ-×ᵣ-error = nothing
-get-ptr (ξ-cast red) = get-ptr red
-get-ptr ξ-cast-error = nothing
-get-ptr (switch red) = get-ptr red
 
 progress-store/mono : ∀ {Σ Σ' A T} {e : Σ ∣ ∅ ⊢ A} {e' : Σ' ∣ ∅ ⊢ A} {ν' : Store Σ'}
   → (ν : Store Σ)
@@ -61,10 +58,10 @@ progress-store/mono {T = T} ν B∈Σ (castref1 (V-addr {A = A} A∈Σ _) rtti�
 progress-store/mono _ _ (castref2 _ _ _) = S-no-change
 progress-store/mono _ _ (castref3 _ _) = S-no-change
 
-progress-store : ∀ {Σ Σ' A T bc} {e : Σ ∣ ∅ ⊢ A} {e' : Σ' ∣ ∅ ⊢ A} {ν' : Store Σ'}
+progress-store : ∀ {Σ Σ' A T} {e : Σ ∣ ∅ ⊢ A} {e' : Σ' ∣ ∅ ⊢ A} {ν' : Store Σ'}
   → (ν : Store Σ)
   → (T∈Σ : T ∈ Σ)
-  → (red : bc / e , ν ⟶ᵤᵣ e' , ν')
+  → (red : e , ν ⟶ᵤᵣ e' , ν')
   → StoreProgress ν T∈Σ (get-ptr red) ν'
 progress-store ν T∈Σ (ξ-×ₗ red) = progress-store ν T∈Σ red
 progress-store ν T∈Σ (ξ-×ᵣ red) = progress-store ν T∈Σ red
@@ -72,6 +69,3 @@ progress-store _ _ ξ-×ₗ-error = S-no-change
 progress-store _ _ ξ-×ᵣ-error = S-no-change
 progress-store ν A∈Σ (mono red) = progress-store/mono ν A∈Σ red
 progress-store _ _ (pure _) = S-no-change
-progress-store ν T∈Σ (ξ-cast red) = progress-store ν T∈Σ red
-progress-store _ _ ξ-cast-error = S-no-change
-progress-store ν T∈Σ (switch red) = progress-store ν T∈Σ red
