@@ -9,9 +9,10 @@ open import MonoRef.Coercions.NormalForm.Faithful.Syntax
            ; ActiveNormalForm to Active ; inert-normalform-decidable to inertP
            ; ¬Inert⇒Active-normform to ¬Inert⇒Active)
 open import MonoRef.Coercions.NormalForm.Faithful.Make renaming (make-normal-form-coercion to make-coercion)
+open import MonoRef.Dynamics.Efficient.Faithful.ActiveCastProgProgress
+open import MonoRef.Dynamics.Efficient.Faithful.Reduction
 open import MonoRef.Dynamics.Efficient.Frames
   _⟹_ Inert
-open import MonoRef.Dynamics.Efficient.Faithful.Reduction
 open import MonoRef.Dynamics.Store.Efficient
   _⟹_ Inert Active inertP ¬Inert⇒Active make-coercion compose
 open import MonoRef.Dynamics.Substitution

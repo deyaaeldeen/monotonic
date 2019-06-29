@@ -36,9 +36,8 @@ data StrongCastedValueProgress {Γ Σ A} (M : Σ ∣ Γ ⊢ A) (ν : Store Σ) :
   → StrongCastedValue cv → (ν : Store Σ) → StrongCastedValueProgress e ν
 ⟶ᵤᵣprogress-scv (SCV-cast v ac) ν
   with ⟶ᵤᵣprogress-active/sv v ac ν
-... | step-pure R = step-a (pure R)
-... | step-mono R = step-a (mono R)
-⟶ᵤᵣprogress-scv (SCV-ccast _ _ _) _ = step-a (pure compose-casts)
+... | step-pure R = step-d (pure R)
+... | step-mono R = step-d (mono R)
 ⟶ᵤᵣprogress-scv (SCV-pair _ _ p) ν
   with p
 ... | inj₂ (inj₁ ⟨ v₁ , scv₂ ⟩)

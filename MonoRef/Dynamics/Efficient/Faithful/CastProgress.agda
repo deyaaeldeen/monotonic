@@ -16,7 +16,7 @@ open import MonoRef.Dynamics.Store.Efficient
   _⟹_ Inert Active inertP ¬Inert⇒Active make-coercion compose
 open import MonoRef.Language.TargetWithoutBlame
   _⟹_ Inert
-open import MonoRef.Dynamics.Efficient.Faithful.ActiveCastProgress
+open import MonoRef.Dynamics.Efficient.Faithful.ActiveCastProgProgress
 
 
 data CastProgress {Γ Σ A} (M : Σ ∣ Γ ⊢ A) (ν : Store Σ) : Set where

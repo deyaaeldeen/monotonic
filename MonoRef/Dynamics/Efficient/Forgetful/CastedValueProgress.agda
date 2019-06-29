@@ -3,6 +3,7 @@ module MonoRef.Dynamics.Efficient.Forgetful.CastedValueProgress where
 open import Data.Product renaming (_,_ to ⟨_,_⟩)
 open import Data.Sum using (inj₁ ; inj₂)
 
+open import MonoRef.Coercions.NormalForm.Forgetful.CastedValueReduction
 open import MonoRef.Coercions.NormalForm.Forgetful.Compose
 open import MonoRef.Coercions.NormalForm.Forgetful.Reduction
 open import MonoRef.Coercions.NormalForm.Forgetful.Syntax
@@ -22,7 +23,7 @@ open import MonoRef.Dynamics.Efficient.Forgetful.ActiveCastProgress
 
 
 open ParamReduction SimpleValue Value CastedValue StrongCastedValue ref⟹T ref⟹∈ ref⟹⊑
-open ParamReduction/ν-cast/ν-update/ref/store/⟶ᵤ ν-cast ν-update/ref store _⟶ᵤ_
+open ParamReduction/ν-cast/ν-update/ref/store/⟶ᵤ/⟶ᵤᶜᵛ ν-cast ν-update/ref store _⟶ᵤ_ _⟶ᵤᶜᵛ_
 
 
 data StrongCastedValueProgress {Γ Σ A} (M : Σ ∣ Γ ⊢ A) (ν : Store Σ) : Set where
@@ -41,9 +42,8 @@ data StrongCastedValueProgress {Γ Σ A} (M : Σ ∣ Γ ⊢ A) (ν : Store Σ) :
   → StrongCastedValue cv → (ν : Store Σ) → StrongCastedValueProgress e ν
 ⟶ᵤᵣprogress-scv (SCV-cast v ac) ν
   with ⟶ᵤᵣprogress-active/sv v ac ν
-... | step-pure R = step-a (pure R)
-... | step-mono R = step-a (mono R)
-⟶ᵤᵣprogress-scv (SCV-ccast _ _ _) _ = step-a (pure compose-casts)
+... | step-pure R = step-d (pure R)
+... | step-mono R = step-d (mono R)
 ⟶ᵤᵣprogress-scv (SCV-pair _ _ p) ν
   with p
 ... | inj₂ (inj₁ ⟨ v₁ , scv₂ ⟩)

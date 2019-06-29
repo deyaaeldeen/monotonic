@@ -29,13 +29,15 @@ open import MonoRef.Static.Types
 open import MonoRef.Static.Types.Relations
 
 
-sval∧Inert⇒¬⟶ᵤ : ∀ {Σ A B} {e : Σ ∣ ∅ ⊢ A} {e' : Σ ∣ ∅ ⊢ B} {c : A ⟹ B}
-  → SimpleValue e → Inert c → ¬ (e < c > ⟶ᵤ e')
-sval∧Inert⇒¬⟶ᵤ _ (I-final ()) (`⊥ _)
-sval∧Inert⇒¬⟶ᵤ _ (I-final (I-middle ())) (⊥ₘ _)
-sval∧Inert⇒¬⟶ᵤ _ (I-final (I-middle ())) (`× _ _)
-sval∧Inert⇒¬⟶ᵤ _ (I-final (I-middle ())) (ι _)
-sval∧Inert⇒¬⟶ᵤ () _ compose-casts
+sval∧Inert⇒¬⟶ᵤᶜᵛ : ∀ {Σ A B} {e : Σ ∣ ∅ ⊢ A} {e' : Σ ∣ ∅ ⊢ B} {c : A ⟹ B}
+  → SimpleValue e → Inert c → ¬ (e < c > ⟶ᵤᶜᵛ e')
+sval∧Inert⇒¬⟶ᵤᶜᵛ _ (I-final ()) (`⊥ _)
+sval∧Inert⇒¬⟶ᵤᶜᵛ _ (I-final (I-middle ())) (⊥ₘ _)
+sval∧Inert⇒¬⟶ᵤᶜᵛ _ (I-final (I-middle ())) (pair-simple _ _)
+sval∧Inert⇒¬⟶ᵤᶜᵛ _ (I-final (I-middle ())) (pair-cast-left _ _)
+sval∧Inert⇒¬⟶ᵤᶜᵛ _ (I-final (I-middle ())) (pair-cast-right _ _)
+sval∧Inert⇒¬⟶ᵤᶜᵛ _ (I-final (I-middle ())) (pair-cast-both _ _)
+sval∧Inert⇒¬⟶ᵤᶜᵛ _ (I-final (I-middle ())) (ι _)
 
 sval∧Inert⇒¬⟶ₘ : ∀ {Σ Σ' A B} {e : Σ ∣ ∅ ⊢ A} {ν : Store Σ} {e' : Σ' ∣ ∅ ⊢ B} {ν' : Store Σ'} {c : A ⟹ B}
   → SimpleValue e → Inert c → ¬ (e < c > , ν ⟶ₘ e' , ν')
@@ -49,26 +51,28 @@ sval⟶ᵤᵣ⊥ : ∀ {Σ Σ' A bc} {e : Σ ∣ ∅ ⊢ A} {ν : Store Σ} {e' 
 sval∧Inert⇒¬⟶ᵤᵣ : ∀ {Σ Σ' A B bc} {e : Σ ∣ ∅ ⊢ A} {ν : Store Σ} {e' : Σ' ∣ ∅ ⊢ B} {ν' : Store Σ'} {c : A ⟹ B}
   → SimpleValue e → Inert c → ¬ (bc / e < c > , ν ⟶ᵤᵣ e' , ν')
 sval∧Inert⇒¬⟶ᵤᵣ sv c (switch red) = sval∧Inert⇒¬⟶ᵤᵣ sv c red
-sval∧Inert⇒¬⟶ᵤᵣ sv c (pure red) = sval∧Inert⇒¬⟶ᵤ sv c red
+sval∧Inert⇒¬⟶ᵤᵣ sv c (pure red) = sval∧Inert⇒¬⟶ᵤᶜᵛ sv c red
 sval∧Inert⇒¬⟶ᵤᵣ sv c (mono red) = sval∧Inert⇒¬⟶ₘ sv c red
 sval∧Inert⇒¬⟶ᵤᵣ sv c (ξ-cast red) = sval⟶ᵤᵣ⊥ sv red
 sval∧Inert⇒¬⟶ᵤᵣ () c ξ-cast-error
 
-sval⟶ᵤ⊥ : ∀ {Σ A} {e : Σ ∣ ∅ ⊢ A} {e' : Σ ∣ ∅ ⊢ A} → SimpleValue e → ¬ (e ⟶ᵤ e')
-sval⟶ᵤ⊥ (V-ƛ N) ()
-sval⟶ᵤ⊥ V-zero ()
-sval⟶ᵤ⊥ (V-suc v) ()
-sval⟶ᵤ⊥ V-unit ()
-sval⟶ᵤ⊥ (V-addr _ _) ()
-sval⟶ᵤ⊥ (V-pair _ _) ()
+sval⟶ᵤᶜᵛ⊥ : ∀ {Σ A} {e : Σ ∣ ∅ ⊢ A} {e' : Σ ∣ ∅ ⊢ A} → SimpleValue e → ¬ (e ⟶ᵤᶜᵛ e')
+sval⟶ᵤᶜᵛ⊥ (V-ƛ N) ()
+sval⟶ᵤᶜᵛ⊥ V-zero ()
+sval⟶ᵤᶜᵛ⊥ (V-suc v) ()
+sval⟶ᵤᶜᵛ⊥ V-unit ()
+sval⟶ᵤᶜᵛ⊥ (V-addr _ _) ()
+sval⟶ᵤᶜᵛ⊥ (V-pair _ _) ()
 
-val⟶ᵤ⊥ : ∀ {Σ A} {e : Σ ∣ ∅ ⊢ A} {e' : Σ ∣ ∅ ⊢ A} → Value e → ¬ (e ⟶ᵤ e')
-val⟶ᵤ⊥ (S-Val sv) red = sval⟶ᵤ⊥ sv red
-val⟶ᵤ⊥ (V-cast _ (I-final ())) (`⊥ _)
-val⟶ᵤ⊥ (V-cast _ (I-final (I-middle ()))) (⊥ₘ _)
-val⟶ᵤ⊥ (V-cast () _) compose-casts
-val⟶ᵤ⊥ (V-cast _ (I-final (I-middle ()))) (ι _)
-val⟶ᵤ⊥ (V-cast _ (I-final (I-middle ()))) (`× _ _)
+val⟶ᵤᶜᵛ⊥ : ∀ {Σ A} {e : Σ ∣ ∅ ⊢ A} {e' : Σ ∣ ∅ ⊢ A} → Value e → ¬ (e ⟶ᵤᶜᵛ e')
+val⟶ᵤᶜᵛ⊥ (S-Val sv) red = sval⟶ᵤᶜᵛ⊥ sv red
+val⟶ᵤᶜᵛ⊥ (V-cast _ (I-final ())) (`⊥ _)
+val⟶ᵤᶜᵛ⊥ (V-cast _ (I-final (I-middle ()))) (⊥ₘ _)
+val⟶ᵤᶜᵛ⊥ (V-cast _ (I-final (I-middle ()))) (ι _)
+val⟶ᵤᶜᵛ⊥ (V-cast _ (I-final (I-middle ()))) (pair-simple _ _)
+val⟶ᵤᶜᵛ⊥ (V-cast _ (I-final (I-middle ()))) (pair-cast-left _ _)
+val⟶ᵤᶜᵛ⊥ (V-cast _ (I-final (I-middle ()))) (pair-cast-right _ _)
+val⟶ᵤᶜᵛ⊥ (V-cast _ (I-final (I-middle ()))) (pair-cast-both _ _)
 
 sval⟶ₘ⊥ : ∀ {Σ Σ' A} {e : Σ ∣ ∅ ⊢ A} {ν : Store Σ} {e' : Σ' ∣ ∅ ⊢ A} {ν' : Store Σ'}
   → SimpleValue e → ¬ (e , ν ⟶ₘ e' , ν')
@@ -90,7 +94,7 @@ val⟶ᵤᵣ⊥ : ∀ {Σ Σ' A bc} {e : Σ ∣ ∅ ⊢ A} {ν : Store Σ} {e' :
   → Value e → ¬ (bc / e , ν ⟶ᵤᵣ e' , ν')
 
 sval⟶ᵤᵣ⊥ sv (switch red) = sval⟶ᵤᵣ⊥ sv red
-sval⟶ᵤᵣ⊥ sv (pure red) = sval⟶ᵤ⊥ sv red
+sval⟶ᵤᵣ⊥ sv (pure red) = sval⟶ᵤᶜᵛ⊥ sv red
 sval⟶ᵤᵣ⊥ sv (mono red) = sval⟶ₘ⊥ sv red
 sval⟶ᵤᵣ⊥ (V-pair v _) (ξ-×ₗ red) = val⟶ᵤᵣ⊥ v red
 sval⟶ᵤᵣ⊥ (V-pair _ v) (ξ-×ᵣ red) = val⟶ᵤᵣ⊥ v red
@@ -102,51 +106,65 @@ sval⟶ᵤᵣ⊥ () ξ-cast-error
 val⟶ᵤᵣ⊥ (S-Val sv) red = sval⟶ᵤᵣ⊥ sv red
 val⟶ᵤᵣ⊥ (V-cast sv c) red = sval∧Inert⇒¬⟶ᵤᵣ sv c red
 
-scv⟶ᵤ⟹cv' : ∀ {Σ A} {e : Σ ∣ ∅ ⊢ A} {cv : CastedValue e} {e' : Σ ∣ ∅ ⊢ A}
+scv⟶ᵤᶜᵛ⟹cv' : ∀ {Σ A} {e : Σ ∣ ∅ ⊢ A} {cv : CastedValue e} {e' : Σ ∣ ∅ ⊢ A}
   → StrongCastedValue cv
-  → e ⟶ᵤ e'
+  → e ⟶ᵤᶜᵛ e'
   → CastedValue e' ⊎ Erroneous e'
-scv⟶ᵤ⟹cv' scv (ι v) = inj₁ (v⇑ (S-Val v))
-scv⟶ᵤ⟹cv' _ (`× {c = c} {d = d} (V-cast {c = c'} v₁ _) (S-Val v₂))
-  with inertP d
-... | yes d-inert =
-  inj₁ (cv-pair (cast-cval v₁ c' c) (v⇑ (V-cast v₂ d-inert))
-    (inj₁ ⟨ SCV-ccast v₁ c' c , V-cast v₂ d-inert ⟩))
-... | no d-¬inert =
-  inj₁ (cv-pair (cast-cval v₁ c' c) (cast-val v₂ (¬Inert⇒Active d-¬inert))
-    (inj₂ (inj₂ ⟨ SCV-ccast v₁ c' c , SCV-cast v₂ (¬Inert⇒Active d-¬inert) ⟩)))
-scv⟶ᵤ⟹cv' _ (`× {c = c} {d = d} (V-cast {c = c'} v₁ _) (V-cast {c = d'} v₂ _)) =
-  inj₁ (cv-pair (cast-cval v₁ c' c) (cast-cval v₂ d' d)
-    (inj₂ (inj₂ ⟨ SCV-ccast v₁ c' c , SCV-ccast v₂ d' d ⟩)))
-scv⟶ᵤ⟹cv' _ (`× {c = c} {d = d} (S-Val v₁) (S-Val v₂))
+scv⟶ᵤᶜᵛ⟹cv' scv (ι v) = inj₁ (v⇑ (S-Val v))
+scv⟶ᵤᶜᵛ⟹cv' _ (pair-simple {c = c}{d} sv₁ sv₂)
   with inertP c | inertP d
 ... | yes c-inert | yes d-inert =
-  inj₁ (v⇑ (S-Val (V-pair (V-cast v₁ c-inert) (V-cast v₂ d-inert))))
-... | no c-¬inert | yes d-inert =
- inj₁ (cv-pair (cast-val v₁ (¬Inert⇒Active c-¬inert)) (v⇑ (V-cast v₂ d-inert))
-   (inj₁ ⟨ SCV-cast v₁ (¬Inert⇒Active c-¬inert) , V-cast v₂ d-inert ⟩))
+  inj₁ (v⇑ (S-Val (V-pair (V-cast sv₁ c-inert) (V-cast sv₂ d-inert))))
 ... | yes c-inert | no d-¬inert =
- inj₁ (cv-pair (v⇑ (V-cast v₁ c-inert)) (cast-val v₂ (¬Inert⇒Active d-¬inert))
-   (inj₂ (inj₁ ⟨ V-cast v₁ c-inert , SCV-cast v₂ (¬Inert⇒Active d-¬inert) ⟩)))
+  inj₁ (cv-pair (v⇑ (V-cast sv₁ c-inert)) (cast-val sv₂ (¬Inert⇒Active d-¬inert))
+    (inj₂ (inj₁ ⟨ V-cast sv₁ c-inert , SCV-cast sv₂ (¬Inert⇒Active d-¬inert) ⟩)))
+... | no c-¬inert | yes d-inert =
+  inj₁ (cv-pair (cast-val sv₁ (¬Inert⇒Active c-¬inert)) (v⇑ (V-cast sv₂ d-inert))
+    (inj₁ ⟨ SCV-cast sv₁ (¬Inert⇒Active c-¬inert) , V-cast sv₂ d-inert ⟩))
 ... | no c-¬inert | no d-¬inert =
-  inj₁ (cv-pair (cast-val v₁ (¬Inert⇒Active c-¬inert)) (cast-val v₂ (¬Inert⇒Active d-¬inert))
-    (inj₂ (inj₂ ⟨ SCV-cast v₁ (¬Inert⇒Active c-¬inert) ,
-                  SCV-cast v₂ (¬Inert⇒Active d-¬inert) ⟩)))
-scv⟶ᵤ⟹cv' _ (`× {c = c} {d = d} (S-Val v₁) (V-cast {c = d'} v₂ _))
-  with inertP c
-... | yes c-inert =
-  inj₁ (cv-pair (v⇑ V-cast v₁ c-inert) (cast-cval v₂ d' d)
-    (inj₂ (inj₁ ⟨ V-cast v₁ c-inert , SCV-ccast v₂ d' d ⟩)))
-... | no c-¬inert =
-  inj₁ (cv-pair (cast-val v₁ (¬Inert⇒Active c-¬inert)) (cast-cval v₂ d' d)
-    (inj₂ (inj₂ ⟨ SCV-cast v₁ (¬Inert⇒Active c-¬inert) , SCV-ccast v₂ d' d ⟩)))
-scv⟶ᵤ⟹cv' (SCV-cast () _) compose-casts
-scv⟶ᵤ⟹cv' (SCV-ccast v c d) compose-casts
-  with inertP (compose c d)
-... | yes cd-inert = inj₁ (v⇑ (V-cast v cd-inert))
-... | no cd-¬inert = inj₁ (cast-val v (¬Inert⇒Active cd-¬inert))
-scv⟶ᵤ⟹cv' _ (`⊥ _) = inj₂ Err-intro
-scv⟶ᵤ⟹cv' _ (⊥ₘ _) = inj₂ Err-intro
+  inj₁ (cv-pair (cast-val sv₁ (¬Inert⇒Active c-¬inert)) (cast-val sv₂ (¬Inert⇒Active d-¬inert))
+    (inj₂ (inj₂ ⟨ SCV-cast sv₁ (¬Inert⇒Active c-¬inert) , SCV-cast sv₂ (¬Inert⇒Active d-¬inert) ⟩)))
+scv⟶ᵤᶜᵛ⟹cv' _ (pair-cast-left {c' = c'}{c}{d} sv₁ sv₂)
+  with inertP (compose c' c) | inertP d
+... | yes c-inert | yes d-inert =
+  inj₁ (v⇑ (S-Val (V-pair (V-cast sv₁ c-inert) (V-cast sv₂ d-inert))))
+... | yes c-inert | no d-¬inert =
+  inj₁ (cv-pair (v⇑ (V-cast sv₁ c-inert)) (cast-val sv₂ (¬Inert⇒Active d-¬inert))
+    (inj₂ (inj₁ ⟨ V-cast sv₁ c-inert , SCV-cast sv₂ (¬Inert⇒Active d-¬inert) ⟩)))
+... | no c-¬inert | yes d-inert =
+  inj₁ (cv-pair (cast-val sv₁ (¬Inert⇒Active c-¬inert)) (v⇑ (V-cast sv₂ d-inert))
+    (inj₁ ⟨ SCV-cast sv₁ (¬Inert⇒Active c-¬inert) , V-cast sv₂ d-inert ⟩))
+... | no c-¬inert | no d-¬inert =
+  inj₁ (cv-pair (cast-val sv₁ (¬Inert⇒Active c-¬inert)) (cast-val sv₂ (¬Inert⇒Active d-¬inert))
+    (inj₂ (inj₂ ⟨ SCV-cast sv₁ (¬Inert⇒Active c-¬inert) , SCV-cast sv₂ (¬Inert⇒Active d-¬inert) ⟩)))
+scv⟶ᵤᶜᵛ⟹cv' _ (pair-cast-right {d' = d'}{c}{d} sv₁ sv₂)
+  with inertP c | inertP (compose d' d)
+... | yes c-inert | yes d-inert =
+  inj₁ (v⇑ (S-Val (V-pair (V-cast sv₁ c-inert) (V-cast sv₂ d-inert))))
+... | yes c-inert | no d-¬inert =
+  inj₁ (cv-pair (v⇑ (V-cast sv₁ c-inert)) (cast-val sv₂ (¬Inert⇒Active d-¬inert))
+    (inj₂ (inj₁ ⟨ V-cast sv₁ c-inert , SCV-cast sv₂ (¬Inert⇒Active d-¬inert) ⟩)))
+... | no c-¬inert | yes d-inert =
+  inj₁ (cv-pair (cast-val sv₁ (¬Inert⇒Active c-¬inert)) (v⇑ (V-cast sv₂ d-inert))
+    (inj₁ ⟨ SCV-cast sv₁ (¬Inert⇒Active c-¬inert) , V-cast sv₂ d-inert ⟩))
+... | no c-¬inert | no d-¬inert =
+  inj₁ (cv-pair (cast-val sv₁ (¬Inert⇒Active c-¬inert)) (cast-val sv₂ (¬Inert⇒Active d-¬inert))
+    (inj₂ (inj₂ ⟨ SCV-cast sv₁ (¬Inert⇒Active c-¬inert) , SCV-cast sv₂ (¬Inert⇒Active d-¬inert) ⟩)))
+scv⟶ᵤᶜᵛ⟹cv' _ (pair-cast-both {c' = c'}{d'}{c}{d} sv₁ sv₂)
+  with inertP (compose c' c) | inertP (compose d' d)
+... | yes c-inert | yes d-inert =
+  inj₁ (v⇑ (S-Val (V-pair (V-cast sv₁ c-inert) (V-cast sv₂ d-inert))))
+... | yes c-inert | no d-¬inert =
+  inj₁ (cv-pair (v⇑ (V-cast sv₁ c-inert)) (cast-val sv₂ (¬Inert⇒Active d-¬inert))
+    (inj₂ (inj₁ ⟨ V-cast sv₁ c-inert , SCV-cast sv₂ (¬Inert⇒Active d-¬inert) ⟩)))
+... | no c-¬inert | yes d-inert =
+  inj₁ (cv-pair (cast-val sv₁ (¬Inert⇒Active c-¬inert)) (v⇑ (V-cast sv₂ d-inert))
+    (inj₁ ⟨ SCV-cast sv₁ (¬Inert⇒Active c-¬inert) , V-cast sv₂ d-inert ⟩))
+... | no c-¬inert | no d-¬inert =
+  inj₁ (cv-pair (cast-val sv₁ (¬Inert⇒Active c-¬inert)) (cast-val sv₂ (¬Inert⇒Active d-¬inert))
+    (inj₂ (inj₂ ⟨ SCV-cast sv₁ (¬Inert⇒Active c-¬inert) , SCV-cast sv₂ (¬Inert⇒Active d-¬inert) ⟩)))
+scv⟶ᵤᶜᵛ⟹cv' _ (`⊥ x₁) = inj₂ Err-intro
+scv⟶ᵤᶜᵛ⟹cv' _ (⊥ₘ x₁) = inj₂ Err-intro
 
 scv⟶ₘ⟹cv' : ∀ {Σ Σ' A} {e : Σ ∣ ∅ ⊢ A} {cv : CastedValue e} {ν : Store Σ}
   {e' : Σ' ∣ ∅ ⊢ A} {ν' : Store Σ'}
@@ -165,7 +183,7 @@ scv⟶ᵤᵣ⟹cv' : ∀ {Σ Σ' A bc} {e : Σ ∣ ∅ ⊢ A} {cv : CastedValue 
   → bc / e , ν ⟶ᵤᵣ e' , ν'
   → CastedValue e' ⊎ Erroneous e'
 scv⟶ᵤᵣ⟹cv' scv (switch red) = scv⟶ᵤᵣ⟹cv' scv red
-scv⟶ᵤᵣ⟹cv' scv (pure red) = scv⟶ᵤ⟹cv' scv red
+scv⟶ᵤᵣ⟹cv' scv (pure red) = scv⟶ᵤᶜᵛ⟹cv' scv red
 scv⟶ᵤᵣ⟹cv' scv (mono red) = scv⟶ₘ⟹cv' scv red
 scv⟶ᵤᵣ⟹cv' (SCV-pair _ _ p) (ξ-×ₗ red)
   -- we case-analysis on the shape of the pair and process each case accordingly
@@ -236,7 +254,6 @@ scv⟶ᵤᵣ⟹cv' (SCV-pair cv₁ _ _) (ξ-×ᵣ red) | inj₂ (inj₂ ⟨ scv�
 scv⟶ᵤᵣ⟹cv' (SCV-pair _ _ _) (ξ-×ᵣ {e₁ = e₁} red) | inj₂ (inj₂ _) | inj₂ err =
   inj₂ (Err-plugged err (ξ-×ᵣ (typeprecise-strenthen-expr (⟶ᵤᵣ⟹⊑ₕ red) e₁)))
 scv⟶ᵤᵣ⟹cv' (SCV-cast v _) (ξ-cast red) = ⊥-elim (sval⟶ᵤᵣ⊥ v red)
-scv⟶ᵤᵣ⟹cv' (SCV-ccast _ _ _) (ξ-cast ())
 scv⟶ᵤᵣ⟹cv' _ ξ-×ₗ-error = inj₂ Err-intro
 scv⟶ᵤᵣ⟹cv' _ ξ-×ᵣ-error = inj₂ Err-intro
 scv⟶ᵤᵣ⟹cv' _ ξ-cast-error = inj₂ Err-intro

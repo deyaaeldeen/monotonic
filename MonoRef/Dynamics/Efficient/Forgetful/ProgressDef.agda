@@ -1,5 +1,6 @@
 module MonoRef.Dynamics.Efficient.Forgetful.ProgressDef where
 
+open import MonoRef.Coercions.NormalForm.Forgetful.CastedValueReduction
 open import MonoRef.Coercions.NormalForm.Forgetful.Compose
 open import MonoRef.Coercions.NormalForm.Forgetful.Reduction
 open import MonoRef.Coercions.NormalForm.Forgetful.Syntax
@@ -21,7 +22,7 @@ open import MonoRef.Static.Context
 
 
 open ParamReduction SimpleValue Value CastedValue StrongCastedValue ref⟹T ref⟹∈ ref⟹⊑
-open ParamReduction/ν-cast/ν-update/ref/store/⟶ᵤ ν-cast ν-update/ref store _⟶ᵤ_
+open ParamReduction/ν-cast/ν-update/ref/store/⟶ᵤ/⟶ᵤᶜᵛ ν-cast ν-update/ref store _⟶ᵤ_ _⟶ᵤᶜᵛ_
 
 data Progress {Σ A} (M : Σ ∣ ∅ ⊢ A) (ν : Store Σ) : Set where
 

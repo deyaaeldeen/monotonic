@@ -7,6 +7,7 @@ open import Data.Sum using (inj₁ ; inj₂)
 open import Relation.Binary.PropositionalEquality using (refl)
 open import Relation.Nullary using (yes ; no ; ¬_)
 
+open import MonoRef.Coercions.NormalForm.Forgetful.CastedValueReduction
 open import MonoRef.Coercions.NormalForm.Forgetful.Compose
 open import MonoRef.Coercions.NormalForm.Forgetful.Reduction
 open import MonoRef.Coercions.NormalForm.Forgetful.Syntax
@@ -35,7 +36,7 @@ open import MonoRef.Static.Types.Relations
 
 
 open ParamReduction SimpleValue Value CastedValue StrongCastedValue ref⟹T ref⟹∈ ref⟹⊑
-open ParamReduction/ν-cast/ν-update/ref/store/⟶ᵤ ν-cast ν-update/ref store _⟶ᵤ_
+open ParamReduction/ν-cast/ν-update/ref/store/⟶ᵤ/⟶ᵤᶜᵛ ν-cast ν-update/ref store _⟶ᵤ_ _⟶ᵤᶜᵛ_
 
 
 proof : ∀ {Σ Σ' A B bc} {M : Σ ∣ ∅ ⊢ B} {e : Σ ∣ ∅ ⊢ A} {cv : CastedValue e} {e' : Σ' ∣ ∅ ⊢ A} {ν' : Store Σ'}

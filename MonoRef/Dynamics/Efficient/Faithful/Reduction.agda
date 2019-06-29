@@ -11,6 +11,7 @@ open import Relation.Nullary using (¬_)
 open import Data.List.Prefix renaming (_⊑_ to _⊑ₗ_ ; ⊑-refl to ⊑ₗ-refl)
 open import Data.List.Properties.Extra using (∈-∷ʳ)
 
+open import MonoRef.Coercions.NormalForm.Faithful.CastedValueReduction public
 open import MonoRef.Coercions.NormalForm.Faithful.Compose
 open import MonoRef.Coercions.NormalForm.Faithful.Reduction
 open import MonoRef.Coercions.NormalForm.Faithful.Syntax
@@ -67,14 +68,14 @@ data _/_,_⟶ᵤᵣ_,_ {Γ Σ} where
     → allow / M , ν ⟶ᵤᵣ M' , ν'
 
   pure : ∀ {A} {ν : Store Σ} {M' M : Σ ∣ Γ ⊢ A}
-    → M ⟶ᵤ M'
+    → M ⟶ᵤᶜᵛ M'
       -------------------------
-    → allow / M , ν ⟶ᵤᵣ M' , ν
+    → disallow / M , ν ⟶ᵤᵣ M' , ν
 
   mono : ∀ {Σ' A} {ν : Store Σ} {ν' : Store Σ'} {M : Σ ∣ Γ ⊢ A} {M' : Σ' ∣ Γ ⊢ A}
     → M , ν ⟶ₘ M' , ν'
       -------------------------
-    → allow / M , ν ⟶ᵤᵣ M' , ν'
+    → disallow / M , ν ⟶ᵤᵣ M' , ν'
 
   ξ-×ₗ : ∀ {Σ' A B} {ν : Store Σ} {ν' : Store Σ'} {e₁ : Σ ∣ Γ ⊢ A} {e₁' : Σ' ∣ Γ ⊢ A} {e₂ : Σ ∣ Γ ⊢ B}
     → (red : allow / e₁ , ν ⟶ᵤᵣ e₁' , ν')

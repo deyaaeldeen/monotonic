@@ -55,8 +55,6 @@ typeprecise-strenthen-scv : ∀ {Σ Σ' Γ A} {e : Σ ∣ Γ ⊢ A} {cv : Casted
 typeprecise-strenthen-cv Σ'⊑ₕΣ (v⇑ x) = v⇑ typeprecise-strenthen-val Σ'⊑ₕΣ x
 typeprecise-strenthen-cv Σ'⊑ₕΣ (cast-val v c) =
   cast-val (typeprecise-strenthen-sval Σ'⊑ₕΣ v) c
-typeprecise-strenthen-cv Σ'⊑ₕΣ (cast-cval v c d) =
-  cast-cval (typeprecise-strenthen-sval Σ'⊑ₕΣ v) c d
 typeprecise-strenthen-cv Σ'⊑ₕΣ (cv-pair cv cv₁ p) =
   cv-pair (typeprecise-strenthen-cv Σ'⊑ₕΣ cv)
           (typeprecise-strenthen-cv Σ'⊑ₕΣ cv₁)
@@ -66,8 +64,6 @@ typeprecise-strenthen-cv Σ'⊑ₕΣ (cv-pair cv cv₁ p) =
 
 typeprecise-strenthen-scv Σ'⊑ₕΣ (SCV-cast v ac) =
   SCV-cast (typeprecise-strenthen-sval Σ'⊑ₕΣ v) ac
-typeprecise-strenthen-scv Σ'⊑ₕΣ (SCV-ccast v c d) =
-  SCV-ccast (typeprecise-strenthen-sval Σ'⊑ₕΣ v) c d
 typeprecise-strenthen-scv Σ'⊑ₕΣ (SCV-pair cv₁ cv₂ p) =
   SCV-pair (typeprecise-strenthen-cv Σ'⊑ₕΣ cv₁)
            (typeprecise-strenthen-cv Σ'⊑ₕΣ cv₂)

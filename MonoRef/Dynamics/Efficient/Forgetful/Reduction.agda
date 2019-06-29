@@ -67,7 +67,7 @@ module ParamReduction
     SimpleValue Value CastedValue StrongCastedValue ref⟹T ref⟹∈ ref⟹⊑ public
   open ParamNormal Value CastedValue StrongCastedValue
 
-  module ParamReduction/ν-cast/ν-update/ref/store/⟶ᵤ
+  module ParamReduction/ν-cast/ν-update/ref/store/⟶ᵤ/⟶ᵤᶜᵛ
     (ν-cast : ∀ {Σ T t'}
       → (T∈Σ : T ∈ Σ)
       → (ν : Store Σ)
@@ -81,6 +81,7 @@ module ParamReduction
       → Store Σ)
     (store : ∀ {Σ A} {v : Σ ∣ ∅ ⊢ A} → Value v → Store Σ → Store (Σ ∷ʳ A))
     (_⟶ᵤ_ : ∀ {Γ Σ A} → Σ ∣ Γ ⊢ A → Σ ∣ Γ ⊢ A → Set)
+    (_⟶ᵤᶜᵛ_ : ∀ {Γ Σ A} → Σ ∣ Γ ⊢ A → Σ ∣ Γ ⊢ A → Set)
     where
 
     open ParamMonoCastReduction/ν-cast ν-cast public
@@ -112,14 +113,14 @@ module ParamReduction
         → allow / M , ν ⟶ᵤᵣ M' , ν'
 
       pure : ∀ {A} {ν : Store Σ} {M' M : Σ ∣ Γ ⊢ A}
-        → M ⟶ᵤ M'
-          -------------------------
-        → allow / M , ν ⟶ᵤᵣ M' , ν
+        → M ⟶ᵤᶜᵛ M'
+          ----------------------------
+        → disallow / M , ν ⟶ᵤᵣ M' , ν
 
       mono : ∀ {Σ' A} {ν : Store Σ} {ν' : Store Σ'} {M : Σ ∣ Γ ⊢ A} {M' : Σ' ∣ Γ ⊢ A}
         → M , ν ⟶ₘ M' , ν'
-          -------------------------
-        → allow / M , ν ⟶ᵤᵣ M' , ν'
+          ----------------------------
+        → disallow / M , ν ⟶ᵤᵣ M' , ν'
 
       ξ-×ₗ : ∀ {Σ' A B} {ν : Store Σ} {ν' : Store Σ'} {e₁ : Σ ∣ Γ ⊢ A} {e₁' : Σ' ∣ Γ ⊢ A} {e₂ : Σ ∣ Γ ⊢ B}
         → (red : allow / e₁ , ν ⟶ᵤᵣ e₁' , ν')

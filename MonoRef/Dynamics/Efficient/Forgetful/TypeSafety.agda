@@ -10,6 +10,7 @@ module MonoRef.Dynamics.Efficient.Forgetful.TypeSafety where
 open import Data.Nat using (ℕ ; suc)
 open import Relation.Nullary using (yes ; no)
 
+open import MonoRef.Coercions.NormalForm.Forgetful.CastedValueReduction
 open import MonoRef.Coercions.NormalForm.Forgetful.Compose
 open import MonoRef.Coercions.NormalForm.Forgetful.Reduction
 open import MonoRef.Coercions.NormalForm.Forgetful.Syntax
@@ -38,7 +39,7 @@ open import MonoRef.Static.Types
 
 
 open ParamReduction SimpleValue Value CastedValue StrongCastedValue ref⟹T ref⟹∈ ref⟹⊑
-open ParamReduction/ν-cast/ν-update/ref/store/⟶ᵤ ν-cast ν-update/ref store _⟶ᵤ_
+open ParamReduction/ν-cast/ν-update/ref/store/⟶ᵤ/⟶ᵤᶜᵛ ν-cast ν-update/ref store _⟶ᵤ_ _⟶ᵤᶜᵛ_
 open ParamReflTransClosure Value CastedValue StrongCastedValue
 open ParamReflTransClosure/⟶ₛ _,_⟶ₛ_,_
 
