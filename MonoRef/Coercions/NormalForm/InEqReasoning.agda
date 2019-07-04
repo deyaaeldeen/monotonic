@@ -1,6 +1,6 @@
 module MonoRef.Coercions.NormalForm.InEqReasoning where
 
-open import Data.Nat using (ℕ ; suc ; _*_ ; _+_ ; _≤_)
+open import Data.Nat using (ℕ ; suc ; _*_ ; _+_ ; _≤_ ; _⊔_)
 open import Data.Nat.Properties
 open ≤-Reasoning
 open import Relation.Binary.PropositionalEquality using (refl ; sym ; cong₂)
@@ -273,4 +273,54 @@ a+3+c+b≤n⇒a+b≤n {a}{b}{c}{n} m =
     a + b           ≤⟨ +-monoʳ-≤ _ (n≤m+n (3 + c) _) ⟩
     a + (3 + c + b) ≤⟨ m ⟩
     n
+  ∎
+
+1+b⊔a⊔c⊔d≤1+a⊔c⊔b⊔d : ∀ {a b c d}
+  → suc (b ⊔ a ⊔ (c ⊔ d)) ≤ suc (a ⊔ c ⊔ (b ⊔ d))
+1+b⊔a⊔c⊔d≤1+a⊔c⊔b⊔d {a} {b} {c} {d} =
+  begin
+    suc ((b ⊔ a) ⊔ (c ⊔ d))
+       ≤⟨ +-monoʳ-≤ 1 (≤-reflexive (⊔-assoc b _ _)) ⟩
+    suc (b ⊔ (a ⊔ (c ⊔ d)))
+       ≤⟨ +-monoʳ-≤ 1 (⊔-monoʳ-≤ b (≤-reflexive (sym (⊔-assoc a c d))) ) ⟩
+    suc (b ⊔ ((a ⊔ c) ⊔ d))
+       ≤⟨ +-monoʳ-≤ 1 (⊔-monoʳ-≤ b (≤-reflexive (⊔-comm _ d)) ) ⟩
+    suc (b ⊔ (d ⊔ (a ⊔ c)))
+       ≤⟨ +-monoʳ-≤ 1 (≤-reflexive (sym (⊔-assoc b d _))) ⟩
+    suc ((b ⊔ d) ⊔ (a ⊔ c))
+       ≤⟨ +-monoʳ-≤ 1 (≤-reflexive (⊔-comm _ (a ⊔ c))) ⟩
+    suc (a ⊔ c ⊔ (b ⊔ d))
+  ∎
+
+1+a⊔b⊔c⊔d≤1+a⊔c⊔b⊔d : ∀ {a b c d}
+  → suc (a ⊔ b ⊔ (c ⊔ d)) ≤ suc (a ⊔ c ⊔ (b ⊔ d))
+1+a⊔b⊔c⊔d≤1+a⊔c⊔b⊔d {a} {b} {c} {d} =
+  begin
+    suc ((a ⊔ b) ⊔ (c ⊔ d))
+       ≤⟨ +-monoʳ-≤ 1 (⊔-monoˡ-≤ _ (≤-reflexive (⊔-comm a b))) ⟩
+    suc ((b ⊔ a) ⊔ (c ⊔ d))
+       ≤⟨ 1+b⊔a⊔c⊔d≤1+a⊔c⊔b⊔d{a}{b} ⟩
+    suc (a ⊔ c ⊔ (b ⊔ d))
+  ∎
+
+1+a0≤1+1⊔a : ∀ {a}
+  → suc (a ⊔ 0) ≤ suc (1 ⊔ a)
+1+a0≤1+1⊔a {a} =
+  begin
+    suc (a ⊔ 0)
+       ≤⟨ +-monoʳ-≤ 1 (≤-reflexive (⊔-identityʳ a)) ⟩
+    suc a
+       ≤⟨ +-monoʳ-≤ 1 (n≤m⊔n 1 _) ⟩
+    suc (1 ⊔ a)
+  ∎
+
+1+a0≤1+a⊔1 : ∀ {a}
+  → suc (a ⊔ 0) ≤ suc (a ⊔ 1)
+1+a0≤1+a⊔1 {a} =
+  begin
+    suc (a ⊔ 0)
+       ≤⟨ +-monoʳ-≤ 1 (≤-reflexive (⊔-identityʳ a)) ⟩
+    suc a
+       ≤⟨ +-monoʳ-≤ 1 (m≤m⊔n a _) ⟩
+    suc (a ⊔ 1)
   ∎

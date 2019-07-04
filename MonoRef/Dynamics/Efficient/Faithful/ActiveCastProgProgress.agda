@@ -53,8 +53,3 @@ data ActiveCastProgProgress {Γ Σ A} (M : Σ ∣ Γ ⊢ A) (ν : Store Σ) : Se
   → SimpleValue e → Active c → (ν : Store Σ) → ActiveCastProgProgress (e < c >) ν
 ⟶ᵤᵣprogress-active/sv () (A-prjSeq _ _) _
 ⟶ᵤᵣprogress-active/sv sv (A-final c) ν = ⟶ᵤᵣprogress-active/final/sv sv c ν
-
-⟶ᵤᵣprogress-active : ∀ {Γ Σ A B} {e : Σ ∣ Γ ⊢ A} {c : A ⟹ B}
-  → Value e → Active c → (ν : Store Σ) → ActiveCastProgProgress (e < c >) ν
-⟶ᵤᵣprogress-active (S-Val sv) c ν = ⟶ᵤᵣprogress-active/sv sv c ν
-⟶ᵤᵣprogress-active (V-cast _ _) _ _ = step-pure compose-casts
