@@ -17,6 +17,11 @@ open import MonoRef.Static.Types
 open import MonoRef.Static.Types.Relations
 
 
+compose-middle-height : ∀ {A B C}
+  → (mc : MiddleCoercion A B) → (md : MiddleCoercion B C)
+  → {n : ℕ} {m : ‖ mc ‖ₘ + ‖ md ‖ₘ ≤ n }
+  → ‖ compose-middle mc md {n} {m} ‖ʰₘ ≤ ‖ mc ‖ʰₘ ⊔ ‖ md ‖ʰₘ
+
 compose-final-height : ∀ {A B C}
   → (fc : FinalCoercion A B) → (nd : NormalFormCoercion B C)
   → {n : ℕ} {m : ‖ fc ‖ᶠ + ‖ nd ‖ ≤ n }
@@ -75,14 +80,35 @@ compose-final-height (injSeq B≢⋆ g) (prjSeq A≢⋆ i) {suc n} {s≤s m}
     c   = make-final-coercion B≢⋆ A≢⋆
     m'  = make-coercion+i≤n g i n m
     i⨟c = compose-final c (final i) {n} {m'}
-compose-final-height (injSeq iB x) (final x₁) {suc n} {s≤s m} = {!!}
-compose-final-height (middle x) (prjSeq iA x₁) {suc n} {s≤s m} = {!!}
-compose-final-height (middle x) (final x₁) {suc n} = {!!}
+compose-final-height (injSeq _ _) (final fail) {suc _} {s≤s _} = n≤m⊔n _ 1
+compose-final-height (injSeq A x) (final (injSeq B fail)) {suc n} {s≤s m} =
+  begin
+   1
+      ≤⟨ n≤m⊔n _ 1 ⟩
+    ((‖ A ‖ʰᵢₜ ⊔ ‖ x ‖ʰₘ) ⊔ ‖ B ‖ʰᵢₜ) ⊔ 1
+      ≡⟨ ⊔-assoc (‖ A ‖ʰᵢₜ ⊔ ‖ x ‖ʰₘ) ‖ B ‖ʰᵢₜ 1 ⟩
+    ‖ A ‖ʰᵢₜ ⊔ ‖ x ‖ʰₘ ⊔ (‖ B ‖ʰᵢₜ ⊔ 1)
+  ∎
+compose-final-height (injSeq _ _) (final (injSeq B≢⋆ id)) {suc _} {s≤s _} = ⊥-elim (Injectable⋆⇒⊥ B≢⋆)
+compose-final-height (injSeq _ _) (final (middle id)) {suc _} {s≤s _} = m≤m⊔n _ 1
+compose-final-height (injSeq _ _) (final (middle fail)) {suc _} {s≤s _} = n≤m⊔n _ 1
+compose-final-height (middle x) (final fail) {suc _} = n≤m⊔n _ 1
+compose-final-height (middle x) (final (middle y)) {suc n} {s≤s m} = compose-middle-height x y {n} {a+2+b≤n⇒a+b≤n m}
+compose-final-height (middle x) (final (injSeq B y)) {suc n} {s≤s m} =
+  begin
+    ‖ B ‖ʰᵢₜ ⊔ ‖ compose-middle x y {n} {a+3+c+b≤n⇒a+b≤n m} ‖ʰₘ
+      ≤⟨ ⊔-monoʳ-≤ ‖ B ‖ʰᵢₜ (compose-middle-height x y {n} {a+3+c+b≤n⇒a+b≤n m}) ⟩
+    ‖ B ‖ʰᵢₜ ⊔ (‖ x ‖ʰₘ ⊔ ‖ y ‖ʰₘ)
+      ≡⟨ sym (⊔-assoc ‖ B ‖ʰᵢₜ ‖ x ‖ʰₘ _)  ⟩
+    (‖ B ‖ʰᵢₜ ⊔ ‖ x ‖ʰₘ) ⊔ ‖ y ‖ʰₘ
+      ≤⟨ ⊔-monoˡ-≤ _ (≤-reflexive (⊔-comm ‖ B ‖ʰᵢₜ _)) ⟩
+    (‖ x ‖ʰₘ ⊔ ‖ B ‖ʰᵢₜ) ⊔ ‖ y ‖ʰₘ
+      ≡⟨ ⊔-assoc ‖ x ‖ʰₘ _ _ ⟩
+    ‖ x ‖ʰₘ ⊔ (‖ B ‖ʰᵢₜ ⊔ ‖ y ‖ʰₘ)
+  ∎
+compose-final-height (middle id) (prjSeq _ _) {suc _} {s≤s _} = n≤m⊔n 1 _
+compose-final-height (middle fail) (prjSeq A x) {suc _} {s≤s _} = m≤m⊔n 1 (‖ A ‖ʰᵢₜ ⊔ ‖ x ‖ʰᶠ)
 
-compose-middle-height : ∀ {A B C}
-  → (mc : MiddleCoercion A B) → (md : MiddleCoercion B C)
-  → {n : ℕ} {m : ‖ mc ‖ₘ + ‖ md ‖ₘ ≤ n }
-  → ‖ compose-middle mc md {n} {m} ‖ʰₘ ≤ ‖ mc ‖ʰₘ ⊔ ‖ md ‖ʰₘ
 compose-middle-height c d {0} {m} = ⊥-elim (¬size-two-mcoercions≤0 c d m)
 compose-middle-height id d {suc _} {s≤s _} = n≤m⊔n 1 ‖ d ‖ʰₘ
 compose-middle-height fail d {suc _} = m≤m⊔n 1 ‖ d ‖ʰₘ

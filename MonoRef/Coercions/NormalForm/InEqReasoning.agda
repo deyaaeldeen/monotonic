@@ -302,25 +302,3 @@ a+3+c+b≤n⇒a+b≤n {a}{b}{c}{n} m =
        ≤⟨ 1+b⊔a⊔c⊔d≤1+a⊔c⊔b⊔d{a}{b} ⟩
     suc (a ⊔ c ⊔ (b ⊔ d))
   ∎
-
-1+a0≤1+1⊔a : ∀ {a}
-  → suc (a ⊔ 0) ≤ suc (1 ⊔ a)
-1+a0≤1+1⊔a {a} =
-  begin
-    suc (a ⊔ 0)
-       ≤⟨ +-monoʳ-≤ 1 (≤-reflexive (⊔-identityʳ a)) ⟩
-    suc a
-       ≤⟨ +-monoʳ-≤ 1 (n≤m⊔n 1 _) ⟩
-    suc (1 ⊔ a)
-  ∎
-
-1+a0≤1+a⊔1 : ∀ {a}
-  → suc (a ⊔ 0) ≤ suc (a ⊔ 1)
-1+a0≤1+a⊔1 {a} =
-  begin
-    suc (a ⊔ 0)
-       ≤⟨ +-monoʳ-≤ 1 (≤-reflexive (⊔-identityʳ a)) ⟩
-    suc a
-       ≤⟨ +-monoʳ-≤ 1 (m≤m⊔n a _) ⟩
-    suc (a ⊔ 1)
-  ∎
