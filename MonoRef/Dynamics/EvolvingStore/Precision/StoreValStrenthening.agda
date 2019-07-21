@@ -1,11 +1,11 @@
 open import MonoRef.Static.Types
 
-module MonoRef.Dynamics.Store.Precision.StoreValStrenthening
+module MonoRef.Dynamics.EvolvingStore.Precision.StoreValStrenthening
   (_⟹_ : Type → Type → Set)
   (Inert : ∀ {A B} → A ⟹ B → Set)
   where
 
-open import MonoRef.Dynamics.Store.Precision
+open import MonoRef.Dynamics.EvolvingStore.Precision
   _⟹_ Inert
 open import MonoRef.Language.TargetWithoutBlame
   _⟹_ Inert
@@ -23,7 +23,7 @@ module ParamPrecisionStoreValStrenthening
     → Value (typeprecise-strenthen-expr Σ'⊑ₕΣ v))
   where
 
-  open import MonoRef.Dynamics.Store.Value _⟹_ Inert
+  open import MonoRef.Dynamics.EvolvingStore.Value _⟹_ Inert
   open ParamStoreValue Value CastedValue StrongCastedValue
   
   typeprecise-strenthen-evolvingstoreval : ∀ {Σ Σ' t} → Σ' ⊑ₕ Σ

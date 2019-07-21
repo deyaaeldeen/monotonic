@@ -1,6 +1,6 @@
 open import MonoRef.Static.Types
 
-module MonoRef.Dynamics.Store.TypingProgress
+module MonoRef.Dynamics.EvolvingStore.TypingProgress
   (_⟹_ : Type → Type → Set)
   (Inert : ∀ {A B} → A ⟹ B → Set)
   where
@@ -8,9 +8,9 @@ module MonoRef.Dynamics.Store.TypingProgress
 -- standard library++
 open import Data.List.Prefix renaming (_⊑_ to _⊑ₗ_)
 
-open import MonoRef.Dynamics.Store.Extension
+open import MonoRef.Dynamics.EvolvingStore.Extension
   _⟹_ Inert
-open import MonoRef.Dynamics.Store.Precision
+open import MonoRef.Dynamics.EvolvingStore.Precision
   _⟹_ Inert
 open import MonoRef.Static.Types.Relations using (StoreTyping)
 

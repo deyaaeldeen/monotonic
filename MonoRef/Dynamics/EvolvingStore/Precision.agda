@@ -1,6 +1,6 @@
 open import MonoRef.Static.Types
 
-module MonoRef.Dynamics.Store.Precision
+module MonoRef.Dynamics.EvolvingStore.Precision
   (_⟹_ : Type → Type → Set)
   (Inert : ∀ {A B} → A ⟹ B → Set)
   where

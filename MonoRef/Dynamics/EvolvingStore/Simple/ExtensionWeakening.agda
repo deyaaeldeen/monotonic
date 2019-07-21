@@ -1,6 +1,6 @@
 open import MonoRef.Static.Types
 
-module MonoRef.Dynamics.Store.Simple.ExtensionWeakening
+module MonoRef.Dynamics.EvolvingStore.Simple.ExtensionWeakening
   (_⟹_ : Type → Type → Set)
   (Inert : ∀ {A B} → A ⟹ B → Set)
   (Active : ∀ {A B} → A ⟹ B → Set)
@@ -12,9 +12,9 @@ open import Data.Sum renaming (map to sum-map)
 -- standard library++
 open import Data.List.Prefix using (_⊑_ ; ∈-⊒)
 
-open import MonoRef.Dynamics.Store.Simple.CastedValue
+open import MonoRef.Dynamics.EvolvingStore.Simple.CastedValue
   _⟹_ Inert Active
-open import MonoRef.Dynamics.Store.Extension
+open import MonoRef.Dynamics.EvolvingStore.Extension
   _⟹_ Inert
 open import MonoRef.Dynamics.Simple.Value
   _⟹_ Inert

@@ -1,6 +1,6 @@
 {-
 
-  MonoRef.Dynamics.Store.Efficient instantiates MonoRef.Dynamics.Store.Base with
+  MonoRef.Dynamics.EvolvingStore.Efficient instantiates MonoRef.Dynamics.EvolvingStore.Base with
   the right efficient definitions and re-exports all store definitions. It is
   paramaterized by the semantics of coercions and requires a compose operator.
 
@@ -12,7 +12,7 @@ open import Relation.Nullary using (Dec ; yes ; no ; ¬_)
 open import MonoRef.Static.Types
 open import MonoRef.Static.Types.Relations
 
-module MonoRef.Dynamics.Store.Efficient
+module MonoRef.Dynamics.EvolvingStore.Efficient
   (_⟹_ : Type → Type → Set)
   (Inert : ∀ {A B} → A ⟹ B → Set)
   (Active : ∀ {A B} → A ⟹ B → Set)
@@ -34,26 +34,26 @@ open import Relation.Binary.PropositionalEquality using (refl)
 
 open import MonoRef.Dynamics.Efficient.Value
   _⟹_ Inert
-open import MonoRef.Dynamics.Store.Base
+open import MonoRef.Dynamics.EvolvingStore.Base
   _⟹_ Inert
-open import MonoRef.Dynamics.Store.Efficient.Utilities
+open import MonoRef.Dynamics.EvolvingStore.Efficient.Utilities
   _⟹_ Inert public
-open import MonoRef.Dynamics.Store.Normal
+open import MonoRef.Dynamics.EvolvingStore.Normal
   _⟹_ Inert
-open import MonoRef.Dynamics.Store.Precision
+open import MonoRef.Dynamics.EvolvingStore.Precision
   _⟹_ Inert public
-open import MonoRef.Dynamics.Store.Efficient.CastedValue
+open import MonoRef.Dynamics.EvolvingStore.Efficient.CastedValue
   _⟹_ Inert Active public
-open import MonoRef.Dynamics.Store.Efficient.ExtensionWeakening
+open import MonoRef.Dynamics.EvolvingStore.Efficient.ExtensionWeakening
   _⟹_ Inert Active public
-open import MonoRef.Dynamics.Store.Efficient.PrecisionStrenthening
+open import MonoRef.Dynamics.EvolvingStore.Efficient.PrecisionStrenthening
   _⟹_ Inert Active public
-open import MonoRef.Dynamics.Store.Ptr public
-open import MonoRef.Dynamics.Store.Store
+open import MonoRef.Dynamics.EvolvingStore.Ptr public
+open import MonoRef.Dynamics.EvolvingStore.Store
   _⟹_ Inert
-open import MonoRef.Dynamics.Store.StoreDef
+open import MonoRef.Dynamics.EvolvingStore.StoreDef
   _⟹_ Inert
-open import MonoRef.Dynamics.Store.Value
+open import MonoRef.Dynamics.EvolvingStore.Value
   _⟹_ Inert
 open import MonoRef.Language.TargetWithoutBlame
   _⟹_ Inert
@@ -178,5 +178,5 @@ open ParamBase SimpleValue Value CastedValue StrongCastedValue ref⟹T ref⟹∈
 open StoreExtend prefix-weaken-val prefix-weaken-cv public
 open Corollary1 typeprecise-strenthen-val typeprecise-strenthen-cv all-⊑ₕ public
 
-open import MonoRef.Dynamics.Store.TypingProgress
+open import MonoRef.Dynamics.EvolvingStore.TypingProgress
   _⟹_ Inert public

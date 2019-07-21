@@ -1,6 +1,6 @@
 open import MonoRef.Static.Types
 
-module MonoRef.Dynamics.Store.Value
+module MonoRef.Dynamics.EvolvingStore.Value
   (_⟹_ : Type → Type → Set)
   (Inert : ∀ {A B} → A ⟹ B → Set)
   where

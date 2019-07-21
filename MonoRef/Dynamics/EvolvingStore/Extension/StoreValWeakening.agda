@@ -1,6 +1,6 @@
 open import MonoRef.Static.Types
 
-module MonoRef.Dynamics.Store.Extension.StoreValWeakening
+module MonoRef.Dynamics.EvolvingStore.Extension.StoreValWeakening
   (_⟹_ : Type → Type → Set)
   (Inert : ∀ {A B} → A ⟹ B → Set)
   where
@@ -8,7 +8,7 @@ module MonoRef.Dynamics.Store.Extension.StoreValWeakening
 -- standard library++
 open import Data.List.Prefix using (_⊑_ ; ∈-⊒)
 
-open import MonoRef.Dynamics.Store.Extension
+open import MonoRef.Dynamics.EvolvingStore.Extension
   _⟹_ Inert
 open import MonoRef.Language.TargetWithoutBlame
   _⟹_ Inert
@@ -24,7 +24,7 @@ module ParamExtensionStoreValWeakening
     → Value v → Value (prefix-weaken-expr Σ⊑Σ' v))
   where
 
-  open import MonoRef.Dynamics.Store.Value _⟹_ Inert
+  open import MonoRef.Dynamics.EvolvingStore.Value _⟹_ Inert
   open ParamStoreValue Value CastedValue StrongCastedValue
   
   prefix-weaken-storeval  : ∀ {A Σ Σ'}

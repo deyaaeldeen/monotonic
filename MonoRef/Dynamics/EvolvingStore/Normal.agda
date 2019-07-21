@@ -1,12 +1,12 @@
 {-
 
-  MonoRef.Dynamics.Store.Normal provides a definition for a normal store.
+  MonoRef.Dynamics.EvolvingStore.Normal provides a definition for a normal store.
 
 -}
 
 open import MonoRef.Static.Types
 
-module MonoRef.Dynamics.Store.Normal
+module MonoRef.Dynamics.EvolvingStore.Normal
   (_⟹_ : Type → Type → Set)
   (Inert : ∀ {A B} → A ⟹ B → Set)
   where
@@ -15,9 +15,9 @@ open import Data.Empty using (⊥)
 open import Data.List.All using (All)
 open import Relation.Nullary using (Dec ; yes ; no ; ¬_)
 
-open import MonoRef.Dynamics.Store.StoreDef
+open import MonoRef.Dynamics.EvolvingStore.StoreDef
   _⟹_ Inert
-open import MonoRef.Dynamics.Store.Value
+open import MonoRef.Dynamics.EvolvingStore.Value
   _⟹_ Inert
 open import MonoRef.Language.TargetWithoutBlame
   _⟹_ Inert

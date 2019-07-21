@@ -1,7 +1,7 @@
 {-
 
   Casted values are special kind of values that can be written to the heap.
-  MonoRef.Dynamics.Store.Efficient.CastedValue provides definitions for
+  MonoRef.Dynamics.EvolvingStore.Efficient.CastedValue provides definitions for
   efficient casted values and strong casted values. Strong casted values are
   casted values that are guaranteed to be productive i.e. have at least one
   active cast.
@@ -10,7 +10,7 @@
 
 open import MonoRef.Static.Types
 
-module MonoRef.Dynamics.Store.Efficient.CastedValue
+module MonoRef.Dynamics.EvolvingStore.Efficient.CastedValue
   (_⟹_ : Type → Type → Set)
   (Inert : ∀ {A B} → A ⟹ B → Set)
   (Active : ∀ {A B} → A ⟹ B → Set)

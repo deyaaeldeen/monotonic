@@ -2,18 +2,14 @@ open import MonoRef.Static.Types
 
 open import Data.Empty using (⊥ ; ⊥-elim)
 
-module MonoRef.Dynamics.Store.Simple.Utilities
+module MonoRef.Dynamics.EvolvingStore.Simple.Utilities
   (_⟹_ : Type → Type → Set)
   (Inert : ∀ {A B} → A ⟹ B → Set)
   (Inert⇒¬Ref : ∀ {A B} {c : A ⟹ Ref B} → Inert c → ⊥)
   where
 
-open import Data.List.Any using (here; there)
 open import Data.List.Membership.Propositional using (_∈_)
-open import Relation.Binary.PropositionalEquality using (_≡_ ; refl)
 
-open import MonoRef.Dynamics.Store.Precision
-  _⟹_ Inert
 open import MonoRef.Dynamics.Simple.Value
   _⟹_ Inert
 open import MonoRef.Language.TargetWithoutBlame

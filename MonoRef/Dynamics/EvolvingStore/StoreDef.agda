@@ -1,12 +1,12 @@
 {-
 
-  MonoRef.Dynamics.Store.StoreDeff exports the definition of the store.
+  MonoRef.Dynamics.EvolvingStore.StoreDeff exports the definition of the store.
 
 -}
 
 open import MonoRef.Static.Types
 
-module MonoRef.Dynamics.Store.StoreDef
+module MonoRef.Dynamics.EvolvingStore.StoreDef
   (_⟹_ : Type → Type → Set)
   (Inert : ∀ {A B} → A ⟹ B → Set)
   where

@@ -12,9 +12,9 @@ module MonoRef.Dynamics.Reduction.ReflTransClosure
   (Inert : ∀ {A B} → A ⟹ B → Set)
   where
 
-open import MonoRef.Dynamics.Store.StoreDef
+open import MonoRef.Dynamics.EvolvingStore.StoreDef
   _⟹_ Inert
-open import MonoRef.Dynamics.Store.Value
+open import MonoRef.Dynamics.EvolvingStore.Value
   _⟹_ Inert
 open import MonoRef.Language.TargetWithoutBlame
   _⟹_ Inert

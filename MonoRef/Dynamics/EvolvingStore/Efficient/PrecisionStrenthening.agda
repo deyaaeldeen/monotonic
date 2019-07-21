@@ -1,6 +1,6 @@
 open import MonoRef.Static.Types
 
-module MonoRef.Dynamics.Store.Efficient.PrecisionStrenthening
+module MonoRef.Dynamics.EvolvingStore.Efficient.PrecisionStrenthening
   (_⟹_ : Type → Type → Set)
   (Inert : ∀ {A B} → A ⟹ B → Set)
   (Active : ∀ {A B} → A ⟹ B → Set)
@@ -9,9 +9,9 @@ module MonoRef.Dynamics.Store.Efficient.PrecisionStrenthening
 open import Data.Product renaming (_,_ to ⟨_,_⟩ ; map to prod-map)
 open import Data.Sum renaming (map to sum-map)
 
-open import MonoRef.Dynamics.Store.Efficient.CastedValue
+open import MonoRef.Dynamics.EvolvingStore.Efficient.CastedValue
   _⟹_ Inert Active
-open import MonoRef.Dynamics.Store.Precision
+open import MonoRef.Dynamics.EvolvingStore.Precision
   _⟹_ Inert
 open import MonoRef.Dynamics.Efficient.Value
   _⟹_ Inert

@@ -1,4 +1,4 @@
-module MonoRef.Dynamics.Store.Ptr where
+module MonoRef.Dynamics.EvolvingStore.Ptr where
 
 open import Data.List.Any using (here ; there)
 open import Data.List.Membership.Propositional using (_∈_)

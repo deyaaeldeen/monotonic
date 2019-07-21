@@ -15,14 +15,14 @@ open import Relation.Binary.PropositionalEquality using (_≢_)
 
 open import MonoRef.Dynamics.Reduction.MonoCastReduction
   _⟹_ Inert
-open import MonoRef.Dynamics.Store.Precision
+open import MonoRef.Dynamics.EvolvingStore.Precision
   _⟹_ Inert
-open import MonoRef.Dynamics.Store.Ptr
-open import MonoRef.Dynamics.Store.Store
+open import MonoRef.Dynamics.EvolvingStore.Ptr
+open import MonoRef.Dynamics.EvolvingStore.Store
   _⟹_ Inert
-open import MonoRef.Dynamics.Store.StoreDef
+open import MonoRef.Dynamics.EvolvingStore.StoreDef
   _⟹_ Inert
-open import MonoRef.Dynamics.Store.Value
+open import MonoRef.Dynamics.EvolvingStore.Value
   _⟹_ Inert
 open import MonoRef.Language.TargetWithoutBlame
   _⟹_ Inert

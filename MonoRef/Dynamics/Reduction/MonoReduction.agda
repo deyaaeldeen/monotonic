@@ -16,13 +16,13 @@ open import Relation.Nullary using (¬_)
 open import Data.List.Prefix renaming (_⊑_ to _⊑ₗ_ ; ⊑-refl to ⊑ₗ-refl)
 open import Data.List.Properties.Extra using (∈-∷ʳ)
 
-open import MonoRef.Dynamics.Store.Normal
+open import MonoRef.Dynamics.EvolvingStore.Normal
   _⟹_ Inert
-open import MonoRef.Dynamics.Store.Store
+open import MonoRef.Dynamics.EvolvingStore.Store
   _⟹_ Inert
-open import MonoRef.Dynamics.Store.StoreDef
+open import MonoRef.Dynamics.EvolvingStore.StoreDef
   _⟹_ Inert
-open import MonoRef.Dynamics.Store.Value
+open import MonoRef.Dynamics.EvolvingStore.Value
   _⟹_ Inert
 open import MonoRef.Language.TargetWithoutBlame
   _⟹_ Inert

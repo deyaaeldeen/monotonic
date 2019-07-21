@@ -26,18 +26,18 @@ open import MonoRef.Dynamics.Reduction.PureReduction
   _⟹_ Inert make-coercion
 open import MonoRef.Dynamics.Simple.Frames
   _⟹_ Inert
-open import MonoRef.Dynamics.Store.Normal
+open import MonoRef.Dynamics.EvolvingStore.Normal
   _⟹_ Inert
-open import MonoRef.Dynamics.Store.Ptr
-open import MonoRef.Dynamics.Store.Precision
+open import MonoRef.Dynamics.EvolvingStore.Ptr
+open import MonoRef.Dynamics.EvolvingStore.Precision
   _⟹_ Inert
-open import MonoRef.Dynamics.Store.Store
+open import MonoRef.Dynamics.EvolvingStore.Store
   _⟹_ Inert
-open import MonoRef.Dynamics.Store.StoreDef
+open import MonoRef.Dynamics.EvolvingStore.StoreDef
   _⟹_ Inert
-open import MonoRef.Dynamics.Store.TypingProgress
+open import MonoRef.Dynamics.EvolvingStore.TypingProgress
   _⟹_ Inert
-open import MonoRef.Dynamics.Store.Value
+open import MonoRef.Dynamics.EvolvingStore.Value
   _⟹_ Inert
 open import MonoRef.Language.TargetWithoutBlame
   _⟹_ Inert

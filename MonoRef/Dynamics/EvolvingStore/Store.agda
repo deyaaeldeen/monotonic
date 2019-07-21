@@ -1,13 +1,13 @@
 {-
 
-  MonoRef.Dynamics.Store.Store exports various tools to work stores
+  MonoRef.Dynamics.EvolvingStore.Store exports various tools to work stores
   parameterized over the representation of values and casted values.
 
 -}
 
 open import MonoRef.Static.Types
 
-module MonoRef.Dynamics.Store.Store
+module MonoRef.Dynamics.EvolvingStore.Store
   (_⟹_ : Type → Type → Set)
   (Inert : ∀ {A B} → A ⟹ B → Set)
   where
@@ -20,9 +20,9 @@ open import Relation.Binary.PropositionalEquality using (_≡_ ; refl ; subst)
 -- stdlib++
 open import Data.List.All.Properties.Extra using (_All[_]≔'_)
 
-open import MonoRef.Dynamics.Store.StoreDef
+open import MonoRef.Dynamics.EvolvingStore.StoreDef
   _⟹_ Inert
-open import MonoRef.Dynamics.Store.Value
+open import MonoRef.Dynamics.EvolvingStore.Value
   _⟹_ Inert
 open import MonoRef.Language.TargetWithoutBlame
   _⟹_ Inert

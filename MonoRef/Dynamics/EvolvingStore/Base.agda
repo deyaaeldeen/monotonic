@@ -1,6 +1,6 @@
 {-
 
-  MonoRef.Dynamics.Store.Base provides ν-cast and store, where the former casts
+  MonoRef.Dynamics.EvolvingStore.Base provides ν-cast and store, where the former casts
   the store to a more precise type and the latter extends the store with one
   more element.
 
@@ -10,7 +10,7 @@ open import MonoRef.Static.Types
 
 open import Data.Empty using (⊥ ; ⊥-elim)
 
-module MonoRef.Dynamics.Store.Base
+module MonoRef.Dynamics.EvolvingStore.Base
   (_⟹_ : Type → Type → Set)
   (Inert : ∀ {A B} → A ⟹ B → Set)
   where
@@ -23,19 +23,19 @@ open import Data.List.Membership.Propositional using (_∈_)
 open import Data.List.Prefix renaming (_⊑_ to _⊑ₗ_)
 open import Data.List.All.Properties.Extra using (_all-∷ʳ_)
 
-open import MonoRef.Dynamics.Store.Extension
+open import MonoRef.Dynamics.EvolvingStore.Extension
   _⟹_ Inert
-open import MonoRef.Dynamics.Store.Extension.StoreValWeakening
+open import MonoRef.Dynamics.EvolvingStore.Extension.StoreValWeakening
   _⟹_ Inert
-open import MonoRef.Dynamics.Store.Precision
+open import MonoRef.Dynamics.EvolvingStore.Precision
   _⟹_ Inert
-open import MonoRef.Dynamics.Store.Precision.StoreValStrenthening
+open import MonoRef.Dynamics.EvolvingStore.Precision.StoreValStrenthening
   _⟹_ Inert
-open import MonoRef.Dynamics.Store.Store
+open import MonoRef.Dynamics.EvolvingStore.Store
   _⟹_ Inert
-open import MonoRef.Dynamics.Store.StoreDef
+open import MonoRef.Dynamics.EvolvingStore.StoreDef
   _⟹_ Inert
-open import MonoRef.Dynamics.Store.Value
+open import MonoRef.Dynamics.EvolvingStore.Value
   _⟹_ Inert
 open import MonoRef.Language.TargetWithoutBlame
   _⟹_ Inert
