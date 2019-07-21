@@ -1,21 +1,9 @@
 module MonoRef.Dynamics.Efficient.Faithful.ProgressDef where
 
-open import MonoRef.Coercions.NormalForm.Faithful.Compose
-open import MonoRef.Coercions.NormalForm.Faithful.Reduction
-open import MonoRef.Coercions.NormalForm.Faithful.Syntax
-  renaming (NormalFormCoercion to _⟹_ ; InertNormalForm to Inert
-           ; ActiveNormalForm to Active ; inert-normalform-decidable to inertP
-           ; ¬Inert⇒Active-normform to ¬Inert⇒Active)
-open import MonoRef.Coercions.NormalForm.Faithful.Make renaming (make-normal-form-coercion to make-coercion)
+open import MonoRef.Dynamics.Efficient.Faithful.Error
 open import MonoRef.Dynamics.Efficient.Faithful.Reduction
-open import MonoRef.Dynamics.Efficient.Value
-  _⟹_ Inert
-open import MonoRef.Dynamics.Store.Efficient
-  _⟹_ Inert Active inertP ¬Inert⇒Active make-coercion compose
-open import MonoRef.Language.TargetWithoutBlame
-  _⟹_ Inert
-open import MonoRef.Dynamics.Error
-  _⟹_ Inert
+open import MonoRef.Dynamics.Efficient.Faithful.Store
+open import MonoRef.Dynamics.Efficient.Faithful.TargetWithoutBlame
 open import MonoRef.Static.Context
 
 

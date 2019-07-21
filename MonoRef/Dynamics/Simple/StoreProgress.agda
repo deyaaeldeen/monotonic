@@ -7,26 +7,15 @@ open import Data.Product using (∃ ; ∃-syntax ; -,_) renaming (_,_ to ⟨_,_�
 open import Relation.Binary.PropositionalEquality using (_≢_ ; refl)
 open import Relation.Nullary using (yes ; no)
 
-open import MonoRef.Coercions.Reduction
-open import MonoRef.Coercions.Syntax
-open import MonoRef.Dynamics.MonoStoreProgress
-  _⟹_ Inert
-open import MonoRef.Dynamics.Simple.Reduction
-  _⟹_ Inert make-coercion
-open import MonoRef.Dynamics.Simple.Value
-  _⟹_ Inert
-open import MonoRef.Dynamics.Store.Simple
-  _⟹_ Inert Active inertP ¬Inert⇒Active make-coercion Inert⇒¬Ref
-open import MonoRef.Language.TargetWithoutBlame
-  _⟹_ Inert
+
+open import MonoRef.Dynamics.Simple.Coercions
+open import MonoRef.Dynamics.Simple.SReduction
+open import MonoRef.Dynamics.Simple.Store
+open import MonoRef.Dynamics.Simple.TargetWithoutBlame
+open import MonoRef.Dynamics.Simple.MonoStoreProgress
 open import MonoRef.Static.Context
 open import MonoRef.Static.Types.Relations
 
-
-open ParamReduction Value CastedValue StrongCastedValue ref⟹T ref⟹∈ ref⟹⊑
-open ParamReduction/ν-cast/ν-update/ref/store/⟶ᵤ ν-cast ν-update/ref store _⟶ᵤ_
-open ParamMonoStoreProgress Value Value CastedValue StrongCastedValue ref⟹T ref⟹∈ ref⟹⊑
-open ParamMonoStoreProgress/ν-cast ν-cast public
 
 get-ptr : ∀ {Σ Σ' A} {e : Σ ∣ ∅ ⊢ A} {e' : Σ' ∣ ∅ ⊢ A} {ν : Store Σ} {ν' : Store Σ'}
   → (red : e , ν ⟶ᵤᵣ e' , ν') → Maybe (∃[ B ] (B ∈ Σ))
