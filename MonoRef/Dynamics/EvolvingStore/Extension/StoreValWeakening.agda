@@ -16,20 +16,20 @@ open import MonoRef.Language.TargetWithoutBlame
 
 module ParamExtensionStoreValWeakening
   (Value             : ∀ {Σ Γ A} → Σ ∣ Γ ⊢ A → Set)
-  (CastedValue       : ∀ {Σ Γ A} → Σ ∣ Γ ⊢ A → Set)
-  (StrongCastedValue : ∀ {Σ Γ A} {e : Σ ∣ Γ ⊢ A} → CastedValue e → Set)
+  (DelayedCast       : ∀ {Σ Γ A} → Σ ∣ Γ ⊢ A → Set)
+  (StrongDelayedCast : ∀ {Σ Γ A} {e : Σ ∣ Γ ⊢ A} → DelayedCast e → Set)
   (prefix-weaken-cv  : ∀ {Σ Σ' Γ A} {v : Σ ∣ Γ ⊢ A} → (Σ⊑Σ' : Σ ⊑ Σ')
-    → CastedValue v → CastedValue (prefix-weaken-expr Σ⊑Σ' v))
+    → DelayedCast v → DelayedCast (prefix-weaken-expr Σ⊑Σ' v))
   (prefix-weaken-val : ∀ {Σ Σ' Γ A} {v : Σ ∣ Γ ⊢ A} → (Σ⊑Σ' : Σ ⊑ Σ')
     → Value v → Value (prefix-weaken-expr Σ⊑Σ' v))
   where
 
   open import MonoRef.Dynamics.EvolvingStore.Value _⟹_ Inert
-  open ParamStoreValue Value CastedValue StrongCastedValue
+  open ParamStoreValue Value DelayedCast StrongDelayedCast
   
   prefix-weaken-storeval  : ∀ {A Σ Σ'}
     → Σ ⊑ Σ' → StoreValue A Σ → StoreValue A Σ'
   prefix-weaken-storeval Σ⊑Σ' (fromNormalValue (intro v t)) =
     fromNormalValue (intro (prefix-weaken-val Σ⊑Σ' v) t)
-  prefix-weaken-storeval Σ⊑Σ' (fromCastedValue (intro cv t)) =
-    fromCastedValue (intro (prefix-weaken-cv Σ⊑Σ' cv) t)
+  prefix-weaken-storeval Σ⊑Σ' (fromDelayedCast (intro cv t)) =
+    fromDelayedCast (intro (prefix-weaken-cv Σ⊑Σ' cv) t)

@@ -9,7 +9,7 @@ module MonoRef.Dynamics.EvolvingStore.Simple.PrecisionStrenthening
 open import Data.Product renaming (_,_ to ⟨_,_⟩ ; map to prod-map)
 open import Data.Sum renaming (map to sum-map)
 
-open import MonoRef.Dynamics.EvolvingStore.Simple.CastedValue
+open import MonoRef.Dynamics.EvolvingStore.Simple.DelayedCast
   _⟹_ Inert Active
 open import MonoRef.Dynamics.EvolvingStore.Precision
   _⟹_ Inert
@@ -39,13 +39,13 @@ typeprecise-strenthen-val Σ'⊑ₕΣ (V-pair v v₁) =
 
 typeprecise-strenthen-cv : ∀ {Σ Σ' Γ A} {e : Σ ∣ Γ ⊢ A}
   → (Σ'⊑ₕΣ : Σ' ⊑ₕ Σ)
-  → CastedValue e
-  → CastedValue (typeprecise-strenthen-expr Σ'⊑ₕΣ e)
+  → DelayedCast e
+  → DelayedCast (typeprecise-strenthen-expr Σ'⊑ₕΣ e)
 
-typeprecise-strenthen-scv : ∀ {Σ Σ' Γ A} {e : Σ ∣ Γ ⊢ A} {cv : CastedValue e}
+typeprecise-strenthen-scv : ∀ {Σ Σ' Γ A} {e : Σ ∣ Γ ⊢ A} {cv : DelayedCast e}
   → (Σ'⊑ₕΣ : Σ' ⊑ₕ Σ)
-  → StrongCastedValue cv
-  → StrongCastedValue (typeprecise-strenthen-cv Σ'⊑ₕΣ cv)
+  → ReducibleDelayedCast cv
+  → ReducibleDelayedCast (typeprecise-strenthen-cv Σ'⊑ₕΣ cv)
 
 typeprecise-strenthen-cv Σ'⊑ₕΣ (v⇑ x) = v⇑ typeprecise-strenthen-val Σ'⊑ₕΣ x
 typeprecise-strenthen-cv Σ'⊑ₕΣ (cast-val v c) =

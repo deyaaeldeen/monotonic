@@ -46,8 +46,8 @@ open import MonoRef.Static.Types.Relations
 module ParamBase
   (SimpleValue       : ∀ {Σ Γ A} → Σ ∣ Γ ⊢ A → Set)
   (Value             : ∀ {Σ Γ A} → Σ ∣ Γ ⊢ A → Set)
-  (CastedValue       : ∀ {Σ Γ A} → Σ ∣ Γ ⊢ A → Set)
-  (StrongCastedValue : ∀ {Σ Γ A} {e : Σ ∣ Γ ⊢ A} → CastedValue e → Set)
+  (DelayedCast       : ∀ {Σ Γ A} → Σ ∣ Γ ⊢ A → Set)
+  (ReducibleDelayedCast : ∀ {Σ Γ A} {e : Σ ∣ Γ ⊢ A} → DelayedCast e → Set)
 
   {- These utilities depend on the definition of Value -}
   (ref⟹T : ∀ {Σ Γ A} {v : Σ ∣ Γ ⊢ Ref A} → (V : SimpleValue v) → Type)
@@ -55,9 +55,9 @@ module ParamBase
   (ref⟹⊑ : ∀ {Σ Γ A} {v : Σ ∣ Γ ⊢ Ref A} → (V : SimpleValue v) → ref⟹T V ⊑ A)
   where
 
-  open ParamStoreValue Value CastedValue StrongCastedValue
+  open ParamStoreValue Value DelayedCast ReducibleDelayedCast
   open ParamStoreDef StoreValue
-  open ParamStore SimpleValue Value CastedValue StrongCastedValue ref⟹T ref⟹∈ ref⟹⊑
+  open ParamStore SimpleValue Value DelayedCast ReducibleDelayedCast ref⟹T ref⟹∈ ref⟹⊑
 
   module StoreExtend
     (prefix-weaken-val : ∀ {Σ Σ' Γ A} {e : Σ ∣ Γ ⊢ A}
@@ -65,12 +65,12 @@ module ParamBase
       → Value e → Value (prefix-weaken-expr Σ⊑ₗΣ' e))
     (prefix-weaken-cv  : ∀ {Σ Σ' Γ A} {e : Σ ∣ Γ ⊢ A}
       → (Σ⊑ₗΣ' : Σ ⊑ₗ Σ')
-      → CastedValue e
-      → CastedValue (prefix-weaken-expr Σ⊑ₗΣ' e))
+      → DelayedCast e
+      → DelayedCast (prefix-weaken-expr Σ⊑ₗΣ' e))
     where
 
     open ParamExtensionStoreValWeakening
-      Value CastedValue StrongCastedValue prefix-weaken-cv prefix-weaken-val
+      Value DelayedCast ReducibleDelayedCast prefix-weaken-cv prefix-weaken-val
 
     store : ∀ {Σ A} {e : Σ ∣ ∅ ⊢ A} → Value e → Store Σ → Store (Σ ∷ʳ A)
     store v ν =
@@ -86,8 +86,8 @@ module ParamBase
       → Value (typeprecise-strenthen-expr Σ'⊑ₕΣ e))
     (typeprecise-strenthen-cv : ∀ {Σ Σ' Γ A} {e : Σ ∣ Γ ⊢ A}
       → (Σ'⊑ₕΣ : Σ' ⊑ₕ Σ)
-      → CastedValue e
-      → CastedValue (typeprecise-strenthen-expr Σ'⊑ₕΣ e))
+      → DelayedCast e
+      → DelayedCast (typeprecise-strenthen-expr Σ'⊑ₕΣ e))
     (all-⊑ₕ : ∀ {Σ Σ'}
       → All (λ ty → StoreValue ty Σ') Σ
       → Σ' ⊑ₕ Σ
@@ -95,7 +95,7 @@ module ParamBase
     where
 
     open ParamPrecisionStoreValStrenthening
-      Value CastedValue StrongCastedValue
+      Value DelayedCast ReducibleDelayedCast
       typeprecise-strenthen-cv typeprecise-strenthen-val
 
     -- FIXME: There is a typo in the paper in this part when it says Σ' ⊢ ν

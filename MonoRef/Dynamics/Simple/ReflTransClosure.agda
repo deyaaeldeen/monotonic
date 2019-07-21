@@ -7,5 +7,5 @@ open import MonoRef.Dynamics.Simple.SReduction
 open import MonoRef.Dynamics.Simple.Store
 
 
-open ParamReflTransClosure Value CastedValue StrongCastedValue
+open ParamReflTransClosure Value DelayedCast ReducibleDelayedCast
 open ParamReflTransClosure/⟶ₛ _,_⟶ₛ_,_ public

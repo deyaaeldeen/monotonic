@@ -35,16 +35,16 @@ open import MonoRef.Static.Types.Relations
 module ParamMonoCastReduction
   (SimpleValue       : ∀ {Σ Γ A} → Σ ∣ Γ ⊢ A → Set)
   (Value             : ∀ {Σ Γ A} → Σ ∣ Γ ⊢ A → Set)
-  (CastedValue       : ∀ {Σ Γ A} → Σ ∣ Γ ⊢ A → Set)
-  (StrongCastedValue : ∀ {Σ Γ A} {e : Σ ∣ Γ ⊢ A} → CastedValue e → Set)
+  (DelayedCast       : ∀ {Σ Γ A} → Σ ∣ Γ ⊢ A → Set)
+  (ReducibleDelayedCast : ∀ {Σ Γ A} {e : Σ ∣ Γ ⊢ A} → DelayedCast e → Set)
   (ref⟹T : ∀ {Σ Γ A} {v : Σ ∣ Γ ⊢ Ref A} → (V : SimpleValue v) → Type)
   (ref⟹∈ : ∀ {Σ Γ A} {v : Σ ∣ Γ ⊢ Ref A} → (V : SimpleValue v) → ref⟹T V ∈ Σ)
   (ref⟹⊑ : ∀ {Σ Γ A} {v : Σ ∣ Γ ⊢ Ref A} → (V : SimpleValue v) → ref⟹T V ⊑ A)
   where
 
-  open ParamStoreValue Value CastedValue StrongCastedValue
+  open ParamStoreValue Value DelayedCast ReducibleDelayedCast
   open ParamStoreDef StoreValue
-  open ParamStore SimpleValue Value CastedValue StrongCastedValue ref⟹T ref⟹∈ ref⟹⊑
+  open ParamStore SimpleValue Value DelayedCast ReducibleDelayedCast ref⟹T ref⟹∈ ref⟹⊑
 
   module ParamMonoCastReduction/ν-cast
     (ν-cast : ∀ {Σ T t'}

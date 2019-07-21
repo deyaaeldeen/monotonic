@@ -7,5 +7,5 @@ open import MonoRef.Dynamics.Reduction.MonoReduction
   _⟹_ Inert make-coercion
 
 open ParamMonoReduction
-  SimpleValue Value CastedValue StrongCastedValue ref⟹T ref⟹∈ ref⟹⊑ public
+  SimpleValue Value DelayedCast ReducibleDelayedCast ref⟹T ref⟹∈ ref⟹⊑ public
 open ParamMonoReduction/ν-update/ref/store ν-update/ref store public

@@ -13,12 +13,12 @@ data ActiveCastProgProgress {Γ Σ A} (M : Σ ∣ Γ ⊢ A) (ν : Store Σ) : Se
 
   step-pure : ∀ {N : Σ ∣ Γ ⊢ A}
     → M ⟶ᵤ N
-      ----------------------
+      --------------------------
     → ActiveCastProgProgress M ν
 
   step-mono : ∀ {Σ'} {ν' : Store Σ'} {N : Σ' ∣ Γ ⊢ A}
     → M , ν ⟶ₘ N , ν'
-      ----------------------
+      --------------------------
     → ActiveCastProgProgress M ν
 
 

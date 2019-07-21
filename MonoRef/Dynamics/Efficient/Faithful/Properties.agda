@@ -85,10 +85,10 @@ sval⟶ᵤᵣ⊥ (V-pair _ v) (ξ-×ᵣ red) = val⟶ᵤᵣ⊥ v red
 val⟶ᵤᵣ⊥ (S-Val sv) red = sval⟶ᵤᵣ⊥ sv red
 val⟶ᵤᵣ⊥ (V-cast sv c) red = sval∧Inert⇒¬⟶ᵤᵣ sv c red
 
-scv⟶ᵤᶜᵛ⟹cv' : ∀ {Σ A} {e : Σ ∣ ∅ ⊢ A} {cv : CastedValue e} {e' : Σ ∣ ∅ ⊢ A}
-  → StrongCastedValue cv
+scv⟶ᵤᶜᵛ⟹cv' : ∀ {Σ A} {e : Σ ∣ ∅ ⊢ A} {cv : DelayedCast e} {e' : Σ ∣ ∅ ⊢ A}
+  → ReducibleDelayedCast cv
   → e ⟶ᵤᶜᵛ e'
-  → CastedValue e' ⊎ Erroneous e'
+  → DelayedCast e' ⊎ Erroneous e'
 scv⟶ᵤᶜᵛ⟹cv' scv (ι v) = inj₁ (v⇑ (S-Val v))
 scv⟶ᵤᶜᵛ⟹cv' _ (pair-simple {c = c}{d} sv₁ sv₂)
   with inertP c | inertP d
@@ -145,22 +145,22 @@ scv⟶ᵤᶜᵛ⟹cv' _ (pair-cast-both {c' = c'}{d'}{c}{d} sv₁ sv₂)
 scv⟶ᵤᶜᵛ⟹cv' _ (`⊥ x₁) = inj₂ Err-intro
 scv⟶ᵤᶜᵛ⟹cv' _ (⊥ₘ x₁) = inj₂ Err-intro
 
-scv⟶ₘ⟹cv' : ∀ {Σ Σ' A} {e : Σ ∣ ∅ ⊢ A} {cv : CastedValue e} {ν : Store Σ}
+scv⟶ₘ⟹cv' : ∀ {Σ Σ' A} {e : Σ ∣ ∅ ⊢ A} {cv : DelayedCast e} {ν : Store Σ}
   {e' : Σ' ∣ ∅ ⊢ A} {ν' : Store Σ'}
-  → StrongCastedValue cv
+  → ReducibleDelayedCast cv
   → e , ν ⟶ₘ e' , ν'
-  → CastedValue e' ⊎ Erroneous e'
+  → DelayedCast e' ⊎ Erroneous e'
 scv⟶ₘ⟹cv' scv (castref1 {T₂⊑A = T₂⊑A} R rtti∼T₂ x) =
   inj₁ (v⇑ (S-Val (V-addr (Σ-cast⟹∈ (ref⟹∈ R) (⊓ rtti∼T₂)) (⊑-trans (⊓⟹⊑ᵣ rtti∼T₂) T₂⊑A))))
 scv⟶ₘ⟹cv' _ (castref2 {ν = ν} {T₂⊑A = T₂⊑A} R rtti∼T₂ eq) =
   inj₁ (v⇑ (S-Val (V-addr (ref-ν⟹∈ R ν) (⊑-trans (⊓⟹⊑ᵣ-with-≡ rtti∼T₂ eq) T₂⊑A))))
 scv⟶ₘ⟹cv' _ (castref3 _ _) = inj₂ Err-intro
 
-scv⟶ᵤᵣ⟹cv' : ∀ {Σ Σ' A} {e : Σ ∣ ∅ ⊢ A} {cv : CastedValue e} {ν : Store Σ}
+scv⟶ᵤᵣ⟹cv' : ∀ {Σ Σ' A} {e : Σ ∣ ∅ ⊢ A} {cv : DelayedCast e} {ν : Store Σ}
   {e' : Σ' ∣ ∅ ⊢ A} {ν' : Store Σ'}
-  → StrongCastedValue cv
+  → ReducibleDelayedCast cv
   → e , ν ⟶ᵤᵣ e' , ν'
-  → CastedValue e' ⊎ Erroneous e'
+  → DelayedCast e' ⊎ Erroneous e'
 scv⟶ᵤᵣ⟹cv' scv (pure red) = scv⟶ᵤᶜᵛ⟹cv' scv red
 scv⟶ᵤᵣ⟹cv' scv (mono red) = scv⟶ₘ⟹cv' scv red
 scv⟶ᵤᵣ⟹cv' (SCV-pair _ _ p) (ξ-×ₗ red)

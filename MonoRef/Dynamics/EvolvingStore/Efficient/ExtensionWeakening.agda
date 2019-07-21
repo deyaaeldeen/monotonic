@@ -12,7 +12,7 @@ open import Data.Sum renaming (map to sum-map)
 -- standard library++
 open import Data.List.Prefix using (_⊑_ ; ∈-⊒)
 
-open import MonoRef.Dynamics.EvolvingStore.Efficient.CastedValue
+open import MonoRef.Dynamics.EvolvingStore.Efficient.DelayedCast
   _⟹_ Inert Active
 open import MonoRef.Dynamics.EvolvingStore.Extension
   _⟹_ Inert
@@ -39,13 +39,13 @@ prefix-weaken-val ext (S-Val sv) = S-Val (prefix-weaken-sval ext sv)
 prefix-weaken-val ext (V-cast e c) = V-cast (prefix-weaken-sval ext e) c
 
 prefix-weaken-cv : ∀ {Σ Σ' Γ A} {v : Σ ∣ Γ ⊢ A} → (ext : Σ ⊑ Σ')
-  → CastedValue v
-  → CastedValue (prefix-weaken-expr ext v)
+  → DelayedCast v
+  → DelayedCast (prefix-weaken-expr ext v)
 
-prefix-weaken-scv : ∀ {Σ Σ' Γ A} {e : Σ ∣ Γ ⊢ A} {cv : CastedValue e}
+prefix-weaken-scv : ∀ {Σ Σ' Γ A} {e : Σ ∣ Γ ⊢ A} {cv : DelayedCast e}
   → (ext : Σ ⊑ Σ')
-  → StrongCastedValue cv
-  → StrongCastedValue (prefix-weaken-cv ext cv)
+  → ReducibleDelayedCast cv
+  → ReducibleDelayedCast (prefix-weaken-cv ext cv)
 
 prefix-weaken-cv ext (v⇑ x) = v⇑ (prefix-weaken-val ext x)
 prefix-weaken-cv ext (cast-val v c) = cast-val (prefix-weaken-sval ext v) c

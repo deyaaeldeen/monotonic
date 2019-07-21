@@ -42,7 +42,7 @@ open import MonoRef.Dynamics.EvolvingStore.Normal
   _⟹_ Inert
 open import MonoRef.Dynamics.EvolvingStore.Precision
   _⟹_ Inert public
-open import MonoRef.Dynamics.EvolvingStore.Efficient.CastedValue
+open import MonoRef.Dynamics.EvolvingStore.Efficient.DelayedCast
   _⟹_ Inert Active public
 open import MonoRef.Dynamics.EvolvingStore.Efficient.ExtensionWeakening
   _⟹_ Inert Active public
@@ -60,31 +60,31 @@ open import MonoRef.Language.TargetWithoutBlame
 open import MonoRef.Static.Context
 
 
-open ParamStoreValue Value CastedValue StrongCastedValue public
+open ParamStoreValue Value DelayedCast ReducibleDelayedCast public
 open ParamStoreDef StoreValue public
 open ParamStore
-  SimpleValue Value CastedValue StrongCastedValue ref⟹T ref⟹∈ ref⟹⊑ public
-open ParamNormal Value CastedValue StrongCastedValue public
+  SimpleValue Value DelayedCast ReducibleDelayedCast ref⟹T ref⟹∈ ref⟹⊑ public
+open ParamNormal Value DelayedCast ReducibleDelayedCast public
 open ParamNormalDecidable scv-decidable public
 
 
 ¬NormalStore⇒∃cv : ∀ {Σ Σ'} {ν : StoreUnder Σ Σ'}
   → ¬ NormalStore ν
-  → ∃[ A ] (A ∈ Σ' × (Σ[ cv ∈ EvolvingStoreValue A Σ ] StronglyEvolvingStoreValue cv))
+  → ∃[ A ] (A ∈ Σ' × (Σ[ cv ∈ EvolvingStoreValue A Σ ] ReduciblelyEvolvingStoreValue cv))
 ¬NormalStore⇒∃cv {ν = All.[]} ν-¬NS = ⊥-elim (ν-¬NS NS-Z)
 ¬NormalStore⇒∃cv {ν = fromNormalValue (intro v _) All.∷ ν} ν-¬NS
   with normalStoreP ν
 ... | yes p = ⊥-elim (ν-¬NS (NS-S p v))
 ... | no ¬p with ¬NormalStore⇒∃cv ¬p
 ...   | ⟨ _ , ⟨ A∈Σ , cv ⟩ ⟩ = -, ⟨ there A∈Σ , cv ⟩
-¬NormalStore⇒∃cv {ν = fromCastedValue (intro (v⇑ v) _) All.∷ ν'} ν-¬NS
+¬NormalStore⇒∃cv {ν = fromDelayedCast (intro (v⇑ v) _) All.∷ ν'} ν-¬NS
   with normalStoreP ν'
 ... | yes ν'-NS = ⊥-elim (ν-¬NS (NS-S' ν'-NS (λ ())))
 ... | no ν'-¬NS with ¬NormalStore⇒∃cv ν'-¬NS
 ...   | ⟨ _ , ⟨ A∈Σ , cv ⟩ ⟩ = -, ⟨ there A∈Σ , cv ⟩
-¬NormalStore⇒∃cv {ν = fromCastedValue v@(intro (cast-val cv c) T) All.∷ _} _ =
+¬NormalStore⇒∃cv {ν = fromDelayedCast v@(intro (cast-val cv c) T) All.∷ _} _ =
   -, ⟨ here refl , ⟨ v , intro (SCV-cast cv c) T ⟩ ⟩
-¬NormalStore⇒∃cv {ν = fromCastedValue v@(intro (cv-pair  cv₁ cv₂ p) T) All.∷ _} _ =
+¬NormalStore⇒∃cv {ν = fromDelayedCast v@(intro (cv-pair  cv₁ cv₂ p) T) All.∷ _} _ =
   -, ⟨ here refl , ⟨ v , intro (SCV-pair cv₁ cv₂ p) T ⟩ ⟩
 
 private
@@ -105,8 +105,8 @@ private
 
       cast-casted-value : ∀ {A B Σ} {e : Σ ∣ ∅ ⊢ A}
         → B ⊑ A
-        → CastedValue e
-        → Σ[ e' ∈ Σ ∣ ∅ ⊢ B ] (Value e' ⊎ (Σ[ cv' ∈ CastedValue e' ] StrongCastedValue cv'))
+        → DelayedCast e
+        → Σ[ e' ∈ Σ ∣ ∅ ⊢ B ] (Value e' ⊎ (Σ[ cv' ∈ DelayedCast e' ] ReducibleDelayedCast cv'))
       cast-casted-value {A}{B} _ (v⇑ v)
         with v
       ... | V-cast {c = c} sv _
@@ -140,16 +140,16 @@ private
       ... | V-cast {c = c} sv _
          with inertP (compose c (make-coercion A B))
       ...  | yes c-inert = fromNormalValue (intro (V-cast sv c-inert) (Type⇑ _))
-      ...  | no c-¬inert = fromCastedValue (intro (cast-val sv (¬Inert⇒Active c-¬inert)) (Type⇑ _))
+      ...  | no c-¬inert = fromDelayedCast (intro (cast-val sv (¬Inert⇒Active c-¬inert)) (Type⇑ _))
       update-type {A}{B} _ (fromNormalValue (intro v ty)) | S-Val sv
          with inertP (make-coercion A B)
       ...  | yes c-inert = fromNormalValue (intro (V-cast sv c-inert) (Type⇑ _))
-      ...  | no c-¬inert = fromCastedValue (intro (cast-val sv (¬Inert⇒Active c-¬inert)) (Type⇑ _))
+      ...  | no c-¬inert = fromDelayedCast (intro (cast-val sv (¬Inert⇒Active c-¬inert)) (Type⇑ _))
 
-      update-type B⊑A (fromCastedValue (intro cv _))
+      update-type B⊑A (fromDelayedCast (intro cv _))
         with cast-casted-value B⊑A cv
       ... | ⟨ _ , inj₁ v           ⟩ = fromNormalValue (intro v   (Type⇑ _))
-      ... | ⟨ _ , inj₂ ⟨ cv' , _ ⟩ ⟩ = fromCastedValue (intro cv' (Type⇑ _))
+      ... | ⟨ _ , inj₂ ⟨ cv' , _ ⟩ ⟩ = fromDelayedCast (intro cv' (Type⇑ _))
 
       -- a modified version of pw-map where the relation is anti-symmetric and
       -- points left
@@ -174,7 +174,7 @@ private
 
 {- Re-exported concrete definitions -}
 
-open ParamBase SimpleValue Value CastedValue StrongCastedValue ref⟹T ref⟹∈ ref⟹⊑
+open ParamBase SimpleValue Value DelayedCast ReducibleDelayedCast ref⟹T ref⟹∈ ref⟹⊑
 open StoreExtend prefix-weaken-val prefix-weaken-cv public
 open Corollary1 typeprecise-strenthen-val typeprecise-strenthen-cv all-⊑ₕ public
 

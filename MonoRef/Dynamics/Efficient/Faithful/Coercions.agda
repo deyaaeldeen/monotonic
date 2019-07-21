@@ -9,4 +9,4 @@ open import MonoRef.Coercions.NormalForm.Faithful.Syntax
 open import MonoRef.Coercions.NormalForm.Faithful.Make
   renaming (make-normal-form-coercion to make-coercion) public
 open import MonoRef.Coercions.NormalForm.Faithful.Reduction public
-open import MonoRef.Coercions.NormalForm.Faithful.CastedValueReduction public
+open import MonoRef.Coercions.NormalForm.Faithful.DelayedCastReduction public

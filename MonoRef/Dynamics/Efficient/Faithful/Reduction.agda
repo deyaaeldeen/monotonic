@@ -183,33 +183,33 @@ data _,_⟶ₛ_,_ {Σ A} :
       ----------------------
     → M , ν ⟶ₛ error , ν'
 
-  hcast : ∀ {M : Σ ∣ ∅ ⊢ A} {T} {e e' : Σ ∣ ∅ ⊢ T} {cv : CastedValue e} {ν : Store Σ}
+  hcast : ∀ {M : Σ ∣ ∅ ⊢ A} {T} {e e' : Σ ∣ ∅ ⊢ T} {cv : DelayedCast e} {ν : Store Σ}
     → ¬ NormalStore ν
     → (T∈Σ : T ∈ Σ)
-    → (scv : StrongCastedValue cv)
+    → (scv : ReducibleDelayedCast cv)
     → (red : e , ν ⟶ᵤᵣ e' , ν)
-    → (cv' : CastedValue e')
+    → (cv' : DelayedCast e')
       ---------------------------------
     → M , ν ⟶ₛ M , ν-update T∈Σ ν cv'
 
-  hmcast : ∀ {M : Σ ∣ ∅ ⊢ A} {T A B} {e : Σ ∣ ∅ ⊢ T} {cv : CastedValue e} {ν : Store Σ}
+  hmcast : ∀ {M : Σ ∣ ∅ ⊢ A} {T A B} {e : Σ ∣ ∅ ⊢ T} {cv : DelayedCast e} {ν : Store Σ}
     → ¬ NormalStore ν
     → (T∈Σ : T ∈ Σ)
-    → (scv : StrongCastedValue cv)
+    → (scv : ReducibleDelayedCast cv)
     → (A∈Σ : A ∈ Σ)
     → (T∈Σ≢A∈Σ : PtrInEquality T∈Σ A∈Σ)
     → (B⊑A : B ⊑ store-lookup-rtti A∈Σ ν)
     → {e' : Σ-cast A∈Σ B ∣ ∅ ⊢ T}
     → (red : e , ν ⟶ᵤᵣ e' , ν-cast A∈Σ ν B⊑A)
-    → (cv' : CastedValue e')
+    → (cv' : DelayedCast e')
       --------------------------------------------------------------------------------------------------------------
     →    M                                   , ν
     ⟶ₛ typeprecise-strenthen-expr (⟶ᵤᵣ⟹⊑ₕ red) M , ν-update (weaken-ptr T∈Σ B A∈Σ T∈Σ≢A∈Σ) (ν-cast A∈Σ ν B⊑A) cv'
 
-  hdrop : ∀ {M : Σ ∣ ∅ ⊢ A} {T T'} {e : Σ ∣ ∅ ⊢ T} {cv : CastedValue e} {ν : Store Σ}
+  hdrop : ∀ {M : Σ ∣ ∅ ⊢ A} {T T'} {e : Σ ∣ ∅ ⊢ T} {cv : DelayedCast e} {ν : Store Σ}
     → ¬ NormalStore ν
     → (T∈Σ : T ∈ Σ)
-    → (scv : StrongCastedValue cv)
+    → (scv : ReducibleDelayedCast cv)
     → {e' : Σ-cast T∈Σ T' ∣ ∅ ⊢ T}
     → (T'⊑T : T' ⊑ store-lookup-rtti T∈Σ ν)
     → T' ≢ store-lookup-rtti T∈Σ ν

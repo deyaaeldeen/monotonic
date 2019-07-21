@@ -89,11 +89,11 @@ val⟶ᵤᵣ⊥ v (cong-error (ξ-<> _))
   with v
 ... | V-cast () _
 
-scv⟶ᵤᵣ⟹cv' : ∀ {Σ Σ' A} {e : Σ ∣ ∅ ⊢ A} {cv : CastedValue e} {ν : Store Σ}
+scv⟶ᵤᵣ⟹cv' : ∀ {Σ Σ' A} {e : Σ ∣ ∅ ⊢ A} {cv : DelayedCast e} {ν : Store Σ}
   {e' : Σ' ∣ ∅ ⊢ A} {ν' : Store Σ'}
-  → StrongCastedValue cv
+  → ReducibleDelayedCast cv
   → e , ν ⟶ᵤᵣ e' , ν'
-  → CastedValue e' ⊎ Erroneous e'
+  → DelayedCast e' ⊎ Erroneous e'
 scv⟶ᵤᵣ⟹cv' _ (pure (ι v)) = inj₁ (v⇑ v)
 scv⟶ᵤᵣ⟹cv' _ (pure (!? v))
   with inertP (make-coercion _ _)

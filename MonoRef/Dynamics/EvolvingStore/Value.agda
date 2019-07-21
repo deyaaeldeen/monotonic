@@ -13,8 +13,8 @@ open import MonoRef.Static.Types.Relations
 
 module ParamStoreValue
   (Value : ∀ {Σ Γ A} → Σ ∣ Γ ⊢ A → Set)
-  (CastedValue : ∀ {Σ Γ A} → Σ ∣ Γ ⊢ A → Set)
-  (StrongCastedValue : ∀ {Σ Γ A} {e : Σ ∣ Γ ⊢ A} → CastedValue e → Set)
+  (DelayedCast : ∀ {Σ Γ A} → Σ ∣ Γ ⊢ A → Set)
+  (ReducibleDelayedCast : ∀ {Σ Γ A} {e : Σ ∣ Γ ⊢ A} → DelayedCast e → Set)
   where
 
   data NormalStoreValue (A : Type) (Σ : StoreTyping) : Set where
@@ -28,7 +28,7 @@ module ParamStoreValue
   data EvolvingStoreValue (A : Type) (Σ : StoreTyping) : Set where
   
     intro : ∀ {V : Σ ∣ ∅ ⊢ A}
-      → CastedValue V
+      → DelayedCast V
       → Ty A
         ----------------------
       → EvolvingStoreValue A Σ
@@ -37,14 +37,14 @@ module ParamStoreValue
   
     fromNormalValue : NormalStoreValue A Σ → StoreValue A Σ
   
-    fromCastedValue : EvolvingStoreValue A Σ → StoreValue A Σ
+    fromDelayedCast : EvolvingStoreValue A Σ → StoreValue A Σ
 
-  data StronglyEvolvingStoreValue : ∀ {Σ A} → EvolvingStoreValue A Σ → Set where
+  data ReduciblelyEvolvingStoreValue : ∀ {Σ A} → EvolvingStoreValue A Σ → Set where
   
-    intro : ∀ {Σ A} {e : Σ ∣ ∅ ⊢ A} {cv : CastedValue e}
-      → StrongCastedValue cv → (A' : Ty A)
+    intro : ∀ {Σ A} {e : Σ ∣ ∅ ⊢ A} {cv : DelayedCast e}
+      → ReducibleDelayedCast cv → (A' : Ty A)
         ----------------------------------------
-      → StronglyEvolvingStoreValue (intro cv A')
+      → ReduciblelyEvolvingStoreValue (intro cv A')
 
   toNormalStoreValue : ∀ {Σ A} {v : Σ ∣ ∅ ⊢ A} → Value v → NormalStoreValue A Σ
   toNormalStoreValue v = intro v (Type⇑ _)

@@ -33,8 +33,8 @@ open import MonoRef.Static.Types.Relations
 module ParamStore
   (SimpleValue : ∀ {Σ Γ A} → Σ ∣ Γ ⊢ A → Set)
   (Value : ∀ {Σ Γ A} → Σ ∣ Γ ⊢ A → Set)
-  (CastedValue       : ∀ {Σ Γ A} → Σ ∣ Γ ⊢ A → Set)
-  (StrongCastedValue : ∀ {Σ Γ A} {e : Σ ∣ Γ ⊢ A} → CastedValue e → Set)
+  (DelayedCast       : ∀ {Σ Γ A} → Σ ∣ Γ ⊢ A → Set)
+  (ReducibleDelayedCast : ∀ {Σ Γ A} {e : Σ ∣ Γ ⊢ A} → DelayedCast e → Set)
 
   {- These utilities depend on the definition of Value -}
   (ref⟹T : ∀ {Σ Γ A} {v : Σ ∣ Γ ⊢ Ref A} → (V : SimpleValue v) → Type)
@@ -42,7 +42,7 @@ module ParamStore
   (ref⟹⊑ : ∀ {Σ Γ A} {v : Σ ∣ Γ ⊢ Ref A} → (V : SimpleValue v) → ref⟹T V ⊑ A)
   where
 
-  open ParamStoreValue Value CastedValue StrongCastedValue
+  open ParamStoreValue Value DelayedCast ReducibleDelayedCast
   open ParamStoreDef StoreValue
 
   ref-static-type : ∀ {Σ Γ A} {r : Σ ∣ Γ ⊢ Ref A}
@@ -58,7 +58,7 @@ module ParamStore
   store-lookup-v : ∀ {Σ A} → A ∈ Σ → Store Σ → Σ ∣ ∅ ⊢ A
   store-lookup-v A∈Σ ν with lookup-store A∈Σ ν
   ... | fromNormalValue (intro {V = V} _ _) = V
-  ... | fromCastedValue (intro {V = V} _ _) = V
+  ... | fromDelayedCast (intro {V = V} _ _) = V
 
   store-lookup-v/ref : ∀ {Σ Γ A} {r : Σ ∣ Γ ⊢ Ref A}
     → (R : SimpleValue r) → Store Σ → Σ ∣ ∅ ⊢ ref⟹T R
@@ -67,7 +67,7 @@ module ParamStore
   store-lookup-rtti : ∀ {Σ A} → A ∈ Σ → Store Σ → Type
   store-lookup-rtti A∈Σ ν with lookup-store A∈Σ ν
   ... | fromNormalValue (intro _ ty) = Ty⇓ ty
-  ... | fromCastedValue (intro _ ty) = Ty⇓ ty
+  ... | fromDelayedCast (intro _ ty) = Ty⇓ ty
 
   store-lookup-rtti/ref : ∀ {Σ Γ T} {r : Σ ∣ Γ ⊢ Ref T}
     → (R : SimpleValue r) → Store Σ → Type
@@ -96,9 +96,9 @@ module ParamStore
        helper r x rewrite ref-static-type r x = refl
 
   update-evolvingstore : ∀ {Σ t} → t ∈ Σ → EvolvingStoreValue t Σ → Store Σ → Store Σ
-  update-evolvingstore ptr v μ = μ All[ ptr ]≔' fromCastedValue v
+  update-evolvingstore ptr v μ = μ All[ ptr ]≔' fromDelayedCast v
 
-  toEvolvingStoreValue : ∀ {Σ A} {v : Σ ∣ ∅ ⊢ A} → CastedValue v → EvolvingStoreValue A Σ
+  toEvolvingStoreValue : ∀ {Σ A} {v : Σ ∣ ∅ ⊢ A} → DelayedCast v → EvolvingStoreValue A Σ
   toEvolvingStoreValue {A = A} v = intro v (Type⇑ A)
 
   μ-update : ∀ {Σ A}
@@ -113,7 +113,7 @@ module ParamStore
     → A ∈ Σ
     → Store Σ
     → ∀ {e : Σ ∣ ∅ ⊢ A}
-    → CastedValue e
+    → DelayedCast e
     → Store Σ
   ν-update A∈Σ ν v = update-evolvingstore A∈Σ (toEvolvingStoreValue v) ν
 
@@ -123,7 +123,7 @@ module ParamStore
     → (store-lookup-rtti A∈Σ ν) ≡ A
   mem-rtti-preserves-Σ A∈Σ ν with lookup-store A∈Σ ν
   ... | fromNormalValue (intro _ _) = refl
-  ... | fromCastedValue (intro _ _) = refl
+  ... | fromDelayedCast (intro _ _) = refl
 
   ref-rtti-preserves-Σ : ∀ {Σ Γ A} {r : Σ ∣ Γ ⊢ Ref A}
     → (R : SimpleValue r)

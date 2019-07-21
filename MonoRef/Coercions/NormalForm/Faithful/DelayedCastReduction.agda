@@ -1,4 +1,4 @@
-module MonoRef.Coercions.NormalForm.Faithful.CastedValueReduction where
+module MonoRef.Coercions.NormalForm.Faithful.DelayedCastReduction where
 
 open import MonoRef.Coercions.NormalForm.Faithful.Compose
 open import MonoRef.Coercions.NormalForm.Faithful.Syntax

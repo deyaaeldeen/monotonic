@@ -1,4 +1,4 @@
-module MonoRef.Dynamics.Efficient.Faithful.CastedValueProgress where
+module MonoRef.Dynamics.Efficient.Faithful.ReducibleDelayedCastProgress where
 
 open import Data.Product renaming (_,_ to ⟨_,_⟩)
 open import Data.Sum using (inj₁ ; inj₂)
@@ -10,15 +10,15 @@ open import MonoRef.Dynamics.Efficient.Faithful.TargetWithoutBlame
 open import MonoRef.Dynamics.Efficient.Faithful.ActiveCastProgress
 
 
-data StrongCastedValueProgress {Γ Σ A} (M : Σ ∣ Γ ⊢ A) (ν : Store Σ) : Set where
+data ReducibleDelayedCastProgress {Γ Σ A} (M : Σ ∣ Γ ⊢ A) (ν : Store Σ) : Set where
 
   step : ∀ {Σ'} {ν' : Store Σ'} {N : Σ' ∣ Γ ⊢ A}
     → M , ν ⟶ᵤᵣ N , ν'
       -----------------------------
-    → StrongCastedValueProgress M ν
+    → ReducibleDelayedCastProgress M ν
 
-⟶ᵤᵣprogress-scv : ∀ {Γ Σ A} {e : Σ ∣ Γ ⊢ A} {cv : CastedValue e}
-  → StrongCastedValue cv → (ν : Store Σ) → StrongCastedValueProgress e ν
+⟶ᵤᵣprogress-scv : ∀ {Γ Σ A} {e : Σ ∣ Γ ⊢ A} {cv : DelayedCast e}
+  → ReducibleDelayedCast cv → (ν : Store Σ) → ReducibleDelayedCastProgress e ν
 ⟶ᵤᵣprogress-scv (SCV-cast v ac) ν
   with ⟶ᵤᵣprogress-active/sv v ac ν
 ... | step-pure R = step (pure R)

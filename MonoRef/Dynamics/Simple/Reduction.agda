@@ -47,22 +47,22 @@ open import MonoRef.Static.Types.Relations
 
 module ParamReduction
   (Value             : ∀ {Σ Γ A} → Σ ∣ Γ ⊢ A → Set)
-  (CastedValue       : ∀ {Σ Γ A} → Σ ∣ Γ ⊢ A → Set)
-  (StrongCastedValue : ∀ {Σ Γ A} {e : Σ ∣ Γ ⊢ A} → CastedValue e → Set)
+  (DelayedCast       : ∀ {Σ Γ A} → Σ ∣ Γ ⊢ A → Set)
+  (ReducibleDelayedCast : ∀ {Σ Γ A} {e : Σ ∣ Γ ⊢ A} → DelayedCast e → Set)
   (ref⟹T : ∀ {Σ Γ A} {v : Σ ∣ Γ ⊢ Ref A} → (V : Value v) → Type)
   (ref⟹∈ : ∀ {Σ Γ A} {v : Σ ∣ Γ ⊢ Ref A} → (V : Value v) → ref⟹T V ∈ Σ)
   (ref⟹⊑ : ∀ {Σ Γ A} {v : Σ ∣ Γ ⊢ Ref A} → (V : Value v) → ref⟹T V ⊑ A)
   where
 
-  open ParamStoreValue Value CastedValue StrongCastedValue
+  open ParamStoreValue Value DelayedCast ReducibleDelayedCast
   open ParamStoreDef StoreValue
-  open ParamStore Value Value CastedValue StrongCastedValue ref⟹T ref⟹∈ ref⟹⊑
+  open ParamStore Value Value DelayedCast ReducibleDelayedCast ref⟹T ref⟹∈ ref⟹⊑
   open ParamPureReduction Value Value public
   open ParamMonoCastReduction
-    Value Value CastedValue StrongCastedValue ref⟹T ref⟹∈ ref⟹⊑
+    Value Value DelayedCast ReducibleDelayedCast ref⟹T ref⟹∈ ref⟹⊑
   open ParamMonoReduction
-    Value Value CastedValue StrongCastedValue ref⟹T ref⟹∈ ref⟹⊑ public
-  open ParamNormal Value CastedValue StrongCastedValue
+    Value Value DelayedCast ReducibleDelayedCast ref⟹T ref⟹∈ ref⟹⊑ public
+  open ParamNormal Value DelayedCast ReducibleDelayedCast
 
   module ParamReduction/ν-cast/ν-update/ref/store/⟶ᵤ
     (ν-cast : ∀ {Σ T t'}
@@ -220,33 +220,33 @@ module ParamReduction
           --------------------
         → M , ν ⟶ₛ error , ν'
 
-      hcast : ∀ {T} {e e' : Σ ∣ ∅ ⊢ T} {cv : CastedValue e}
+      hcast : ∀ {T} {e e' : Σ ∣ ∅ ⊢ T} {cv : DelayedCast e}
         → ¬ NormalStore ν
         → (T∈Σ : T ∈ Σ)
-        → (scv : StrongCastedValue cv)
+        → (scv : ReducibleDelayedCast cv)
         → (red : e , ν ⟶ᵤᵣ e' , ν)
-        → (cv' : CastedValue e')
+        → (cv' : DelayedCast e')
           --------------------------------
         → M , ν ⟶ₛ M , ν-update T∈Σ ν cv'
 
-      hmcast : ∀ {T A B} {e : Σ ∣ ∅ ⊢ T} {cv : CastedValue e}
+      hmcast : ∀ {T A B} {e : Σ ∣ ∅ ⊢ T} {cv : DelayedCast e}
         → ¬ NormalStore ν
         → (T∈Σ : T ∈ Σ)
-        → (scv : StrongCastedValue cv)
+        → (scv : ReducibleDelayedCast cv)
         → (A∈Σ : A ∈ Σ)
         → (T∈Σ≢A∈Σ : PtrInEquality T∈Σ A∈Σ)
         → (B⊑A : B ⊑ store-lookup-rtti A∈Σ ν)
         → {e' : Σ-cast A∈Σ B ∣ ∅ ⊢ T}
         → (red : e , ν ⟶ᵤᵣ e' , ν-cast A∈Σ ν B⊑A)
-        → (cv' : CastedValue e')
+        → (cv' : DelayedCast e')
           --------------------------------------------------------------------------------------------------------------
         →    M                                           , ν
         ⟶ₛ typeprecise-strenthen-expr (⟶ᵤᵣ⟹⊑ₕ red) M , ν-update (weaken-ptr T∈Σ B A∈Σ T∈Σ≢A∈Σ) (ν-cast A∈Σ ν B⊑A) cv'
 
-      hdrop : ∀ {T T'} {e : Σ ∣ ∅ ⊢ T} {cv : CastedValue e}
+      hdrop : ∀ {T T'} {e : Σ ∣ ∅ ⊢ T} {cv : DelayedCast e}
         → ¬ NormalStore ν
         → (T∈Σ : T ∈ Σ)
-        → (scv : StrongCastedValue cv)
+        → (scv : ReducibleDelayedCast cv)
         → {e' : Σ-cast T∈Σ T' ∣ ∅ ⊢ T}
         → (T'⊑T : T' ⊑ store-lookup-rtti T∈Σ ν)
         → T' ≢ store-lookup-rtti T∈Σ ν

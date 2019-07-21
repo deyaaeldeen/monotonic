@@ -5,7 +5,7 @@ open import Data.Sum using (inj₁ ; inj₂)
 open import Relation.Nullary using (¬_)
 
 open import MonoRef.Dynamics.Simple.ActiveCastProgress
-open import MonoRef.Dynamics.Simple.CastedValueProgress
+open import MonoRef.Dynamics.Simple.ReducibleDelayedCastProgress
 open import MonoRef.Dynamics.Simple.MonoStoreProgress
 open import MonoRef.Dynamics.Simple.ProgressDef
 open import MonoRef.Dynamics.Simple.Properties

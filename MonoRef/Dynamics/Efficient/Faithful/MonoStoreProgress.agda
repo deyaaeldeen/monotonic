@@ -6,5 +6,5 @@ open import MonoRef.Dynamics.Efficient.Faithful.Value
 open import MonoRef.Dynamics.MonoStoreProgress
   _⟹_ Inert
 
-open ParamMonoStoreProgress SimpleValue Value CastedValue StrongCastedValue ref⟹T ref⟹∈ ref⟹⊑
+open ParamMonoStoreProgress SimpleValue Value DelayedCast ReducibleDelayedCast ref⟹T ref⟹∈ ref⟹⊑
 open ParamMonoStoreProgress/ν-cast ν-cast public

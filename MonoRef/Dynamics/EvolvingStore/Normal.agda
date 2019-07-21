@@ -26,11 +26,11 @@ open import MonoRef.Static.Context
 
 module ParamNormal
   (Value             : ∀ {Σ Γ A} → Σ ∣ Γ ⊢ A → Set)
-  (CastedValue       : ∀ {Σ Γ A} → Σ ∣ Γ ⊢ A → Set)
-  (StrongCastedValue : ∀ {Σ Γ A} {e : Σ ∣ Γ ⊢ A} → CastedValue e → Set)
+  (DelayedCast       : ∀ {Σ Γ A} → Σ ∣ Γ ⊢ A → Set)
+  (ReducibleDelayedCast : ∀ {Σ Γ A} {e : Σ ∣ Γ ⊢ A} → DelayedCast e → Set)
   where
 
-  open ParamStoreValue Value CastedValue StrongCastedValue
+  open ParamStoreValue Value DelayedCast ReducibleDelayedCast
   open ParamStoreDef StoreValue
 
   {- an evidence that a store does not contain any casted values i.e. a normal
@@ -45,14 +45,14 @@ module ParamNormal
       → (V : Value v)
       → NormalStore (fromNormalValue (intro V t) All.∷ ν)
   
-    NS-S' : ∀ {Σ' A} {ν : StoreUnder Σ Σ'} {cv : Σ ∣ ∅ ⊢ A} {CV : CastedValue cv} {t : Ty A}
+    NS-S' : ∀ {Σ' A} {ν : StoreUnder Σ Σ'} {cv : Σ ∣ ∅ ⊢ A} {CV : DelayedCast cv} {t : Ty A}
       → NormalStore ν
-      → ¬ StrongCastedValue CV
-      → NormalStore (fromCastedValue (intro CV t) All.∷ ν)
+      → ¬ ReducibleDelayedCast CV
+      → NormalStore (fromDelayedCast (intro CV t) All.∷ ν)
 
   module ParamNormalDecidable
     (scv-decidable : ∀ {Σ A} {e : Σ ∣ ∅ ⊢ A}
-      → (cv : CastedValue e) → Dec (StrongCastedValue cv))
+      → (cv : DelayedCast e) → Dec (ReducibleDelayedCast cv))
     where
 
     normalStoreP : ∀ {Σ Σ'} → (ν : StoreUnder Σ Σ') → Dec (NormalStore ν)
@@ -60,7 +60,7 @@ module ParamNormal
     normalStoreP (px All.∷ ν)
       with normalStoreP ν
     normalStoreP (fromNormalValue (intro x _) All.∷ _) | yes p = yes (NS-S p x)
-    normalStoreP (fromCastedValue (intro cv _) All.∷ _) | yes p
+    normalStoreP (fromDelayedCast (intro cv _) All.∷ _) | yes p
       with scv-decidable cv
     ... | yes SCV = no (λ { (NS-S' x ¬SCV) → ¬SCV SCV})
     ... | no ¬SCV = yes (NS-S' p ¬SCV)

@@ -1,4 +1,4 @@
-module MonoRef.Dynamics.Simple.CastedValueProgress where
+module MonoRef.Dynamics.Simple.ReducibleDelayedCastProgress where
 
 open import Data.Empty using (⊥-elim)
 open import Data.Product renaming (_,_ to ⟨_,_⟩)
@@ -13,8 +13,8 @@ open import MonoRef.Dynamics.Simple.Store
 open import MonoRef.Dynamics.Simple.TargetWithoutBlame
 
 
-⟶ᵤᵣprogress-scv : ∀ {Γ Σ A} {e : Σ ∣ Γ ⊢ A} {cv : CastedValue e}
-  → StrongCastedValue cv → (ν : Store Σ) → ActiveCastProgress e ν
+⟶ᵤᵣprogress-scv : ∀ {Γ Σ A} {e : Σ ∣ Γ ⊢ A} {cv : DelayedCast e}
+  → ReducibleDelayedCast cv → (ν : Store Σ) → ActiveCastProgress e ν
 ⟶ᵤᵣprogress-scv (SCV-cast v ac) ν = ⟶ᵤᵣprogress-active v ac ν
 ⟶ᵤᵣprogress-scv (SCV-ccast cv scv c) ν
   with ⟶ᵤᵣprogress-scv scv ν

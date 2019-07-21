@@ -4,7 +4,7 @@ open import Data.Product renaming (_,_ to ⟨_,_⟩)
 open import Data.Sum using (inj₁ ; inj₂)
 open import Relation.Nullary using (¬_)
 
-open import MonoRef.Dynamics.Efficient.Faithful.CastedValueProgress
+open import MonoRef.Dynamics.Efficient.Faithful.ReducibleDelayedCastProgress
 open import MonoRef.Dynamics.Efficient.Faithful.MonoStoreProgress
 open import MonoRef.Dynamics.Efficient.Faithful.ProgressDef
 open import MonoRef.Dynamics.Efficient.Faithful.Properties
