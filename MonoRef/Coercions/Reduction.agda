@@ -3,7 +3,7 @@ module MonoRef.Coercions.Reduction where
 open import Relation.Nullary using (¬_)
 
 open import MonoRef.Coercions.Syntax
-open import MonoRef.Dynamics.Simple.Value
+open import MonoRef.Dynamics.Simple.Common.Value
   _⟹_ Inert
 open import MonoRef.Language.TargetWithoutBlame
   _⟹_ Inert
@@ -16,12 +16,12 @@ data _⟶ᵤ_ {Γ Σ} : ∀ {A} → Σ ∣ Γ ⊢ A → Σ ∣ Γ ⊢ A → Set 
 
   ι : ∀ {A} {V : Σ ∣ Γ ⊢ A} → Value V
       ------------------------------
-    → V < ι > ⟶ᵤ V
+    → V < ι A > ⟶ᵤ V
 
   !? : ∀ {A B} {V : Σ ∣ Γ ⊢ A} {iA : Injectable A} {iB : Injectable B}
     → Value V
-      ---------------------------------------------------
-    → V < inj iA > < prj iB > ⟶ᵤ V < make-coercion A B >
+      -----------------------------------------------------------------------------------------------
+    → V < inj iA > < prj iB > ⟶ᵤ V < make-coercion (injectable-to-type iA) (injectable-to-type iB) >
 
   `× : ∀ {A B A' B'} {V₁ : Σ ∣ Γ ⊢ A} {V₂ : Σ ∣ Γ ⊢ B}
          {c₁ : A ⟹ A'} {c₂ : B ⟹ B'}
@@ -32,4 +32,4 @@ data _⟶ᵤ_ {Γ Σ} : ∀ {A} → Σ ∣ Γ ⊢ A → Σ ∣ Γ ⊢ A → Set 
   `⊥ : ∀ {A B} {V : Σ ∣ Γ ⊢ A}
     → Value V → (A≁B : ¬ A ∼ B)
       --------------------------
-    → V < `⊥ A≁B > ⟶ᵤ error
+    → V < `⊥ A B A≁B > ⟶ᵤ error

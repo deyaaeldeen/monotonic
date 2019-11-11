@@ -6,8 +6,9 @@ module MonoRef.Compilation.CastInsertion
   (make-coercion : (A B : Type) → A ⟹ B)
   where
 
-open import MonoRef.Language.Surface
-open import MonoRef.Language.TargetWithoutBlame _⟹_ Inert
+open import MonoRef.Language.Surface renaming (!_ to !)
+open import MonoRef.Language.TargetWithoutBlame
+  _⟹_ Inert
 open import MonoRef.Static.Context
 open import MonoRef.Static.Types.Relations
 
@@ -67,7 +68,7 @@ data _∣_⊢_⦂_↪_ : (Σ : StoreTyping) → (Γ : Context) → (T : Type)
     → Σ ∣ Γ ⊢ A ⦂ sz ↪ tz
     → Σ ∣ Γ , `ℕ ⊢ A ⦂ ss ↪ ts
       ----------------------------------------------------------
-    → Σ ∣ Γ ⊢ A ⦂ case sn ∼-⋆L sz ss ↪ case (tn < prj >) tz ts
+    → Σ ∣ Γ ⊢ A ⦂ case sn (∼-⋆L I-ℕ) sz ss ↪ case (tn < prj >) tz ts
 
   ref_ : ∀ {Γ Σ A} {s t}
     → Σ ∣ Γ ⊢ A ⦂ s ↪ t
@@ -78,17 +79,17 @@ data _∣_⊢_⦂_↪_ : (Σ : StoreTyping) → (Γ : Context) → (T : Type)
     → Σ ∣ Γ ⊢ Ref A ⦂ s ↪ t
     → (p : static A)
       -------------------------
-    → Σ ∣ Γ ⊢ A ⦂ ! s ↪ (!ₛ t) p
+    → Σ ∣ Γ ⊢ A ⦂ (! s) ↪ ((!ₛ t) p)
 
-  !_ : ∀ {Γ Σ A} {s t}
+  ! : ∀ {Γ Σ A} {s t}
     → Σ ∣ Γ ⊢ Ref A ⦂ s ↪ t
       --------------------
-    → Σ ∣ Γ ⊢ A ⦂ ! s ↪ ! t
+    → Σ ∣ Γ ⊢ A ⦂ (! s) ↪ (! A t)
 
   !ᵤ_ : ∀ {Γ Σ} {s t} {prj : ⋆ ⟹ (Ref ⋆)}
     → Σ ∣ Γ ⊢ ⋆ ⦂ s ↪ t
       --------------------------------------
-    → Σ ∣ Γ ⊢ ⋆ ⦂ !ᵤ s ↪ ! (t < prj >)
+    → Σ ∣ Γ ⊢ ⋆ ⦂ (!ᵤ s) ↪ (! ⋆ (t < prj >))
 
   _:=ₛ_ : ∀ {Γ Σ A A'} {sr tr sv tv}
     → Σ ∣ Γ ⊢ Ref A ⦂ sr ↪ tr
@@ -96,21 +97,21 @@ data _∣_⊢_⦂_↪_ : (Σ : StoreTyping) → (Γ : Context) → (T : Type)
     → (x : A ∼ A')
     → (y : static A)
       -------------------------------------------------------------
-    → Σ ∣ Γ ⊢ Unit ⦂ (sr := sv) x ↪ (tr :=ₛ (tv < make-coercion A' A >)) y
+    → Σ ∣ Γ ⊢ Unit ⦂ ((_:=_ sr sv) x) ↪ (tr :=ₛ (tv < make-coercion A' A >)) y
 
   _:=_ : ∀ {Γ Σ A A'} {sr tr sv tv}
     → Σ ∣ Γ ⊢ Ref A ⦂ sr ↪ tr
     → Σ ∣ Γ ⊢ A' ⦂ sv ↪ tv
     → (p : A ∼ A')
       -------------------------------------------------------
-    → Σ ∣ Γ ⊢ Unit ⦂ (sr := sv) p ↪ tr := (tv < make-coercion A' A >)
+    → Σ ∣ Γ ⊢ Unit ⦂ ((_:=_ sr sv) p) ↪ (:= A tr (tv < make-coercion A' A >))
 
   _:=ᵤ_ : ∀ {Γ Σ A} {sr tr sv tv} {prj : ⋆ ⟹ (Ref ⋆)} {inj : A ⟹ ⋆}
     → (A≢⋆ : Injectable A)
     → Σ ∣ Γ ⊢ ⋆ ⦂ sr ↪ tr
     → Σ ∣ Γ ⊢ A ⦂ sv ↪ tv
       -------------------------------------------------------------
-    → Σ ∣ Γ ⊢ Unit ⦂ sr :=ᵤ sv ↪ (tr < prj >) := (tv < inj >)
+    → Σ ∣ Γ ⊢ Unit ⦂ sr :=ᵤ sv ↪ := ⋆ (tr < prj >) (tv < inj >)
 
   _`×_ : ∀ {Γ Σ A B} {sl sr tl tr}
     → Σ ∣ Γ ⊢ A ⦂ sl ↪ tl

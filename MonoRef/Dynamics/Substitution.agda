@@ -33,8 +33,8 @@ rename ρ (π₂ x)          = π₂ rename ρ x
 rename ρ (addr x p)      = addr x p
 rename ρ ((!ₛ x) x₁)     = (!ₛ rename ρ x) x₁
 rename ρ ((x :=ₛ x₁) x₂) = (rename ρ x :=ₛ rename ρ x₁) x₂
-rename ρ (! x)           = ! rename ρ x
-rename ρ (x := x₁)       = rename ρ x := rename ρ x₁
+rename ρ (! A x)         = ! A (rename ρ x)
+rename ρ (:= A x x₁)     = := A (rename ρ x) (rename ρ x₁)
 rename ρ unit            = unit
 rename ρ (x < x₁ >)      = rename ρ x < x₁ >
 rename ρ error           = error
@@ -63,8 +63,8 @@ subst σ (π₂ x)          = π₂ subst σ x
 subst σ (addr x p)      = addr x p
 subst σ ((!ₛ x) x₁)     = (!ₛ subst σ x) x₁
 subst σ ((x :=ₛ x₁) x₂) = (subst σ x :=ₛ subst σ x₁) x₂
-subst σ (! x)           = ! subst σ x
-subst σ (x := x₁)       = subst σ x := subst σ x₁
+subst σ (! A x)         = ! A (subst σ x)
+subst σ (:= A x x₁)     = := A (subst σ x) (subst σ x₁)
 subst σ unit            = unit
 subst σ (x < x₁ >)      = subst σ x < x₁ >
 subst σ error           = error

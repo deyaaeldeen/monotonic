@@ -3,6 +3,7 @@ module MonoRef.Static.Types where
 infixr 6 _⇒_
 infixr 6 Ty⇓
 
+
 data Type : Set where
   _⇒_  : Type → Type → Type
   Ref  : Type        → Type

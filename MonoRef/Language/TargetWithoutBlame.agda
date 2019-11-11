@@ -12,6 +12,7 @@ open import MonoRef.Static.Context
 
 
 infix  4 _∣_⊢_
+infix  5 !
 
 data _∣_⊢_ (Σ : StoreTyping) : Context → Type → Set where
 
@@ -87,12 +88,14 @@ data _∣_⊢_ (Σ : StoreTyping) : Context → Type → Set where
       -----------
     → Σ ∣ Γ ⊢ Unit
 
-  !_ : ∀ {Γ A}
+  ! : ∀ {Γ}
+    → (A : Type)
     → Σ ∣ Γ ⊢ Ref A
       -------------
     → Σ ∣ Γ ⊢ A
 
-  _:=_ : ∀ {Γ A}
+  := : ∀ {Γ}
+    → (A : Type)
     → Σ ∣ Γ ⊢ Ref A
     → Σ ∣ Γ ⊢ A
       -----------
