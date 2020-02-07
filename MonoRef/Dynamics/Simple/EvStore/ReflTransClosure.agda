@@ -1,6 +1,6 @@
 module MonoRef.Dynamics.Simple.EvStore.ReflTransClosure where
 
-open import MonoRef.Coercions.Syntax
+open import MonoRef.Coercions.Plain.Syntax
 open import MonoRef.Dynamics.Reduction.EvolvingStore.ReflTransClosure
   _⟹_ Inert
 open import MonoRef.Dynamics.Simple.EvStore.SReduction

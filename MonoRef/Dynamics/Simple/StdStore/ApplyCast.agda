@@ -20,7 +20,7 @@ open import MonoRef.Static.Types.Relations
 
 apply-cast : ∀ {A B Σ}
   → (Q : List (SuspendedCast Σ)) → ∀ {e : proj₁ (merge Q) ∣ ∅ ⊢ A} → (v : Value e) → A ⟹ B → CastResult Q B
-apply-cast Q v (ι A) rewrite cong (merge' ⊑ₕ-refl) (sym (++-identityʳ Q)) = done [] v
+apply-cast Q v ι rewrite cong (merge' ⊑ₕ-refl) (sym (++-identityʳ Q)) = done [] v
 apply-cast Q (V-cast v (I-inj iA)) (prj iB) =
   apply-cast Q v (make-coercion (injectable-to-type iA) (injectable-to-type iB))
 apply-cast Q v (inj x) rewrite cong (merge' ⊑ₕ-refl) (sym (++-identityʳ Q)) =
@@ -48,4 +48,4 @@ apply-cast Q (V-addr {A} A∈Σ A⊑B) (Ref _ B)
 ... | yes A∼B =
   done [ cast (proj₂ (weaken-ptr/⊑ₕ (proj₂ (merge Q)) A∈Σ)) B ]
        (V-addr (merge-extension-soundness Q A∈Σ A∼B) (⊓⟹⊑ᵣ A∼B))
-apply-cast _ _ (`⊥ _ _ _) = error
+apply-cast _ _ (`⊥ _) = error

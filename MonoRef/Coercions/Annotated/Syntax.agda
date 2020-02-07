@@ -1,4 +1,4 @@
-module MonoRef.Coercions.Syntax where
+module MonoRef.Coercions.Annotated.Syntax where
 
 open import Data.Empty using (⊥ ; ⊥-elim)
 open import Data.Sum using (_⊎_ ; inj₁ ; inj₂)

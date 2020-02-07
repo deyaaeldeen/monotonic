@@ -14,6 +14,7 @@ open import MonoRef.Dynamics.Simple.StdStore.Store
 open import MonoRef.Dynamics.Simple.Frames
 open import MonoRef.Dynamics.Simple.Substitution
 open import MonoRef.Dynamics.Simple.TargetWithoutBlame
+open import MonoRef.Dynamics.Simple.Value
 open import MonoRef.Static.Context
 open import MonoRef.Static.Types
 open import MonoRef.Static.Types.Relations
