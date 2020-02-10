@@ -12,9 +12,9 @@ open import MonoRef.Static.Types.Relations
 
 
 ‖_‖ₜ : Type → ℕ
-‖ (A ⇒ B)  ‖ₜ = 3 + ‖ A ‖ₜ + ‖ B ‖ₜ
+‖ (A ⇒ B)  ‖ₜ = 1 + ‖ A ‖ₜ + ‖ B ‖ₜ
 ‖ (Ref A)  ‖ₜ = 1 + ‖ A ‖ₜ
-‖ (A `× B) ‖ₜ = 3 + ‖ A ‖ₜ + ‖ B ‖ₜ
+‖ (A `× B) ‖ₜ = 1 + ‖ A ‖ₜ + ‖ B ‖ₜ
 ‖ `ℕ       ‖ₜ = 1
 ‖ Unit     ‖ₜ = 1
 ‖ ⋆        ‖ₜ = 1
@@ -32,10 +32,10 @@ open import MonoRef.Static.Types.Relations
 ‖ (Ref t _)  ‖ₘ = 1 + ‖ t ‖ₜ
 ‖ fail       ‖ₘ = 1
 
-‖ (injSeq B g) ‖ᶠ = 3 + (2 * ‖ B ‖ᵢₜ) + ‖ g ‖ₘ
+‖ (injSeq B g) ‖ᶠ = 1 + (2 * ‖ B ‖ᵢₜ) + ‖ g ‖ₘ
 ‖ (middle g)   ‖ᶠ = 1 + ‖ g ‖ₘ
 
-‖ (prjSeq A i) ‖ = 3 + (2 * ‖ A ‖ᵢₜ) + ‖ i ‖ᶠ
+‖ (prjSeq A i) ‖ = 1 + (2 * ‖ A ‖ᵢₜ) + ‖ i ‖ᶠ
 ‖ (final i)    ‖ = 1 + ‖ i ‖ᶠ
 
 
@@ -59,15 +59,3 @@ size-mcoercion≢0 fail       = λ ()
   → ‖ nc ‖ + ‖ nd ‖ ≤ 0 → ⊥
 ¬size-two-nfcoercions≤0 c _ m =
   contradiction (i+j≡0⇒i≡0 (‖ c ‖) (n≤0⇒n≡0 m)) (size-nfcoercion≢0 c)
-
-¬size-two-nf&fcoercions≤0 : ∀{A B C}
-  → (fc : FinalCoercion A B) → (nd : NormalFormCoercion B C)
-  → ‖ fc ‖ᶠ + ‖ nd ‖ ≤ 0 → ⊥
-¬size-two-nf&fcoercions≤0 c _ m =
-  contradiction (i+j≡0⇒i≡0 (‖ c ‖ᶠ) (n≤0⇒n≡0 m)) (size-fcoercion≢0 c)
-
-¬size-two-mcoercions≤0 : ∀{A B C}
-  → (mc : MiddleCoercion A B) → (md : MiddleCoercion B C)
-  → ‖ mc ‖ₘ + ‖ md ‖ₘ ≤ 0 → ⊥
-¬size-two-mcoercions≤0 c _ m =
-  contradiction (i+j≡0⇒i≡0 (‖ c ‖ₘ) (n≤0⇒n≡0 m)) (size-mcoercion≢0 c)

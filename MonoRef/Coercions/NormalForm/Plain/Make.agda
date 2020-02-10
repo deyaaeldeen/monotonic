@@ -29,10 +29,9 @@ make-normal-form-coercion (A ⇒ B) (A' ⇒ B') | yes ⌣-⇒
 ...   | c | d = final (middle (fun c d))
 make-normal-form-coercion .(Ref _) (Ref B) | yes ⌣-ref = final (middle (Ref B ⊑-reflexive))
 
-make-middle-coercion : ∀ {A B}
-  → Injectable A → Injectable B → MiddleCoercion A B
+make-middle-coercion : ∀ {A B} → Injectable A → Injectable B → MiddleCoercion A B
 make-middle-coercion A B with ⌣-decidableᵢ A B
-make-middle-coercion {A} {B} _ _ | no _ = fail
+make-middle-coercion _ _ | no _ = fail
 ... | yes ⌣-ℕ-refl    = id
 ... | yes ⌣-Unit-refl = id
 make-middle-coercion {A ⇒ B} {A' ⇒ B'} _ _ | yes ⌣-⇒
@@ -44,9 +43,3 @@ make-middle-coercion {A `× B} {A' `× B'} _ _ | yes ⌣-×
 make-middle-coercion {Ref _} {Ref B} _ _ | yes ⌣-ref = Ref B ⊑-reflexive
 make-middle-coercion () _ | yes ⌣-⋆L
 make-middle-coercion _ () | yes ⌣-⋆R
-
--- TODO: rewrite compose in terms of make-middle-coercion and delete
--- make-final-coercion
-make-final-coercion : ∀ {A B}
-  → Injectable A → Injectable B → FinalCoercion A B
-make-final-coercion A B = middle (make-middle-coercion A B)
