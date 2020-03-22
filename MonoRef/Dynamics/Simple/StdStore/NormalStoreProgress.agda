@@ -53,11 +53,11 @@ progress-normal-store (case p z s) ν with progress-normal-store p ν
 ... | done (V-suc v) = step (β-pure (β-suc v))
 ... | done (V-cast _ ())
 
-progress-normal-store (ref e) ν with progress-normal-store e ν
-... | step e⟶e' = step (ξ ξ-ref e⟶e')
-progress-normal-store {Σ = Σ} {A = Ref A} (ref e) ν | done v =
+progress-normal-store (ref A e) ν with progress-normal-store e ν
+... | step e⟶e' = step (ξ (ξ-ref A) e⟶e')
+progress-normal-store {Σ = Σ} {A = Ref A} (ref A e) ν | done v =
   step (β-mono (β-ref v))
-... | error E-error = step (ξ-error ξ-ref)
+... | error E-error = step (ξ-error (ξ-ref A))
 
 progress-normal-store (e₁ `× e₂) ν with progress-normal-store e₁ ν
 ... | step e⟶e' = step (ξ (ξ-×ₗ e₂) e⟶e')

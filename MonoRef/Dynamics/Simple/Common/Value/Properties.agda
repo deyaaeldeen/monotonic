@@ -27,7 +27,7 @@ valueP (`suc e)
 ... | yes p = yes (V-suc p)
 ... | no ¬p = no (λ { (V-suc x) → ¬p x})
 valueP (case e e₁ e₂) = no (λ ())
-valueP (ref e) = no (λ ())
+valueP (ref _ e) = no (λ ())
 valueP (e₁ `× e₂)
   with valueP e₁ | valueP e₂
 ... | yes p | yes p₁ = yes (V-pair p p₁)

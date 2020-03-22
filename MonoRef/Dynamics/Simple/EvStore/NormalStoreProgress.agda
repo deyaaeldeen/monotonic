@@ -57,13 +57,13 @@ progress-normal-store (case p z s) ν μ-evd with progress-normal-store p ν μ-
 ... | done (V-suc v) = step (prog-reduce μ-evd (β-pure (β-suc v)))
 ... | done (V-cast _ ())
 
-progress-normal-store (ref e) ν μ-evd with progress-normal-store e ν μ-evd
-... | step (prog-reduce x e⟶e')   = step (prog-reduce x (cong ξ-ref e⟶e'))
-... | step (cast-reduce e⟶e')     = step (cast-reduce (cong ξ-ref e⟶e'))
+progress-normal-store (ref A e) ν μ-evd with progress-normal-store e ν μ-evd
+... | step (prog-reduce x e⟶e')   = step (prog-reduce x (cong (ξ-ref A) e⟶e'))
+... | step (cast-reduce e⟶e')     = step (cast-reduce (cong (ξ-ref A) e⟶e'))
 ... | step (state-reduce ¬NS _)    = ⊥-elim (¬NS μ-evd)
-progress-normal-store {Σ = Σ} {A = Ref A} (ref e) ν μ-evd | done v =
+progress-normal-store {Σ = Σ} {A = Ref A} (ref A e) ν μ-evd | done v =
   step (prog-reduce μ-evd (β-mono (β-ref v)))
-... | error E-error = step (prog-reduce μ-evd (cong-error ξ-ref))
+... | error E-error = step (prog-reduce μ-evd (cong-error (ξ-ref A)))
 
 progress-normal-store (e₁ `× e₂) ν μ-evd with progress-normal-store e₁ ν μ-evd
 ... | step (prog-reduce x e⟶e')   = step (prog-reduce x (cong (ξ-×ₗ e₂) e⟶e'))

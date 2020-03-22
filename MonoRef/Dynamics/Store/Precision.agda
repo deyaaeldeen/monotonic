@@ -196,7 +196,7 @@ typeprecise-strenthen-expr prec (case e e₁ e₂) =
   case (typeprecise-strenthen-expr prec e)
        (typeprecise-strenthen-expr prec e₁)
        (typeprecise-strenthen-expr prec e₂)
-typeprecise-strenthen-expr prec (ref e) = ref typeprecise-strenthen-expr prec e
+typeprecise-strenthen-expr prec (ref t e) = ref t (typeprecise-strenthen-expr prec e)
 typeprecise-strenthen-expr prec (e `× e₁) =
   typeprecise-strenthen-expr prec e `× typeprecise-strenthen-expr prec e₁
 typeprecise-strenthen-expr prec (π₁ e) = π₁ typeprecise-strenthen-expr prec e

@@ -48,9 +48,10 @@ data _∣_⊢_ (Σ : StoreTyping) : Context → Type → Set where
       -----------
     → Σ ∣ Γ ⊢ A
 
-  ref_ : ∀ {Γ A}
+  ref : ∀ {Γ}
+    → (A : Type)
     → Σ ∣ Γ ⊢ A
-      ------
+      -------------
     → Σ ∣ Γ ⊢ Ref A
 
   _`×_ : ∀ {Γ A B}

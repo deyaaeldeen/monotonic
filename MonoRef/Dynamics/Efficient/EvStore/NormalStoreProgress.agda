@@ -54,12 +54,12 @@ progress-normal-store (case p z s) ν μ-evd with progress-normal-store p ν μ-
 ... | done (S-Val (V-suc v)) = step-d μ-evd (β-pure (β-suc v))
 ... | done (V-cast _ (I-final (I-middle ())))
 
-progress-normal-store (ref e) ν μ-evd with progress-normal-store e ν μ-evd
-... | step-d μ-evd' e⟶e' = step-d μ-evd' (ξ ξ-ref (switch e⟶e'))
-... | step-a μ-evd' e⟶e' = step-d μ-evd' (ξ ξ-ref e⟶e')
-progress-normal-store {Σ = Σ} {A = Ref A} (ref e) ν μ-evd | done v =
+progress-normal-store (ref A e) ν μ-evd with progress-normal-store e ν μ-evd
+... | step-d μ-evd' e⟶e' = step-d μ-evd' (ξ (ξ-ref A) (switch e⟶e'))
+... | step-a μ-evd' e⟶e' = step-d μ-evd' (ξ (ξ-ref A) e⟶e')
+progress-normal-store {Σ = Σ} {A = Ref A} (ref A e) ν μ-evd | done v =
   step-d μ-evd (β-mono (β-ref v))
-... | error E-error = step-d μ-evd (ξ-error ξ-ref)
+... | error E-error = step-d μ-evd (ξ-error (ξ-ref A))
 
 progress-normal-store (e₁ `× e₂) ν μ-evd with progress-normal-store e₁ ν μ-evd
 ... | step-d μ-evd' e⟶e' = step-d μ-evd' (ξ (ξ-×ₗ e₂) (switch e⟶e'))

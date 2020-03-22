@@ -76,8 +76,8 @@ module ParamMonoReduction
 
       β-ref : ∀ {A μ μ-evd} {v : Σ ∣ ∅ ⊢ A}
         → (V : Value v)
-          -------------------------------------------------------------
-        → ref v , μ , μ-evd ⟶ᵢₘ addr (∈-∷ʳ Σ A) ⊑-reflexive , store V μ
+          ---------------------------------------------------------------
+        → ref A v , μ , μ-evd ⟶ᵢₘ addr (∈-∷ʳ Σ A) ⊑-reflexive , store V μ
 
       β-!ₛ : ∀ {A x μ μ-evd} {r : Σ ∣ ∅ ⊢ Ref A}
         → (R : SimpleValue r)

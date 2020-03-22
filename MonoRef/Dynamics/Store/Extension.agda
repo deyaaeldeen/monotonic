@@ -23,7 +23,7 @@ prefix-weaken-expr Σ⊑Σ' (case e e₁ e₂) =
   case (prefix-weaken-expr Σ⊑Σ' e)
        (prefix-weaken-expr Σ⊑Σ' e₁)
        (prefix-weaken-expr Σ⊑Σ' e₂)
-prefix-weaken-expr Σ⊑Σ' (ref e) = ref prefix-weaken-expr Σ⊑Σ' e
+prefix-weaken-expr Σ⊑Σ' (ref t e) = ref t (prefix-weaken-expr Σ⊑Σ' e)
 prefix-weaken-expr Σ⊑Σ' (e `× e₁) =
   prefix-weaken-expr Σ⊑Σ' e `× prefix-weaken-expr Σ⊑Σ' e₁
 prefix-weaken-expr Σ⊑Σ' (π₁ e) = π₁ prefix-weaken-expr Σ⊑Σ' e

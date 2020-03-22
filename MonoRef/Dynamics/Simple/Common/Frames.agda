@@ -70,7 +70,8 @@ data Frame {Γ Σ} : (A B : Type) → Set where
       ----------------
     → Frame (A `× B) B
 
-  ξ-ref : ∀ {A}
+  ξ-ref :
+      (A : Type)
       ---------------
     → Frame A (Ref A)
 
@@ -122,7 +123,7 @@ plug L (ξ-×ₗ M) = L `× M
 plug M (ξ-×ᵣ L) = L `× M
 plug M ξ-πₗ = π₁ M
 plug M ξ-πᵣ = π₂ M
-plug M ξ-ref = ref M
+plug M (ξ-ref A) = ref A M
 plug M (ξ-!ₛ x) = (!ₛ M) x
 plug M (ξ-! A) = ! A M
 plug M (ξ-:=ₛₗ x L) = (M :=ₛ L) x
@@ -140,7 +141,7 @@ prefix-weaken-frame Σ⊑ₗΣ' (ξ-×ₗ M) = ξ-×ₗ (prefix-weaken-expr Σ�
 prefix-weaken-frame Σ⊑ₗΣ' (ξ-×ᵣ M) = ξ-×ᵣ (prefix-weaken-expr Σ⊑ₗΣ' M)
 prefix-weaken-frame _ ξ-πₗ = ξ-πₗ
 prefix-weaken-frame _ ξ-πᵣ = ξ-πᵣ
-prefix-weaken-frame _ ξ-ref = ξ-ref
+prefix-weaken-frame _ (ξ-ref A) = ξ-ref A
 prefix-weaken-frame _ (ξ-!ₛ x) = ξ-!ₛ x
 prefix-weaken-frame _ (ξ-! A) = ξ-! A
 prefix-weaken-frame Σ⊑ₗΣ' (ξ-:=ₛₗ x M) = ξ-:=ₛₗ x (prefix-weaken-expr Σ⊑ₗΣ' M)
@@ -160,7 +161,7 @@ typeprecise-strenthen-frame Σ'⊑ₕΣ (ξ-×ₗ M) = ξ-×ₗ (typeprecise-str
 typeprecise-strenthen-frame Σ'⊑ₕΣ (ξ-×ᵣ M) = ξ-×ᵣ (typeprecise-strenthen-expr Σ'⊑ₕΣ M)
 typeprecise-strenthen-frame _ ξ-πₗ = ξ-πₗ
 typeprecise-strenthen-frame _ ξ-πᵣ = ξ-πᵣ
-typeprecise-strenthen-frame _ ξ-ref = ξ-ref
+typeprecise-strenthen-frame _ (ξ-ref A) = ξ-ref A
 typeprecise-strenthen-frame _ (ξ-!ₛ x) = ξ-!ₛ x
 typeprecise-strenthen-frame _ (ξ-! A) = ξ-! A
 typeprecise-strenthen-frame Σ'⊑ₕΣ (ξ-:=ₛₗ x M) = ξ-:=ₛₗ x (typeprecise-strenthen-expr Σ'⊑ₕΣ M)
