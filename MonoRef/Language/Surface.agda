@@ -57,7 +57,7 @@ data _⊢ₛ_ : Context → Type → Set where
       -----------
     → Γ ⊢ₛ B
 
-  ref_ : ∀ {Γ A}
+  ref : ∀ {Γ A}
     → Γ ⊢ₛ A
       -----------
     → Γ ⊢ₛ Ref A

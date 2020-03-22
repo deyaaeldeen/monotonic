@@ -9,6 +9,7 @@ open import Data.List using (List ; [] ; _∷ʳ_)
 open import Data.List.All using (map)
 open import Data.List.Membership.Propositional using (_∈_)
 open import Data.Product using (proj₁ ; proj₂)
+open import Relation.Nullary using (¬_)
 
 -- standard library++
 open import Data.List.Prefix using (∷ʳ-⊒) renaming (_⊑_ to _⊑ₗ_)
@@ -97,9 +98,10 @@ module ParamMonoReduction
         ⟶ᵢₘ [] , μ-static-lookup R x μ , μ
   
       β-! : ∀ {B μ} {r : Σ ∣ ∅ ⊢ Ref B}
+        → (x : ¬ static B)
         → (R : SimpleValue r)
           -----------------------------------------------------------------------
-        →   ! B r , μ
+        →   ! B x r , μ
         ⟶ᵢₘ [] , store-lookup-v (ref⟹∈ R) μ < make-coercion (ref⟹T R) B > , μ
   
       β-:=ₛ : ∀ {A x μ} {r : Σ ∣ ∅ ⊢ Ref A} {v : Σ ∣ ∅ ⊢ A}
@@ -109,11 +111,12 @@ module ParamMonoReduction
         ⟶ᵢₘ [] , unit , μ-static-update R x μ V
   
       β-:= : ∀ {B μ} {r : Σ ∣ ∅ ⊢ Ref B} {v : Σ ∣ ∅ ⊢ B}
+        → (x : ¬ static B)
         → (R : SimpleValue r)
         → (V : Value v)
         → (c : SuccessfulCast (apply-cast [] V (make-coercion B (store-lookup-rtti/ref R μ))))
           ------------------------------------------------------------------------------------
-        → := B r v , μ
+        → := B x r v , μ
         ⟶ᵢₘ proj₁ (get-val-from-successful-cast c)
         , unit
         , μ-update (ref-ν⟹∈ R μ)
@@ -121,22 +124,23 @@ module ParamMonoReduction
                    (proj₂ (proj₂ (get-val-from-successful-cast c)))
 
       β-:=/failed : ∀ {B μ} {r : Σ ∣ ∅ ⊢ Ref B} {v : Σ ∣ ∅ ⊢ B}
+        → (x : ¬ static B)
         → (R : SimpleValue r)
         → (V : Value v)
         → (c : FailedCast (apply-cast [] V (make-coercion B (store-lookup-rtti/ref R μ))))
           --------------------------------------------------------------------------------
-        → := B r v , μ ⟶ᵢₘ [] , error , μ
+        → := B x r v , μ ⟶ᵢₘ [] , error , μ
 
     ⟶ᵢₘ⟹rtti⊑Σ (β-!ₛ _) = StoreTypingProgress-refl
-    ⟶ᵢₘ⟹rtti⊑Σ (β-! _) = StoreTypingProgress-refl
+    ⟶ᵢₘ⟹rtti⊑Σ (β-! _ _) = StoreTypingProgress-refl
     ⟶ᵢₘ⟹rtti⊑Σ (β-:=ₛ _ _) = StoreTypingProgress-refl
-    ⟶ᵢₘ⟹rtti⊑Σ (β-:= _ _ _) = StoreTypingProgress-refl
-    ⟶ᵢₘ⟹rtti⊑Σ (β-:=/failed _ _ _) = StoreTypingProgress-refl
+    ⟶ᵢₘ⟹rtti⊑Σ (β-:= _ _ _ _) = StoreTypingProgress-refl
+    ⟶ᵢₘ⟹rtti⊑Σ (β-:=/failed _ _ _ _) = StoreTypingProgress-refl
     ⟶ᵢₘ⟹rtti⊑Σ {Σ} {A = Ref A} (β-ref _) = from⊑ₗ (∷ʳ-⊒ A Σ)
 
     ⟶ᵢₘ⟹Σ'⊑Σ (β-!ₛ _) = StoreTypingProgress-refl
-    ⟶ᵢₘ⟹Σ'⊑Σ (β-! _) = StoreTypingProgress-refl
+    ⟶ᵢₘ⟹Σ'⊑Σ (β-! _ _) = StoreTypingProgress-refl
     ⟶ᵢₘ⟹Σ'⊑Σ (β-:=ₛ _ _) = StoreTypingProgress-refl
-    ⟶ᵢₘ⟹Σ'⊑Σ (β-:= _ _ c) = from⊑ₕ (proj₂ (merge (proj₁ (get-val-from-successful-cast c))))
-    ⟶ᵢₘ⟹Σ'⊑Σ (β-:=/failed _ _ _) = StoreTypingProgress-refl
+    ⟶ᵢₘ⟹Σ'⊑Σ (β-:= _ _ _ c) = from⊑ₕ (proj₂ (merge (proj₁ (get-val-from-successful-cast c))))
+    ⟶ᵢₘ⟹Σ'⊑Σ (β-:=/failed _ _ _ _) = StoreTypingProgress-refl
     ⟶ᵢₘ⟹Σ'⊑Σ {Σ} {A = Ref A} (β-ref _) = from⊑ₗ (∷ʳ-⊒ A Σ)

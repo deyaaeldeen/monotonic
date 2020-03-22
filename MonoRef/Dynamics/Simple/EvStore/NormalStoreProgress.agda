@@ -114,24 +114,24 @@ progress-normal-store ((e₁ :=ₛ e₂) A-static) ν μ-evd with progress-norma
 ...   | done v₂ = step (prog-reduce μ-evd (β-mono (β-:=ₛ v₁ v₂)))
 ...   | error E-error = step (prog-reduce μ-evd (cong-error (ξ-:=ₛᵣ A-static e₁)))
 
-progress-normal-store (! A e) ν μ-evd with progress-normal-store e ν μ-evd
-... | step (prog-reduce x e⟶e')   = step (prog-reduce x (cong (ξ-! A) e⟶e'))
-... | step (cast-reduce e⟶e')     = step (cast-reduce (cong (ξ-! A) e⟶e'))
+progress-normal-store (! A x e) ν μ-evd with progress-normal-store e ν μ-evd
+... | step (prog-reduce w e⟶e')   = step (prog-reduce w (cong (ξ-! A x) e⟶e'))
+... | step (cast-reduce e⟶e')     = step (cast-reduce (cong (ξ-! A x) e⟶e'))
 ... | step (state-reduce ¬NS _)    = ⊥-elim (¬NS μ-evd)
-... | done v = step (prog-reduce μ-evd (β-mono (β-! v)))
-... | error E-error = step (prog-reduce μ-evd (cong-error (ξ-! A)))
+... | done v = step (prog-reduce μ-evd (β-mono (β-! x v)))
+... | error E-error = step (prog-reduce μ-evd (cong-error (ξ-! A x)))
 
-progress-normal-store (:= A e₁ e₂) ν μ-evd with progress-normal-store e₁ ν μ-evd
-... | step (prog-reduce x e⟶e')   = step (prog-reduce x (cong (ξ-:=ₗ A e₂) e⟶e'))
-... | step (cast-reduce e⟶e')     = step (cast-reduce (cong (ξ-:=ₗ A e₂) e⟶e'))
+progress-normal-store (:= A x e₁ e₂) ν μ-evd with progress-normal-store e₁ ν μ-evd
+... | step (prog-reduce w e⟶e')   = step (prog-reduce w (cong (ξ-:=ₗ A x e₂) e⟶e'))
+... | step (cast-reduce e⟶e')     = step (cast-reduce (cong (ξ-:=ₗ A x e₂) e⟶e'))
 ... | step (state-reduce ¬NS _)    = ⊥-elim (¬NS μ-evd)
-... | error E-error = step (prog-reduce μ-evd (cong-error (ξ-:=ₗ A e₂)))
+... | error E-error = step (prog-reduce μ-evd (cong-error (ξ-:=ₗ A x e₂)))
 ... | done v₁ with progress-normal-store e₂ ν μ-evd
-...   | step (prog-reduce x e⟶e')   = step (prog-reduce x (cong (ξ-:=ᵣ A e₁) e⟶e'))
-...   | step (cast-reduce e⟶e')     = step (cast-reduce (cong (ξ-:=ᵣ A e₁) e⟶e'))
+...   | step (prog-reduce w e⟶e')   = step (prog-reduce w (cong (ξ-:=ᵣ A x e₁) e⟶e'))
+...   | step (cast-reduce e⟶e')     = step (cast-reduce (cong (ξ-:=ᵣ A x e₁) e⟶e'))
 ...   | step (state-reduce ¬NS _)    = ⊥-elim (¬NS μ-evd)
-...   | done v₂ = step (prog-reduce μ-evd (β-mono (β-:= v₁ v₂)))
-...   | error E-error = step (prog-reduce μ-evd (cong-error (ξ-:=ᵣ A e₁)))
+...   | done v₂ = step (prog-reduce μ-evd (β-mono (β-:= x v₁ v₂)))
+...   | error E-error = step (prog-reduce μ-evd (cong-error (ξ-:=ᵣ A x e₁)))
 
 progress-normal-store unit _ _ = done V-unit
 

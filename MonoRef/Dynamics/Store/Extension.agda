@@ -32,9 +32,9 @@ prefix-weaken-expr Σ⊑Σ' (addr mem prec) = addr (∈-⊒ mem Σ⊑Σ') prec
 prefix-weaken-expr Σ⊑Σ' ((!ₛ e) x) = (!ₛ prefix-weaken-expr Σ⊑Σ' e) x
 prefix-weaken-expr Σ⊑Σ' ((e :=ₛ e₁) x) =
   (prefix-weaken-expr Σ⊑Σ' e :=ₛ prefix-weaken-expr Σ⊑Σ' e₁) x
-prefix-weaken-expr Σ⊑Σ' (! A e) = ! A (prefix-weaken-expr Σ⊑Σ' e)
-prefix-weaken-expr Σ⊑Σ' (:= A e e₁) =
-  := A (prefix-weaken-expr Σ⊑Σ' e) (prefix-weaken-expr Σ⊑Σ' e₁)
+prefix-weaken-expr Σ⊑Σ' (! A x e) = ! A x (prefix-weaken-expr Σ⊑Σ' e)
+prefix-weaken-expr Σ⊑Σ' (:= A x e e₁) =
+  := A x (prefix-weaken-expr Σ⊑Σ' e) (prefix-weaken-expr Σ⊑Σ' e₁)
 prefix-weaken-expr _   unit = unit
 prefix-weaken-expr Σ⊑Σ' (e < x >) = prefix-weaken-expr Σ⊑Σ' e < x >
 prefix-weaken-expr _   error = error

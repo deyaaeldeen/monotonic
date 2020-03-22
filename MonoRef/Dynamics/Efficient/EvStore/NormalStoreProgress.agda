@@ -105,23 +105,23 @@ progress-normal-store ((e₁ :=ₛ e₂) A-static) ν μ-evd with progress-norma
 ...   | done v₂ = step-d μ-evd (β-mono (β-:=ₛ v₁ v₂))
 ...   | error E-error = step-d μ-evd (ξ-error (ξ-:=ₛᵣ A-static e₁))
 
-progress-normal-store (! A e) ν μ-evd with progress-normal-store e ν μ-evd
-... | step-d μ-evd' e⟶e' = step-d μ-evd' (ξ (ξ-! A) (switch e⟶e'))
-... | step-a μ-evd' e⟶e' = step-d μ-evd' (ξ (ξ-! A) e⟶e')
+progress-normal-store (! A x e) ν μ-evd with progress-normal-store e ν μ-evd
+... | step-d μ-evd' e⟶e' = step-d μ-evd' (ξ (ξ-! A x) (switch e⟶e'))
+... | step-a μ-evd' e⟶e' = step-d μ-evd' (ξ (ξ-! A x) e⟶e')
 ... | done (V-cast _ (I-final (I-middle ())))
-... | done (S-Val v) = step-d μ-evd (β-mono (β-! v))
-... | error E-error = step-d μ-evd (ξ-error (ξ-! A))
+... | done (S-Val v) = step-d μ-evd (β-mono (β-! x v))
+... | error E-error = step-d μ-evd (ξ-error (ξ-! A x))
 
-progress-normal-store (:= A e₁ e₂) ν μ-evd with progress-normal-store e₁ ν μ-evd
-... | step-d μ-evd' e⟶e' = step-d μ-evd' (ξ (ξ-:=ₗ A e₂) (switch e⟶e'))
-... | step-a μ-evd' e⟶e' = step-d μ-evd' (ξ (ξ-:=ₗ A e₂) e⟶e')
-... | error E-error = step-d μ-evd (ξ-error (ξ-:=ₗ A e₂))
+progress-normal-store (:= A x e₁ e₂) ν μ-evd with progress-normal-store e₁ ν μ-evd
+... | step-d μ-evd' e⟶e' = step-d μ-evd' (ξ (ξ-:=ₗ A x e₂) (switch e⟶e'))
+... | step-a μ-evd' e⟶e' = step-d μ-evd' (ξ (ξ-:=ₗ A x e₂) e⟶e')
+... | error E-error = step-d μ-evd (ξ-error (ξ-:=ₗ A x e₂))
 ... | done (V-cast _ (I-final (I-middle ())))
 ... | done (S-Val v₁) with progress-normal-store e₂ ν μ-evd
-...   | step-d μ-evd' e⟶e' = step-d μ-evd' (ξ (ξ-:=ᵣ A e₁) (switch e⟶e'))
-...   | step-a μ-evd' e⟶e' = step-d μ-evd' (ξ (ξ-:=ᵣ A e₁) e⟶e')
-...   | done v₂ = step-d μ-evd (β-mono (β-:= v₁ v₂))
-...   | error E-error = step-d μ-evd (ξ-error (ξ-:=ᵣ A e₁))
+...   | step-d μ-evd' e⟶e' = step-d μ-evd' (ξ (ξ-:=ᵣ A x e₁) (switch e⟶e'))
+...   | step-a μ-evd' e⟶e' = step-d μ-evd' (ξ (ξ-:=ᵣ A x e₁) e⟶e')
+...   | done v₂ = step-d μ-evd (β-mono (β-:= x v₁ v₂))
+...   | error E-error = step-d μ-evd (ξ-error (ξ-:=ᵣ A x e₁))
 
 progress-normal-store unit _ _ = done (S-Val V-unit)
 

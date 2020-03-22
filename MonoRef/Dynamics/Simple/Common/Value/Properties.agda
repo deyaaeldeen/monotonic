@@ -38,8 +38,8 @@ valueP (π₂ e) = no (λ ())
 valueP (addr x x₁) = yes (V-addr x x₁)
 valueP ((!ₛ e) x) = no (λ ())
 valueP ((e :=ₛ e₁) x) = no (λ ())
-valueP (! _ _) = no (λ ())
-valueP (:= _ _ _) = no (λ ())
+valueP (! _ _ _) = no (λ ())
+valueP (:= _ _ _ _) = no (λ ())
 valueP unit = yes V-unit
 valueP (e < x >)
   with valueP e

@@ -9,7 +9,7 @@ module MonoRef.Dynamics.Reduction.EvolvingStore.MonoReduction
 
 open import Data.List using (_∷ʳ_)
 open import Data.List.Membership.Propositional using (_∈_)
-open import Relation.Nullary using (Dec)
+open import Relation.Nullary using (Dec ; ¬_)
 
 -- standard library++
 open import Data.List.Prefix renaming (_⊑_ to _⊑ₗ_ ; ⊑-refl to ⊑ₗ-refl)
@@ -85,9 +85,10 @@ module ParamMonoReduction
         → (!ₛ r) x , μ , μ-evd ⟶ᵢₘ μ-static-lookup R x μ , μ
 
       β-! : ∀ {B μ μ-evd} {r : Σ ∣ ∅ ⊢ Ref B}
+        → (x : ¬ static B)
         → (R : SimpleValue r)
           --------------------------------------------------------------------------------------
-        → ! B r , μ , μ-evd ⟶ᵢₘ store-lookup-v (ref⟹∈ R) μ < make-coercion (ref⟹T R) B > , μ
+        → ! B x r , μ , μ-evd ⟶ᵢₘ store-lookup-v (ref⟹∈ R) μ < make-coercion (ref⟹T R) B > , μ
 
       β-:=ₛ : ∀ {A x μ μ-evd} {r : Σ ∣ ∅ ⊢ Ref A} {v : Σ ∣ ∅ ⊢ A}
         → (R : SimpleValue r) → (V : Value v)
@@ -95,12 +96,13 @@ module ParamMonoReduction
         → (r :=ₛ v) x , μ , μ-evd ⟶ᵢₘ unit , μ-static-update R x μ V
 
       β-:= : ∀ {B μ μ-evd} {r : Σ ∣ ∅ ⊢ Ref B} {v : Σ ∣ ∅ ⊢ B}
+        → (x : ¬ static B)
         → (R : SimpleValue r) → (V : Value v)
           -----------------------------------------------------
-        → := B r v , μ , μ-evd ⟶ᵢₘ unit , ν-update/ref B R μ V
+        → := B x r v , μ , μ-evd ⟶ᵢₘ unit , ν-update/ref B R μ V
 
     ⟶ᵢₘ⟹⊑ₗ (β-!ₛ R) = ⊑ₗ-refl
-    ⟶ᵢₘ⟹⊑ₗ (β-! R) = ⊑ₗ-refl
+    ⟶ᵢₘ⟹⊑ₗ (β-! _ R) = ⊑ₗ-refl
     ⟶ᵢₘ⟹⊑ₗ (β-:=ₛ R V) = ⊑ₗ-refl
-    ⟶ᵢₘ⟹⊑ₗ (β-:= R V) = ⊑ₗ-refl
+    ⟶ᵢₘ⟹⊑ₗ (β-:= _ R V) = ⊑ₗ-refl
     ⟶ᵢₘ⟹⊑ₗ {Σ} {A = Ref A} (β-ref V) = ∷ʳ-⊒ A Σ

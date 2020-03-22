@@ -6,6 +6,7 @@ module MonoRef.Language.TargetWithoutBlame
   where
 
 open import Data.List.Membership.Propositional using (_∈_)
+open import Relation.Nullary using (¬_)
 
 open import MonoRef.Static.Types.Relations
 open import MonoRef.Static.Context
@@ -91,12 +92,14 @@ data _∣_⊢_ (Σ : StoreTyping) : Context → Type → Set where
 
   ! : ∀ {Γ}
     → (A : Type)
+    → ¬ static A
     → Σ ∣ Γ ⊢ Ref A
       -------------
     → Σ ∣ Γ ⊢ A
 
   := : ∀ {Γ}
     → (A : Type)
+    → ¬ static A
     → Σ ∣ Γ ⊢ Ref A
     → Σ ∣ Γ ⊢ A
       -----------

@@ -207,9 +207,9 @@ typeprecise-strenthen-expr prec ((!ₛ e) x) =
   (!ₛ typeprecise-strenthen-expr prec e) x
 typeprecise-strenthen-expr prec ((e :=ₛ e₁) x) =
   (typeprecise-strenthen-expr prec e :=ₛ typeprecise-strenthen-expr prec e₁) x
-typeprecise-strenthen-expr prec (! A e) = ! A (typeprecise-strenthen-expr prec e)
-typeprecise-strenthen-expr prec (:= A e e₁) =
-  := A (typeprecise-strenthen-expr prec e) (typeprecise-strenthen-expr prec e₁)
+typeprecise-strenthen-expr prec (! A x e) = ! A x (typeprecise-strenthen-expr prec e)
+typeprecise-strenthen-expr prec (:= A x e e₁) =
+  := A x (typeprecise-strenthen-expr prec e) (typeprecise-strenthen-expr prec e₁)
 typeprecise-strenthen-expr _    unit = unit
 typeprecise-strenthen-expr prec (e < x >) = typeprecise-strenthen-expr prec e < x >
 typeprecise-strenthen-expr _    error = error

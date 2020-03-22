@@ -94,20 +94,20 @@ progress-normal-store ((e₁ :=ₛ e₂) A-static) ν with progress-normal-store
 ...   | done v₂ = step (β-mono (β-:=ₛ v₁ v₂))
 ...   | error E-error = step (ξ-error (ξ-:=ₛᵣ A-static e₁))
 
-progress-normal-store (! A e) ν with progress-normal-store e ν
-... | step e⟶e' = step (ξ (ξ-! A) e⟶e')
-... | done v = step (β-mono (β-! v))
-... | error E-error = step (ξ-error (ξ-! A))
+progress-normal-store (! A x e) ν with progress-normal-store e ν
+... | step e⟶e' = step (ξ (ξ-! A x) e⟶e')
+... | done v = step (β-mono (β-! x v))
+... | error E-error = step (ξ-error (ξ-! A x))
 
-progress-normal-store (:= A e₁ e₂) ν with progress-normal-store e₁ ν
-... | step e⟶e' = step (ξ (ξ-:=ₗ A e₂) e⟶e')
-... | error E-error = step (ξ-error (ξ-:=ₗ A e₂))
+progress-normal-store (:= A x e₁ e₂) ν with progress-normal-store e₁ ν
+... | step e⟶e' = step (ξ (ξ-:=ₗ A x e₂) e⟶e')
+... | error E-error = step (ξ-error (ξ-:=ₗ A x e₂))
 ... | done v₁ with progress-normal-store e₂ ν
-...   | step e⟶e' = step (ξ (ξ-:=ᵣ A e₁) e⟶e')
-...   | error E-error = step (ξ-error (ξ-:=ᵣ A e₁))
+...   | step e⟶e' = step (ξ (ξ-:=ᵣ A x e₁) e⟶e')
+...   | error E-error = step (ξ-error (ξ-:=ᵣ A x e₁))
 ...   | done v₂ with successful-cast? (apply-cast [] v₂ (make-coercion A (store-lookup-rtti/ref v₁ ν)))
-...     | inj₁ x = step (β-mono (β-:= v₁ v₂ x))
-...     | inj₂ x = step (β-mono (β-:=/failed v₁ v₂ x))
+...     | inj₁ e = step (β-mono (β-:= x v₁ v₂ e))
+...     | inj₂ e = step (β-mono (β-:=/failed x v₁ v₂ e))
 
 progress-normal-store unit _ = done V-unit
 

@@ -7,6 +7,7 @@ module MonoRef.Dynamics.Efficient.Common.Frames
 
 -- standard library++
 open import Data.List.Prefix renaming (_⊑_ to _⊑ₗ_)
+open import Relation.Nullary using (¬_)
 
 open import MonoRef.Dynamics.Store.Extension
   _⟹_ Inert
@@ -82,6 +83,7 @@ data Frame {Γ Σ} : (A B : Type) → Set where
 
   ξ-! :
       (A : Type)
+    → ¬ static A
       ---------------
     → Frame (Ref A) A
 
@@ -99,12 +101,14 @@ data Frame {Γ Σ} : (A B : Type) → Set where
 
   ξ-:=ₗ :
       (A : Type)
+    → ¬ static A
     → Σ ∣ Γ ⊢ A
       ------------------
     → Frame (Ref A) Unit
 
   ξ-:=ᵣ :
       (A : Type)
+    → ¬ static A
     → Σ ∣ Γ ⊢ Ref A
       -------------
     → Frame A Unit
@@ -120,11 +124,11 @@ plug M ξ-πₗ = π₁ M
 plug M ξ-πᵣ = π₂ M
 plug M (ξ-ref A) = ref A M
 plug M (ξ-!ₛ x) = (!ₛ M) x
-plug M (ξ-! A) = ! A M
+plug M (ξ-! A x) = ! A x M
 plug M (ξ-:=ₛₗ x L) = (M :=ₛ L) x
 plug L (ξ-:=ₛᵣ x M) = (M :=ₛ L) x
-plug M (ξ-:=ₗ A L) = := A M L
-plug L (ξ-:=ᵣ A M) = := A M L
+plug M (ξ-:=ₗ A x L) = := A x M L
+plug L (ξ-:=ᵣ A x M) = := A x M L
 
 prefix-weaken-frame : ∀ {Γ Σ Σ' A B} → Σ ⊑ₗ Σ' → Frame {Γ} {Σ} A B → Frame {Γ} {Σ'} A B
 prefix-weaken-frame Σ⊑ₗΣ' (ξ-appₗ M) = ξ-appₗ (prefix-weaken-expr Σ⊑ₗΣ' M)
@@ -137,11 +141,11 @@ prefix-weaken-frame _ ξ-πₗ = ξ-πₗ
 prefix-weaken-frame _ ξ-πᵣ = ξ-πᵣ
 prefix-weaken-frame _ (ξ-ref A) = ξ-ref A
 prefix-weaken-frame _ (ξ-!ₛ x) = ξ-!ₛ x
-prefix-weaken-frame _ (ξ-! A) = ξ-! A
+prefix-weaken-frame _ (ξ-! A x) = ξ-! A x
 prefix-weaken-frame Σ⊑ₗΣ' (ξ-:=ₛₗ x M) = ξ-:=ₛₗ x (prefix-weaken-expr Σ⊑ₗΣ' M)
 prefix-weaken-frame Σ⊑ₗΣ' (ξ-:=ₛᵣ x M) = ξ-:=ₛᵣ x (prefix-weaken-expr Σ⊑ₗΣ' M)
-prefix-weaken-frame Σ⊑ₗΣ' (ξ-:=ₗ A M) = ξ-:=ₗ A (prefix-weaken-expr Σ⊑ₗΣ' M)
-prefix-weaken-frame Σ⊑ₗΣ' (ξ-:=ᵣ A M) = ξ-:=ᵣ A (prefix-weaken-expr Σ⊑ₗΣ' M)
+prefix-weaken-frame Σ⊑ₗΣ' (ξ-:=ₗ A x M) = ξ-:=ₗ A x (prefix-weaken-expr Σ⊑ₗΣ' M)
+prefix-weaken-frame Σ⊑ₗΣ' (ξ-:=ᵣ A x M) = ξ-:=ᵣ A x (prefix-weaken-expr Σ⊑ₗΣ' M)
 
 typeprecise-strenthen-frame : ∀ {Γ Σ Σ' A B} → Σ' ⊑ₕ Σ → Frame {Γ} {Σ} A B → Frame {Γ} {Σ'} A B
 typeprecise-strenthen-frame Σ'⊑ₕΣ (ξ-appₗ M) = ξ-appₗ (typeprecise-strenthen-expr Σ'⊑ₕΣ M)
@@ -156,11 +160,11 @@ typeprecise-strenthen-frame _ ξ-πₗ = ξ-πₗ
 typeprecise-strenthen-frame _ ξ-πᵣ = ξ-πᵣ
 typeprecise-strenthen-frame _ (ξ-ref A) = ξ-ref A
 typeprecise-strenthen-frame _ (ξ-!ₛ x) = ξ-!ₛ x
-typeprecise-strenthen-frame _ (ξ-! A) = ξ-! A
+typeprecise-strenthen-frame _ (ξ-! A x) = ξ-! A x
 typeprecise-strenthen-frame Σ'⊑ₕΣ (ξ-:=ₛₗ x M) = ξ-:=ₛₗ x (typeprecise-strenthen-expr Σ'⊑ₕΣ M)
 typeprecise-strenthen-frame Σ'⊑ₕΣ (ξ-:=ₛᵣ x M) = ξ-:=ₛᵣ x (typeprecise-strenthen-expr Σ'⊑ₕΣ M)
-typeprecise-strenthen-frame Σ'⊑ₕΣ (ξ-:=ₗ A M) = ξ-:=ₗ A (typeprecise-strenthen-expr Σ'⊑ₕΣ M)
-typeprecise-strenthen-frame Σ'⊑ₕΣ (ξ-:=ᵣ A M) = ξ-:=ᵣ A (typeprecise-strenthen-expr Σ'⊑ₕΣ M)
+typeprecise-strenthen-frame Σ'⊑ₕΣ (ξ-:=ₗ A x M) = ξ-:=ₗ A x (typeprecise-strenthen-expr Σ'⊑ₕΣ M)
+typeprecise-strenthen-frame Σ'⊑ₕΣ (ξ-:=ᵣ A x M) = ξ-:=ᵣ A x (typeprecise-strenthen-expr Σ'⊑ₕΣ M)
 
 -- TODO: find a better name
 weaken-frame : ∀ {Γ Σ Σ' A B} → StoreTypingProgress Σ Σ' → Frame {Γ} {Σ} A B → Frame {Γ} {Σ'} A B
