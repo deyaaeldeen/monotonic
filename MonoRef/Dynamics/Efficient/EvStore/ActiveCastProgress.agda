@@ -25,7 +25,7 @@ data ActiveCastProgress {Γ Σ A} (M : Σ ∣ Γ ⊢ A) (ν : Store Σ) : Set wh
 ⟶ᶜprogress-active/middle/sv : ∀ {Γ Σ A B} {e : Σ ∣ Γ ⊢ A} {c : MiddleCoercion A B}
   → SimpleValue e → ActiveMiddle c → (ν : Store Σ) → ActiveCastProgress (e < final (middle c) >) ν
 ⟶ᶜprogress-active/middle/sv sv A-fail ν = step-pure (`⊥ sv)
-⟶ᶜprogress-active/middle/sv sv A-id ν = step-pure (ι sv)
+⟶ᶜprogress-active/middle/sv sv (A-id x) ν = step-pure (ι x sv)
 ⟶ᶜprogress-active/middle/sv (V-pair x y) (A-prod c d) ν
   with x | y
 ... | S-Val sv₁ | S-Val sv₂ = step-pure (pair-simple sv₁ sv₂)
@@ -45,5 +45,6 @@ data ActiveCastProgress {Γ Σ A} (M : Σ ∣ Γ ⊢ A) (ν : Store Σ) : Set wh
 
 ⟶ᶜprogress-active/sv : ∀ {Γ Σ A B} {e : Σ ∣ Γ ⊢ A} {c : A ⟹ B}
   → SimpleValue e → Active c → (ν : Store Σ) → ActiveCastProgress (e < c >) ν
+⟶ᶜprogress-active/sv sv A-id⋆ ν = step-pure (ι⋆ sv)
 ⟶ᶜprogress-active/sv () (A-prjSeq _ _) _
 ⟶ᶜprogress-active/sv sv (A-final c) ν = ⟶ᶜprogress-active/final/sv sv c ν

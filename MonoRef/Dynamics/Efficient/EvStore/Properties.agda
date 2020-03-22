@@ -20,7 +20,7 @@ sval∧Inert⇒¬⟶ᵤᶜᵛ _ (I-final (I-middle ())) (pair-simple _ _)
 sval∧Inert⇒¬⟶ᵤᶜᵛ _ (I-final (I-middle ())) (pair-cast-left _ _)
 sval∧Inert⇒¬⟶ᵤᶜᵛ _ (I-final (I-middle ())) (pair-cast-right _ _)
 sval∧Inert⇒¬⟶ᵤᶜᵛ _ (I-final (I-middle ())) (pair-cast-both _ _)
-sval∧Inert⇒¬⟶ᵤᶜᵛ _ (I-final (I-middle ())) (ι _)
+sval∧Inert⇒¬⟶ᵤᶜᵛ _ (I-final (I-middle ())) (ι _ _)
 
 sval∧Inert⇒¬⟶ₘ : ∀ {Σ Σ' A B} {e : Σ ∣ ∅ ⊢ A} {ν : Store Σ} {e' : Σ' ∣ ∅ ⊢ B} {ν' : Store Σ'} {c : A ⟹ B}
   → SimpleValue e → Inert c → ¬ (e < c > , ν ⟶ₘ e' , ν')
@@ -47,7 +47,7 @@ sval⟶ᵤᶜᵛ⊥ (V-pair _ _) ()
 val⟶ᵤᶜᵛ⊥ : ∀ {Σ A} {e : Σ ∣ ∅ ⊢ A} {e' : Σ ∣ ∅ ⊢ A} → Value e → ¬ (e ⟶ᵤᶜᵛ e')
 val⟶ᵤᶜᵛ⊥ (S-Val sv) red = sval⟶ᵤᶜᵛ⊥ sv red
 val⟶ᵤᶜᵛ⊥ (V-cast _ (I-final (I-middle ()))) (`⊥ _)
-val⟶ᵤᶜᵛ⊥ (V-cast _ (I-final (I-middle ()))) (ι _)
+val⟶ᵤᶜᵛ⊥ (V-cast _ (I-final (I-middle ()))) (ι _ _)
 val⟶ᵤᶜᵛ⊥ (V-cast _ (I-final (I-middle ()))) (pair-simple _ _)
 val⟶ᵤᶜᵛ⊥ (V-cast _ (I-final (I-middle ()))) (pair-cast-left _ _)
 val⟶ᵤᶜᵛ⊥ (V-cast _ (I-final (I-middle ()))) (pair-cast-right _ _)
@@ -79,7 +79,8 @@ val⟶ᶜ⊥ (V-cast sv c) red = sval∧Inert⇒¬⟶ᶜ sv c red
 
 scv⟶ᵤᶜᵛ⟹cv' : ∀ {Σ A} {e : Σ ∣ ∅ ⊢ A} {e' : Σ ∣ ∅ ⊢ A}
   → DelayedCast e → e ⟶ᵤᶜᵛ e' → DelayedCast e' ⊎ Erroneous e'
-scv⟶ᵤᶜᵛ⟹cv' scv (ι v) = inj₁ (v⇑ (S-Val v))
+scv⟶ᵤᶜᵛ⟹cv' scv (ι⋆ v) = inj₁ (v⇑ (S-Val v))
+scv⟶ᵤᶜᵛ⟹cv' scv (ι _ v) = inj₁ (v⇑ (S-Val v))
 scv⟶ᵤᶜᵛ⟹cv' _ (pair-simple {c = c}{d} sv₁ sv₂) =
   inj₁ (cv-pair (cast-val sv₁ c) (cast-val sv₂ d))
 scv⟶ᵤᶜᵛ⟹cv' _ (pair-cast-left {c' = c'}{c}{d} sv₁ sv₂) =

@@ -31,7 +31,7 @@ apply-active-cast/middle : ∀ {Σ A B} {c : MiddleCoercion A B}
   → (Q : List (SuspendedCast Σ)) → ∀ {e : proj₁ (merge Q) ∣ ∅ ⊢ A} → (v : SimpleValue e) → (ac : ActiveMiddle c)
   → CastResult Q B
 
-apply-active-cast/middle Q v A-id rewrite cong (merge' ⊑ₕ-refl) (sym (++-identityʳ Q)) =
+apply-active-cast/middle Q v (A-id _) rewrite cong (merge' ⊑ₕ-refl) (sym (++-identityʳ Q)) =
   done [] (S-Val v)
 apply-active-cast/middle Q (V-pair v₁ v₂) (A-prod c d)
   with apply-cast Q v₁ c
@@ -55,6 +55,8 @@ apply-active-cast/middle Q (V-addr {A} A∈Σ A⊑B) (A-Ref C C⊑B)
        (S-Val (V-addr (merge-extension-soundness Q A∈Σ A∼C) (⊑-trans (⊓⟹⊑ᵣ A∼C) C⊑B)))
 apply-active-cast/final Q v (A-middle c) = apply-active-cast/middle Q v c
 
+apply-active-cast Q v A-id⋆ rewrite cong (merge' ⊑ₕ-refl) (sym (++-identityʳ Q)) =
+  done [] (S-Val v)
 apply-active-cast Q v (A-final c) = apply-active-cast/final Q v c
 apply-active-cast _ () (A-prjSeq _ _)
 

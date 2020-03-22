@@ -25,7 +25,7 @@ data ActiveCastProgProgress {Γ Σ A} (M : Σ ∣ Γ ⊢ A) (ν : Store Σ) : Se
 ⟶ᵤᵣprogress-active/middle/sv : ∀ {Γ Σ A B} {e : Σ ∣ Γ ⊢ A} {c : MiddleCoercion A B}
   → SimpleValue e → ActiveMiddle c → (ν : Store Σ) → ActiveCastProgProgress (e < final (middle c) >) ν
 ⟶ᵤᵣprogress-active/middle/sv sv A-fail ν = step-pure (`⊥ sv)
-⟶ᵤᵣprogress-active/middle/sv sv A-id ν = step-pure (ι sv)
+⟶ᵤᵣprogress-active/middle/sv sv (A-id x) ν = step-pure (ι x sv)
 ⟶ᵤᵣprogress-active/middle/sv (V-pair x y) (A-prod c d) ν = step-pure (`× x y)
 ⟶ᵤᵣprogress-active/middle/sv R@(V-addr A∈Σ _) (A-Ref B _) ν
   with ∼-decidable (store-lookup-rtti A∈Σ ν) B
@@ -40,5 +40,6 @@ data ActiveCastProgProgress {Γ Σ A} (M : Σ ∣ Γ ⊢ A) (ν : Store Σ) : Se
 
 ⟶ᵤᵣprogress-active/sv : ∀ {Γ Σ A B} {e : Σ ∣ Γ ⊢ A} {c : A ⟹ B}
   → SimpleValue e → Active c → (ν : Store Σ) → ActiveCastProgProgress (e < c >) ν
+⟶ᵤᵣprogress-active/sv sv A-id⋆ ν = step-pure (ι⋆ sv)
 ⟶ᵤᵣprogress-active/sv () (A-prjSeq _ _) _
 ⟶ᵤᵣprogress-active/sv sv (A-final c) ν = ⟶ᵤᵣprogress-active/final/sv sv c ν

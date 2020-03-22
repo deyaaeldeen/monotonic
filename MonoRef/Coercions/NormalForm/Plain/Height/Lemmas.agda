@@ -31,7 +31,7 @@ open import MonoRef.Static.Types.Relations
 ‖_‖ʰᶠ : ∀{A B} → FinalCoercion A B → ℕ
 ‖_‖ʰₘ : ∀{A B} → MiddleCoercion A B → ℕ
   
-‖ id         ‖ʰₘ = 1
+‖ id _       ‖ʰₘ = 1
 ‖ (fun c d)  ‖ʰₘ = 1 + (‖ c ‖ʰ ⊔ ‖ d ‖ʰ)
 ‖ (prod c d) ‖ʰₘ = 1 + (‖ c ‖ʰ ⊔ ‖ d ‖ʰ)
 ‖ (Ref t _)  ‖ʰₘ = 1 + ‖ t ‖ʰₜ
@@ -40,6 +40,7 @@ open import MonoRef.Static.Types.Relations
 ‖ (injSeq B g) ‖ʰᶠ = ‖ B ‖ʰᵢₜ ⊔ ‖ g ‖ʰₘ
 ‖ (middle g)   ‖ʰᶠ = ‖ g ‖ʰₘ
 
+‖ id⋆          ‖ʰ = 1
 ‖ (prjSeq A i) ‖ʰ = ‖ A ‖ʰᵢₜ ⊔ ‖ i ‖ʰᶠ
 ‖ (final i)    ‖ʰ = ‖ i ‖ʰᶠ
 
@@ -97,7 +98,7 @@ mk-nfcoercion-height (A `× B) (A' `× B') | yes ⌣-×
 mk-nfcoercion-height .(Ref _) (Ref B) | yes ⌣-ref = s≤s (n≤m⊔n _ ‖ B ‖ʰₜ)
 
 mk-fcoercion-height : ∀ {A B} → (A≢⋆ : Injectable A) → (B≢⋆ : Injectable B)
-  → ‖ (make-final-coercion A≢⋆ B≢⋆) ‖ʰᶠ ≤ (‖ A≢⋆ ‖ʰᵢₜ ⊔ ‖ B≢⋆ ‖ʰᵢₜ)
+  → ‖ (make-middle-coercion A≢⋆ B≢⋆) ‖ʰₘ ≤ (‖ A≢⋆ ‖ʰᵢₜ ⊔ ‖ B≢⋆ ‖ʰᵢₜ)
 mk-fcoercion-height {A} A≢⋆ B≢⋆ with ⌣-decidableᵢ A≢⋆ B≢⋆
 ... | no _ =
   begin

@@ -28,7 +28,7 @@ compose-middle-final-internal : ∀ {A B C}
 compose-final-normal-internal : ∀ {A B C}
   → (fc : FinalCoercion A B) → (nd : NormalFormCoercion B C)
   → {n : ℕ} → {m : ‖ fc ‖ᶠ + ‖ nd ‖ ≤ n }
-  → NormalFormCoercion A C
+  → FinalCoercion A C
 
 compose-normal-form : ∀ {A B C}
   → (nc : NormalFormCoercion A B) → (nd : NormalFormCoercion B C)
@@ -68,10 +68,10 @@ compose-middle-internal (Ref A x) (Ref B y) {n}
 
 {- id cases -}
 
-compose-middle-internal id           c  = c
-compose-middle-internal c@(fun _ _)  id = c
-compose-middle-internal c@(Ref _ _)  id = c
-compose-middle-internal c@(prod _ _) id = c
+compose-middle-internal (id _)       c      = c
+compose-middle-internal c@(fun _ _)  (id _) = c
+compose-middle-internal c@(Ref _ _)  (id _) = c
+compose-middle-internal c@(prod _ _) (id _) = c
 
 compose-middle-internal fail         d  = fail
 compose-middle-internal (fun _ _)  fail = fail
@@ -85,39 +85,38 @@ compose-middle-final-internal c (middle d) {n} {m} =
 
 {- Composing final coercions -}
 
+compose-final-normal-internal c id⋆ = c
 compose-final-normal-internal (injSeq B≢⋆ g) (prjSeq A≢⋆ i) {n} {m} =
-  final (compose-middle-final-internal g c⨟i {n} {injPrj≤n g i n m m'})
+  compose-middle-final-internal g c⨟i {n} {injPrj≤n g i n m m'}
   where
     c   = make-middle-coercion B≢⋆ A≢⋆
     m'  = make-coercion+i≤n g i n m
     c⨟i = compose-middle-final-internal c i {n} {m'}
 
 compose-final-normal-internal (middle g) (final i) {n} {m} =
-  final (compose-middle-final-internal g i {n} {1+a+1+b≤n⇒a+b≤n m})
+  compose-middle-final-internal g i {n} {1+a+1+b≤n⇒a+b≤n m}
 
-{- id cases -}
+{- vicious cases -}
 
--- this case forces me to return a normal form coercion because this is id on ⋆
-compose-final-normal-internal (middle id) i@(prjSeq _ _) = i
-compose-final-normal-internal i@(injSeq _ _) (final (middle id)) = final i
+compose-final-normal-internal (middle (id ())) i@(prjSeq _ _)
+compose-final-normal-internal i@(injSeq _ _) (final (middle (id ())))
 
 {- Failure cases -}
 
-compose-final-normal-internal (middle fail) (prjSeq _ c) = final (middle fail)
-compose-final-normal-internal (injSeq _ _) (final (injSeq _ fail)) = final (middle fail)
-compose-final-normal-internal (injSeq _ _) (final (middle fail)) = final (middle fail)
-compose-final-normal-internal (injSeq _ _) (final (injSeq () id))
+compose-final-normal-internal (middle fail) (prjSeq _ c) = middle fail
+compose-final-normal-internal (injSeq _ _) (final (injSeq _ fail)) = middle fail
+compose-final-normal-internal (injSeq _ _) (final (middle fail)) = middle fail
+compose-final-normal-internal (injSeq _ _) (final (injSeq () (id _)))
 
 
 {- Composing normal form coercions -}
 
 compose-normal-form c d {0} {m} = ⊥-elim (¬size-two-nfcoercions≤0 c d m)
 
+compose-normal-form id⋆ c {suc n} {s≤s m} = c
 compose-normal-form (prjSeq A≢⋆ i) c {suc n} {s≤s m}
-  with compose-final-normal-internal i c {n} {c+a+b≤n⇒a+b≤n{‖ i ‖ᶠ} m}
-compose-normal-form (prjSeq () _) _ | prjSeq _ _
-...  | final i⨟c = prjSeq A≢⋆ i⨟c
-compose-normal-form (final c) d {suc n} {s≤s m} = compose-final-normal-internal c d {n} {m}
+  = prjSeq A≢⋆ (compose-final-normal-internal i c {n} {c+a+b≤n⇒a+b≤n{‖ i ‖ᶠ} m})
+compose-normal-form (final c) d {suc n} {s≤s m} = final (compose-final-normal-internal c d {n} {m})
 
 
 {-
@@ -140,11 +139,11 @@ mk-nfcoercion-size A B with ⌣-decidable A B
 ... | yes ⌣-Unit-refl = s≤s (s≤s (s≤s z≤n))
 mk-nfcoercion-size .⋆ B | yes ⌣-⋆L
   with T≡⋆? B
-...  | yes refl = s≤s (s≤s (s≤s z≤n))
+...  | yes refl = s≤s z≤n
 ...  | no _     = 1+2*c+2≤2+c+1+c+0
 mk-nfcoercion-size A .⋆ | yes ⌣-⋆R
   with T≡⋆? A
-...  | yes refl = s≤s (s≤s (s≤s z≤n))
+...  | yes refl = s≤s z≤n
 ...  | no _     = 2+2*c+1≤1+c+1+c+1{‖ A ‖ₜ}
 mk-nfcoercion-size (A ⇒ B) (A' ⇒ B') | yes ⌣-⇒
   with make-normal-form-coercion A' A | mk-nfcoercion-size A' A
@@ -217,7 +216,7 @@ compose-normal-form-size : ∀ {A B C}
 compose-final-normal-size : ∀ {A B C}
   → (fc : FinalCoercion A B) → (nd : NormalFormCoercion B C)
   → {n : ℕ} {m : ‖ fc ‖ᶠ + ‖ nd ‖ ≤ n }
-  → ‖ compose-final-normal-internal fc nd {n} {m} ‖ ≤ ‖ fc ‖ᶠ + ‖ nd ‖
+  → ‖ compose-final-normal-internal fc nd {n} {m} ‖ᶠ ≤ ‖ fc ‖ᶠ + ‖ nd ‖
 
 compose-middle-final-size : ∀ {A B C}
   → (fc : MiddleCoercion A B) → (nd : FinalCoercion B C)
@@ -231,27 +230,21 @@ compose-middle-size : ∀ {A B C}
 
 compose-normal-form-size c d {0} {m} = ⊥-elim (¬size-two-nfcoercions≤0 c d m)
 
+compose-normal-form-size id⋆ _ {suc _} {s≤s _} = n≤m+n _ _
 compose-normal-form-size (prjSeq A≢⋆ i) d {suc n} {s≤s m}
   with compose-final-normal-internal i d {n} {c+a+b≤n⇒a+b≤n{‖ i ‖ᶠ} m}
      | compose-final-normal-size i d {n} {c+a+b≤n⇒a+b≤n{‖ i ‖ᶠ} m}
-...  | final x | w =
+...  | x | w =
   begin
     1 + (2 * ‖ A≢⋆ ‖ᵢₜ + ‖ x ‖ᶠ)
-      ≤⟨ +-monoʳ-≤ 1 (+-monoʳ-≤ _ (n≤1+n ‖ x ‖ᶠ)) ⟩
-    1 + (2 * ‖ A≢⋆ ‖ᵢₜ + suc ‖ x ‖ᶠ)
       ≤⟨ +-monoʳ-≤ 1 (+-monoʳ-≤ _ w) ⟩
     1 + ((2 * ‖ A≢⋆ ‖ᵢₜ) + (‖ i ‖ᶠ + ‖ d ‖))
       ≡⟨ cong₂ (_+_) (refl{x = 1}) (sym (+-assoc (2 * ‖ A≢⋆ ‖ᵢₜ) _ _)) ⟩
     1 + (((2 * ‖ A≢⋆ ‖ᵢₜ) + ‖ i ‖ᶠ) + ‖ d ‖)
   ∎
-compose-normal-form-size (prjSeq () _) _ | prjSeq _ _ | _
 
 compose-normal-form-size (final c) d {suc n} {s≤s m} =
-  begin
-    ‖ compose-final-normal-internal c d {n} {m} ‖ ≤⟨ compose-final-normal-size c d {n} {m} ⟩
-    ‖ c ‖ᶠ + ‖ d ‖                 ≤⟨ n≤1+n (‖ c ‖ᶠ + ‖ d ‖) ⟩
-    suc (‖ c ‖ᶠ + ‖ d ‖)
-  ∎
+  s≤s (compose-final-normal-size c d {n} {m})
 
 A⊓B≤A+B : ∀ {A B} → (A∼B : A ∼ B) → ‖ ⊓ A∼B ‖ₜ ≤ ‖ A ‖ₜ + ‖ B ‖ₜ
 A⊓B≤A+B ∼-ℕ-refl = s≤s z≤n
@@ -334,10 +327,10 @@ compose-middle-size (Ref _ _)  fail = m≤m+n _ _
 
 {- Composing with id -}
 
-compose-middle-size id         d  = n≤1+n ‖ d ‖ₘ
-compose-middle-size (fun _ _)  id = m≤m+n _ 1
-compose-middle-size (prod _ _) id = m≤m+n _ 1
-compose-middle-size (Ref _ _)  id = m≤m+n _ 1
+compose-middle-size (id _)     d      = n≤1+n ‖ d ‖ₘ
+compose-middle-size (fun _ _)  (id _) = m≤m+n _ 1
+compose-middle-size (prod _ _) (id _) = m≤m+n _ 1
+compose-middle-size (Ref _ _)  (id _) = m≤m+n _ 1
 
 compose-middle-final-size c (injSeq {B = B} iB d) {n} {m} =
   begin
@@ -356,6 +349,7 @@ compose-middle-final-size c (middle d) {n} {m} =
     ‖ c ‖ₘ + suc ‖ d ‖ₘ
   ∎
 
+compose-final-normal-size c id⋆ = m≤m+n _ _
 compose-final-normal-size (injSeq B≢⋆ g) (prjSeq A≢⋆ i) {n} {m}
   with compose-middle-final-size (make-middle-coercion B≢⋆ A≢⋆) i {n} {make-coercion+i≤n g i n m}
 ... | fst
@@ -366,14 +360,14 @@ compose-final-normal-size (injSeq B≢⋆ g) (prjSeq A≢⋆ i) {n} {m}
       i⨟c = compose-middle-final-internal c i {n} {m'}
 ... |   snd =
   begin
-    1 + ‖ compose-middle-final-internal g i⨟c {n} {injPrj≤n g i n m m'} ‖ᶠ
-      ≤⟨ +-monoʳ-≤ 1 snd ⟩
-    1 + ‖ g ‖ₘ + ‖ compose-middle-final-internal c i {n} {m'} ‖ᶠ
-      ≤⟨ +-monoʳ-≤ 1 (+-monoʳ-≤ _ fst) ⟩
-    1 + (‖ g ‖ₘ + (‖ c ‖ₘ + ‖ i ‖ᶠ))
-      ≤⟨ +-monoʳ-≤ 1 (+-monoʳ-≤ ‖ g ‖ₘ (+-monoˡ-≤ _ (mk-fcoercion-size B≢⋆ A≢⋆))) ⟩
-    1 + (‖ g ‖ₘ + ((2 * (‖ B≢⋆ ‖ᵢₜ + ‖ A≢⋆ ‖ᵢₜ)) + ‖ i ‖ᶠ))
-      ≤⟨ 1+c+2*b+a+d≤1+2*b+c+1+2*a+d{‖ A≢⋆ ‖ᵢₜ}{‖ B≢⋆ ‖ᵢₜ} ⟩
+    ‖ compose-middle-final-internal g i⨟c {n} {injPrj≤n g i n m m'} ‖ᶠ
+      ≤⟨ snd ⟩
+    ‖ g ‖ₘ + ‖ compose-middle-final-internal c i {n} {m'} ‖ᶠ
+      ≤⟨ +-monoʳ-≤ _ fst ⟩
+    ‖ g ‖ₘ + (‖ c ‖ₘ + ‖ i ‖ᶠ)
+      ≤⟨ +-monoʳ-≤ ‖ g ‖ₘ (+-monoˡ-≤ _ (mk-fcoercion-size B≢⋆ A≢⋆)) ⟩
+    ‖ g ‖ₘ + ((2 * (‖ B≢⋆ ‖ᵢₜ + ‖ A≢⋆ ‖ᵢₜ)) + ‖ i ‖ᶠ)
+      ≤⟨ c+2*b+a+d≤1+2*b+c+1+2*a+d{‖ A≢⋆ ‖ᵢₜ}{‖ B≢⋆ ‖ᵢₜ} ⟩
     (1 + (2 * ‖ B≢⋆ ‖ᵢₜ) + ‖ g ‖ₘ) + (1 + (2 * ‖ A≢⋆ ‖ᵢₜ) + ‖ i ‖ᶠ)
   ∎
   where
@@ -381,20 +375,21 @@ compose-final-normal-size (injSeq B≢⋆ g) (prjSeq A≢⋆ i) {n} {m}
     m'  = make-coercion+i≤n g i n m
     i⨟c = compose-middle-final-internal c i {n} {m'}
 
-compose-final-normal-size (injSeq _ _) (final (injSeq () id))
-compose-final-normal-size (injSeq {B = B} _ x) (final (injSeq {B = B'} _ fail)) = 3≤1+2*a+b+2+2*c+1{‖ B ‖ₜ}{‖ x ‖ₘ}{‖ B' ‖ₜ}
-compose-final-normal-size (injSeq {B = B} _ _) (final (middle id)) = 2+2*a+b≤1+2*a+b+3{‖ B ‖ₜ}
-compose-final-normal-size (injSeq {B = B} _ _) (final (middle fail)) = 3≤1+2*a+b+3{‖ B ‖ₜ}
+compose-final-normal-size (injSeq _ _) (final (injSeq () (id _)))
+compose-final-normal-size (injSeq {B = B} _ x) (final (injSeq {B = B'} _ fail)) =
+  2≤1+2*a+b+2+2*c+1{‖ B ‖ₜ}{‖ x ‖ₘ}{‖ B' ‖ₜ}
+compose-final-normal-size (injSeq {B = B} _ _) (final (middle (id ())))
+compose-final-normal-size (injSeq {B = B} _ _) (final (middle fail)) = 2≤1+2*a+b+3{‖ B ‖ₜ}
 compose-final-normal-size (middle g) (final i) {n} {m} =
   begin
-    suc ‖ compose-middle-final-internal g i ‖ᶠ
-      ≤⟨ +-monoʳ-≤ 1 (compose-middle-final-size g i {n} {1+a+1+b≤n⇒a+b≤n m}) ⟩
-    suc (‖ g ‖ₘ + ‖ i ‖ᶠ)
-      ≤⟨ +-monoʳ-≤ 1 (+-monoʳ-≤ ‖ g ‖ₘ (n≤1+n _)) ⟩
+    ‖ compose-middle-final-internal g i ‖ᶠ
+      ≤⟨ compose-middle-final-size g i {n} {1+a+1+b≤n⇒a+b≤n m} ⟩
+    ‖ g ‖ₘ + ‖ i ‖ᶠ
+      ≤⟨ +-mono-≤ (n≤1+n _) (n≤1+n _) ⟩
     suc (‖ g ‖ₘ + suc ‖ i ‖ᶠ)
   ∎
-compose-final-normal-size (middle id) (prjSeq _ _) = n≤m+n 2 _
-compose-final-normal-size (middle fail) (prjSeq _ _) = s≤s (s≤s (s≤s z≤n))
+compose-final-normal-size (middle (id ())) (prjSeq _ _)
+compose-final-normal-size (middle fail) (prjSeq _ _) = s≤s (s≤s z≤n)
 
 injPrj≤n {B≢⋆ = B≢⋆}{C≢⋆} g i n m m' =
   begin
@@ -423,7 +418,7 @@ compose : ∀ {A B C}
 compose c d = compose-normal-form c d {_} {≤-refl}
 
 compose-final : ∀ {A B C}
-  → FinalCoercion A B → NormalFormCoercion B C → NormalFormCoercion A C
+  → FinalCoercion A B → NormalFormCoercion B C → FinalCoercion A C
 compose-final c d = compose-final-normal-internal c d {_} {≤-refl}
 
 compose-middle : ∀ {A B C}

@@ -8,19 +8,21 @@ open import Data.Nat.Solver using (module +-*-Solver)
 open +-*-Solver
 
 
-3≤1+2*a+b+3 : ∀ {a b} → 3 ≤ 1 + (2 * a) + b + 3
-3≤1+2*a+b+3 {a}{b} =
+2≤1+2*a+b+3 : ∀ {a b} → 2 ≤ 1 + (2 * a) + b + 3
+2≤1+2*a+b+3 {a}{b} =
   begin
-    3
-      ≤⟨ n≤m+n (1 + (2 * a) + b) _ ⟩
-    1 + (2 * a) + b + 3
+    2
+      ≤⟨ n≤m+n ((1 + (2 * a) + b) + 1) _ ⟩
+    1 + ((((2 * a) + b) + 1) + 2)
+      ≡⟨ cong₂ (_+_) (refl{x = 1}) (+-assoc ((2 * a) + b) 1 2) ⟩
+    1 + (((2 * a) + b) + 3)
   ∎
 
-3≤1+2*a+b+2+2*c+1 : ∀ {a b c} → 3 ≤ 1 + 2 * a + b + (2 + (2 * c + 1))
-3≤1+2*a+b+2+2*c+1 {a}{b}{c} = 
+2≤1+2*a+b+2+2*c+1 : ∀ {a b c} → 2 ≤ 1 + 2 * a + b + (2 + (2 * c + 1))
+2≤1+2*a+b+2+2*c+1 {a}{b}{c} = 
   begin
-    1 + 2
-      ≤⟨ +-mono-≤ (m≤m+n 1 (2 * a + b)) (m≤m+n 2 (2 * c + 1)) ⟩
+    1 + 1
+      ≤⟨ +-mono-≤ (m≤m+n 1 (2 * a + b)) (m≤m+n 1 (1 + (2 * c + 1))) ⟩
     1 + 2 * a + b + (2 + (2 * c + 1))
   ∎
 
@@ -95,21 +97,6 @@ open +-*-Solver
     n
   ∎
 
-2+2*a+b≤1+2*a+b+3 : ∀ {a b} →  2 + (2 * a + b) ≤ 1 + (2 * a + b + 3)
-2+2*a+b≤1+2*a+b+3 {a} {b} =
-  begin
-    2 + (2 * a + b)
-      ≡⟨ solve 2 (λ a b → con 2 :+ (con 2 :* a :+ b)
-                            :=
-                          con 2 :* a :+ b :+ con 2)
-               refl a b ⟩
-    (2 * a + b) + 2
-      ≤⟨ +-monoʳ-≤ _ (n≤1+n 2) ⟩
-    2 * a + b + 3
-      ≤⟨ n≤m+n 1 _ ⟩
-    1 + (2 * a + b + 3)
-  ∎
-
 1+a+b≡a+1+b : ∀ {a b} → 1 + (a + b) ≡ a + (1 + b)
 1+a+b≡a+1+b {a} {b} =
   solve 2 (λ a b → con 1 :+ (a :+ b) := (a :+ (con 1 :+ b))) refl a b
@@ -140,18 +127,18 @@ a+1+b≤n⇒a+b≤n {a} {b} {n} m =
 1+a+b+c≡b+1+a+c {a} {b} {c} =
   solve 3 (λ a b c → con 1 :+ (a :+ (b :+ c)) := b :+ (con 1 :+ (a :+ c))) refl a b c
 
-1+c+2*b+a+d≤1+2*b+c+1+2*a+d : ∀ {a b c d}
-  → 1 + (c + (2 * (b + a) + d))
+c+2*b+a+d≤1+2*b+c+1+2*a+d : ∀ {a b c d}
+  → c + (2 * (b + a) + d)
   ≤ 1 + (2 * b + c + (1 + (2 * a + d)))
-1+c+2*b+a+d≤1+2*b+c+1+2*a+d {a} {b} {c} {d} =
+c+2*b+a+d≤1+2*b+c+1+2*a+d {a} {b} {c} {d} =
   begin
-    1 + (c + (2 * (b + a) + d))
-      ≡⟨ solve 4 (λ a b c d → con 1 :+ (c :+ (b :+ a :+ (b :+ a :+ con 0) :+ d))
+    c + (2 * (b + a) + d)
+      ≡⟨ solve 4 (λ a b c d → c :+ (b :+ a :+ (b :+ a :+ con 0) :+ d)
                                 :=
-                              con 2 :* b :+ c :+ (con 1 :+ (con 2 :* a :+ d)))
+                              con 2 :* b :+ c :+ (con 2 :* a :+ d))
                refl a b c d ⟩
-    2 * b + c + (1 + (2 * a + d))
-      ≤⟨ n≤m+n 1 _ ⟩
+    (2 * b + c) + (2 * a + d)
+      ≤⟨ +-mono-≤ (n≤1+n _) (n≤1+n _) ⟩
     1 + (2 * b + c + (1 + (2 * a + d)))
   ∎
 

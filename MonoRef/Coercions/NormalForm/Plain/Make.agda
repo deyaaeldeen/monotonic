@@ -11,16 +11,16 @@ open import MonoRef.Static.Types.Relations
 make-normal-form-coercion : ∀ A B → NormalFormCoercion A B
 make-normal-form-coercion A B with ⌣-decidable A B
 ... | no _            = final (middle fail)
-... | yes ⌣-ℕ-refl    = final (middle id)
-... | yes ⌣-Unit-refl = final (middle id)
+... | yes ⌣-ℕ-refl    = final (middle (id I-ℕ))
+... | yes ⌣-Unit-refl = final (middle (id I-Unit))
 make-normal-form-coercion A .⋆ | yes ⌣-⋆R
     with T≡⋆? A
-...    | yes refl = final (middle id)
-...    | no ¬⋆    = final (injSeq (¬⋆⇒Injectable ¬⋆) id)
+...    | yes refl = id⋆
+...    | no ¬⋆    = final (injSeq (¬⋆⇒Injectable ¬⋆) (id (¬⋆⇒Injectable ¬⋆)))
 make-normal-form-coercion .⋆ B | yes ⌣-⋆L
     with T≡⋆? B
-...    | yes refl = final (middle id)
-...    | no ¬⋆    = prjSeq (¬⋆⇒Injectable ¬⋆) (middle id)
+...    | yes refl = id⋆
+...    | no ¬⋆    = prjSeq (¬⋆⇒Injectable ¬⋆) (middle (id (¬⋆⇒Injectable ¬⋆)))
 make-normal-form-coercion (A `× B) (A' `× B') | yes ⌣-×
    with make-normal-form-coercion A A' | make-normal-form-coercion B B'
 ...   | c | d = final (middle (prod c d))
@@ -32,8 +32,8 @@ make-normal-form-coercion .(Ref _) (Ref B) | yes ⌣-ref = final (middle (Ref B 
 make-middle-coercion : ∀ {A B} → Injectable A → Injectable B → MiddleCoercion A B
 make-middle-coercion A B with ⌣-decidableᵢ A B
 make-middle-coercion _ _ | no _ = fail
-... | yes ⌣-ℕ-refl    = id
-... | yes ⌣-Unit-refl = id
+... | yes ⌣-ℕ-refl    = id B
+... | yes ⌣-Unit-refl = id B
 make-middle-coercion {A ⇒ B} {A' ⇒ B'} _ _ | yes ⌣-⇒
     with make-normal-form-coercion A' A | make-normal-form-coercion B B'
 ...    | c | d = fun c d

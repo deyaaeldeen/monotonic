@@ -18,6 +18,8 @@ data NormalFormCoercion where
       ---------------------------------------
     → NormalFormCoercion ⋆ B
 
+  id⋆ : NormalFormCoercion ⋆ ⋆
+
   final : ∀ {A B} → FinalCoercion A B → NormalFormCoercion A B
 
 data FinalCoercion where
@@ -28,7 +30,7 @@ data FinalCoercion where
 
 data MiddleCoercion where
 
-  id : ∀ {A} → MiddleCoercion A A
+  id : ∀ {A} → Injectable A → MiddleCoercion A A
 
   fun : ∀ {A A' B B'}
     → NormalFormCoercion A' A
@@ -84,6 +86,8 @@ data ActiveNormalForm where
       ----------------------------------------------
     → ActiveNormalForm (prjSeq iA fc)
 
+  A-id⋆ : ActiveNormalForm id⋆
+
   A-final : ∀ {A B} {fc : FinalCoercion A B}
       --------------------------------------------
     → ActiveFinal fc → ActiveNormalForm (final fc)
@@ -96,7 +100,7 @@ data ActiveFinal where
 
 data ActiveMiddle where
 
-  A-id : ∀ {A} → ActiveMiddle (id {A})
+  A-id : ∀ {A} → (iA : Injectable A) → ActiveMiddle (id iA)
 
   A-prod : ∀ {A A' B B'}
     → (c : NormalFormCoercion A A')
@@ -115,6 +119,7 @@ inert-normalform-decidable : ∀ {A B} → (c : NormalFormCoercion A B) → Dec 
 inert-final-decidable : ∀ {A B} → (c : FinalCoercion A B) → Dec (InertFinal c)
 inert-middle-decidable : ∀ {A B} → (c : MiddleCoercion A B) → Dec (InertMiddle c)
 
+inert-normalform-decidable id⋆ = no (λ ())
 inert-normalform-decidable (prjSeq _ _) = no (λ ())
 inert-normalform-decidable (final c)
   with inert-final-decidable c
@@ -127,7 +132,7 @@ inert-final-decidable (middle c)
 ... | yes d = yes (I-middle d)
 ... | no a = no λ { (I-middle b) → a b}
 
-inert-middle-decidable id = no (λ ())
+inert-middle-decidable (id _) = no (λ ())
 inert-middle-decidable (fun _ _) = yes I-fun
 inert-middle-decidable (prod _ _) = no (λ ())
 inert-middle-decidable (Ref _ _) = no (λ ())
@@ -137,6 +142,7 @@ inert-middle-decidable fail = no (λ ())
 ¬Inert⇒Active-final : ∀ {A B} {c : FinalCoercion A B} → ¬ InertFinal c → ActiveFinal c
 ¬Inert⇒Active-middle : ∀ {A B} {c : MiddleCoercion A B} → ¬ InertMiddle c → ActiveMiddle c
 
+¬Inert⇒Active-normform {c = id⋆} _ = A-id⋆
 ¬Inert⇒Active-normform {c = prjSeq iA x} _ = A-prjSeq iA x
 ¬Inert⇒Active-normform {c = final fc} ¬Inert =
   A-final (¬Inert⇒Active-final (λ x → ¬Inert (I-final x)))
@@ -145,7 +151,7 @@ inert-middle-decidable fail = no (λ ())
 ¬Inert⇒Active-final {c = middle x} ¬Inert =
   A-middle (¬Inert⇒Active-middle (λ x → ¬Inert (I-middle x)))
 
-¬Inert⇒Active-middle {c = id} _ = A-id
+¬Inert⇒Active-middle {c = id x} _ = A-id x
 ¬Inert⇒Active-middle {c = fun _ _} ¬Inert = ⊥-elim (¬Inert I-fun)
 ¬Inert⇒Active-middle {c = prod c d} ¬Inert = A-prod c d
 ¬Inert⇒Active-middle {c = Ref x y} ¬Inert = A-Ref x y

@@ -26,7 +26,7 @@ open import MonoRef.Static.Types.Relations
 ‖_‖ᶠ : ∀{A B} → FinalCoercion A B → ℕ
 ‖_‖ₘ : ∀{A B} → MiddleCoercion A B → ℕ
   
-‖ id         ‖ₘ = 1
+‖ id _       ‖ₘ = 1
 ‖ (fun c d)  ‖ₘ = 1 + ‖ c ‖ + ‖ d ‖
 ‖ (prod c d) ‖ₘ = 1 + ‖ c ‖ + ‖ d ‖
 ‖ (Ref t _)  ‖ₘ = 1 + ‖ t ‖ₜ
@@ -37,18 +37,20 @@ open import MonoRef.Static.Types.Relations
 
 ‖ (prjSeq A i) ‖ = 1 + (2 * ‖ A ‖ᵢₜ) + ‖ i ‖ᶠ
 ‖ (final i)    ‖ = 1 + ‖ i ‖ᶠ
+‖ id⋆          ‖ = 1
 
 
 size-nfcoercion≢0 : ∀{A B} → (nc : NormalFormCoercion A B) → ‖ nc ‖ ≢ 0
 size-nfcoercion≢0 (prjSeq _ _) = λ ()
 size-nfcoercion≢0 (final _   ) = λ ()
+size-nfcoercion≢0 id⋆          = λ ()
 
 size-fcoercion≢0 : ∀{A B} → (fc : FinalCoercion A B) → ‖ fc ‖ᶠ ≢ 0
 size-fcoercion≢0 (injSeq _ _) = λ ()
 size-fcoercion≢0 (middle _  ) = λ ()
 
 size-mcoercion≢0 : ∀{A B} → (mc : MiddleCoercion A B) → ‖ mc ‖ₘ ≢ 0
-size-mcoercion≢0 id         = λ ()
+size-mcoercion≢0 (id _)     = λ ()
 size-mcoercion≢0 (fun _ _ ) = λ ()
 size-mcoercion≢0 (prod _ _) = λ ()
 size-mcoercion≢0 (Ref _ _)  = λ ()

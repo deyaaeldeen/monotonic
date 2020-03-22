@@ -6,15 +6,21 @@ open import MonoRef.Dynamics.Efficient.Common.Value
   NormalFormCoercion InertNormalForm
 open import MonoRef.Language.TargetWithoutBlame
   NormalFormCoercion InertNormalForm
+open import MonoRef.Static.Types
+open import MonoRef.Static.Types.Relations
 
 
 infix 3 _⟶ᵤ_
 
 data _⟶ᵤ_ {Γ Σ} : ∀ {A} → Σ ∣ Γ ⊢ A → Σ ∣ Γ ⊢ A → Set where
 
-  ι : ∀ {A} {V : Σ ∣ Γ ⊢ A} → SimpleValue V
-      ------------------------------------
-    → V < final (middle id) > ⟶ᵤ V
+  ι⋆ : ∀ {V : Σ ∣ Γ ⊢ ⋆} → SimpleValue V
+      ---------------------------------
+    → V < id⋆ > ⟶ᵤ V
+
+  ι : ∀ {A} {V : Σ ∣ Γ ⊢ A} → (iA : Injectable A) → SimpleValue V
+      ----------------------------------------------------------
+    → V < final (middle (id iA)) > ⟶ᵤ V
 
   `× : ∀ {A B A' B'}
          {V₁ : Σ ∣ Γ ⊢ A} {V₂ : Σ ∣ Γ ⊢ B}
