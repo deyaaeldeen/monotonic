@@ -206,13 +206,30 @@ module ParamStateReduction/Pre
     ⟶⟹rtti⊑Σ {Σ₁⊑ₕΣ = Σ₁⊑ₕΣ} (state/discard _ _) = Σ₁⊑ₕΣ
 
     ⟶⟹Σ'⊑Σ : ∀ {Σ Σ₁ Σ₂ T A B} {Q Q' : List (SuspendedCast Σ)} {A∈Σ : A ∈ Σ}
-                    {Σ₁⊑ₕΣ : Σ₁ ⊑ₕ Σ} {M : proj₁ (merge' Σ₁⊑ₕΣ (cast A∈Σ B ∷ Q)) ∣ ∅ ⊢ T}
-                    {μ  : Store (proj₁ (merge' Σ₁⊑ₕΣ (cast A∈Σ B ∷ Q))) Σ₁}
-                    {Σ₂⊑ₕΣ₁ : Σ₂ ⊑ₕ Σ₁}
-                    {M' : (proj₁ (merge' (⊑ₕ-trans Σ₂⊑ₕΣ₁ Σ₁⊑ₕΣ) Q')) ∣ ∅ ⊢ T}
-                    {μ' : Store (proj₁ (merge' (⊑ₕ-trans Σ₂⊑ₕΣ₁ Σ₁⊑ₕΣ) Q')) Σ₂}
+                  {Σ₁⊑ₕΣ : Σ₁ ⊑ₕ Σ} {M : proj₁ (merge' Σ₁⊑ₕΣ (cast A∈Σ B ∷ Q)) ∣ ∅ ⊢ T}
+                  {μ  : Store (proj₁ (merge' Σ₁⊑ₕΣ (cast A∈Σ B ∷ Q))) Σ₁}
+                  {Σ₂⊑ₕΣ₁ : Σ₂ ⊑ₕ Σ₁}
+                  {M' : (proj₁ (merge' (⊑ₕ-trans Σ₂⊑ₕΣ₁ Σ₁⊑ₕΣ) Q')) ∣ ∅ ⊢ T}
+                  {μ' : Store (proj₁ (merge' (⊑ₕ-trans Σ₂⊑ₕΣ₁ Σ₁⊑ₕΣ) Q')) Σ₂}
       → _,_,_⟶_,_,_ {A∈Σ = A∈Σ} {Σ₁⊑ₕΣ = Σ₁⊑ₕΣ} Q M μ Q' M' μ'
       → proj₁ (merge' (⊑ₕ-trans Σ₂⊑ₕΣ₁ Σ₁⊑ₕΣ) Q') ⊑ₕ Σ
     ⟶⟹Σ'⊑Σ {Q' = Q'} {Σ₁⊑ₕΣ = Σ₁⊑ₕΣ} {Σ₂⊑ₕΣ₁ = Σ₂⊑ₕΣ₁} red =
       ⊑ₕ-trans (proj₂ (proj₂ (merge' Σ'⊑ₕΣ Q'))) (proj₁ (proj₂ (merge' Σ'⊑ₕΣ Q')))
       where Σ'⊑ₕΣ = (⊑ₕ-trans Σ₂⊑ₕΣ₁ Σ₁⊑ₕΣ)
+
+    ⟶⟹qst : ∀ {Σ Σ₁ Σ₂ T A B} {Q Q' : List (SuspendedCast Σ)} {A∈Σ : A ∈ Σ}
+                  {Σ₁⊑ₕΣ : Σ₁ ⊑ₕ Σ} {M : proj₁ (merge' Σ₁⊑ₕΣ (cast A∈Σ B ∷ Q)) ∣ ∅ ⊢ T}
+                  {μ  : Store (proj₁ (merge' Σ₁⊑ₕΣ (cast A∈Σ B ∷ Q))) Σ₁}
+                  {Σ₂⊑ₕΣ₁ : Σ₂ ⊑ₕ Σ₁}
+                  {M' : (proj₁ (merge' (⊑ₕ-trans Σ₂⊑ₕΣ₁ Σ₁⊑ₕΣ) Q')) ∣ ∅ ⊢ T}
+                  {μ' : Store (proj₁ (merge' (⊑ₕ-trans Σ₂⊑ₕΣ₁ Σ₁⊑ₕΣ) Q')) Σ₂}
+      → QueueStoreTyping Σ₁⊑ₕΣ (cast A∈Σ B ∷ Q)
+      → _,_,_⟶_,_,_ {A∈Σ = A∈Σ} {Σ₁⊑ₕΣ = Σ₁⊑ₕΣ} Q M μ Q' M' μ'
+      → QueueStoreTyping (⊑ₕ-trans Σ₂⊑ₕΣ₁ Σ₁⊑ₕΣ) Q'
+    ⟶⟹qst qst (state/update-store rtti∼B x c) = {!!}
+    ⟶⟹qst {Q = Q} {A∈Σ = A∈Σ} _ (state/error1 rtti∼B x y) = evolving Q A∈Σ
+    ⟶⟹qst (evolving Q A∈Σ) (state/error2 x) = {!!}
+    ⟶⟹qst {Q = Q} qst (state/discard rtti∼B x)
+      with Q
+    ... | [] = {!normal!}
+    ... | cast A∈Σ _ ∷ Q' = evolving Q' A∈Σ

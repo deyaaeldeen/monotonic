@@ -5,7 +5,7 @@ module MonoRef.Dynamics.Reduction.StdStore.MonoReduction
   (Inert : ∀ {A B} → A ⟹ B → Set)
   where
 
-open import Data.List using (List ; [] ; _∷ʳ_)
+open import Data.List using (List ; [] ; _∷ʳ_ ; _∷_)
 open import Data.List.All using (map)
 open import Data.List.Membership.Propositional using (_∈_)
 open import Data.Product using (proj₁ ; proj₂)
@@ -147,3 +147,20 @@ module ParamMonoReduction
     ⟶ᵢₘ⟹Σ'⊑Σ (β-:= _ _ _ c) = from⊑ₕ (proj₂ (merge (proj₁ (get-val-from-successful-cast c))))
     ⟶ᵢₘ⟹Σ'⊑Σ (β-:=/failed _ _ _ _) = StoreTypingProgress-refl
     ⟶ᵢₘ⟹Σ'⊑Σ {Σ} {A = Ref A} (β-ref _) = from⊑ₗ (∷ʳ-⊒ A Σ)
+
+    ⟶ᵢₘ⟹qst : ∀ {Σ Σ' A} {Q : List (SuspendedCast Σ')} {μ : Store Σ Σ}
+                    {μ' : Store (proj₁ (merge Q)) Σ'}
+                    {M : Σ ∣ ∅ ⊢ A} {M' : proj₁ (merge Q) ∣ ∅ ⊢ A}
+      → M , μ ⟶ᵢₘ Q , M' , μ'
+      → QueueStoreTyping ⊑ₕ-refl Q
+    ⟶ᵢₘ⟹qst (β-!ₛ _) = normal
+    ⟶ᵢₘ⟹qst (β-! _ _) = normal
+    ⟶ᵢₘ⟹qst (β-:=ₛ _ _) = normal
+    ⟶ᵢₘ⟹qst {μ = μ} (β-:= {B = B} _ R V c)
+      with apply-cast ⊑ₕ-refl [] V (make-coercion B (store-lookup-rtti/ref R μ)) | c
+    ... | _ | intro Q' v'
+        with Q'
+    ...   | [] = normal
+    ...   | cast A∈Σ B' ∷ w = evolving w A∈Σ
+    ⟶ᵢₘ⟹qst (β-:=/failed _ _ _ _) = normal
+    ⟶ᵢₘ⟹qst {Σ} {A = Ref A} (β-ref _) = normal
