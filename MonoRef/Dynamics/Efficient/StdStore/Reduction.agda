@@ -27,31 +27,33 @@ open import MonoRef.Static.Types.Relations
 infix 3  _/_,_⟶ₑ_,_,_
 infix 3  _,_,_⟶_,_,_
 
-data _/_,_⟶ₑ_,_,_ {Σ} : ∀ {Σ' Σ'' A}
+data _/_,_⟶ₑ_,_,_ {Σ} : ∀ {Σ' A}
   → BypassCast
-  → Σ  ∣ ∅ ⊢ A → (μ : Store Σ Σ)
-  → (Q : List (SuspendedCast Σ)) → Σ'' ∣ ∅ ⊢ A → (μ' : Store Σ'' Σ')
+  → Σ   ∣ ∅ ⊢ A → (μ : Store Σ Σ)
+  → (Q : List (SuspendedCast Σ'))
+  → proj₁ (merge Q) ∣ ∅ ⊢ A
+  → Store (proj₁ (merge Q)) Σ'
   → Set
 
-⟶ₑ⟹rtti⊑Σ : ∀ {Σ Σ' Σ'' A} {μ : Store Σ Σ} {Q : List (SuspendedCast Σ)}
-  {μ' : Store Σ'' Σ'} {bc : BypassCast}
-  {M : Σ ∣ ∅ ⊢ A} {M' : Σ'' ∣ ∅ ⊢ A}
+⟶ₑ⟹rtti⊑Σ : ∀ {Σ Σ' A} {μ : Store Σ Σ} {Q : List (SuspendedCast Σ')}
+  {μ' : Store (proj₁ (merge Q)) Σ'} {bc : BypassCast}
+  {M : Σ ∣ ∅ ⊢ A} {M' : proj₁ (merge Q) ∣ ∅ ⊢ A}
   → bc / M , μ ⟶ₑ Q , M' , μ'
   → StoreTypingProgress Σ Σ'
 
-⟶ₑ⟹Σ'⊑Σ : ∀ {Σ Σ' Σ'' A} {μ : Store Σ Σ} {Q : List (SuspendedCast Σ)}
-  {μ' : Store Σ'' Σ'} {bc : BypassCast}
-  {M : Σ ∣ ∅ ⊢ A} {M' : Σ'' ∣ ∅ ⊢ A}
+⟶ₑ⟹Σ'⊑Σ : ∀ {Σ Σ' A} {μ : Store Σ Σ} {Q : List (SuspendedCast Σ')}
+  {μ' : Store (proj₁ (merge Q)) Σ'} {bc : BypassCast}
+  {M : Σ ∣ ∅ ⊢ A} {M' : proj₁ (merge Q) ∣ ∅ ⊢ A}
   → bc / M , μ ⟶ₑ Q , M' , μ'
-  → StoreTypingProgress Σ Σ''
+  → StoreTypingProgress Σ (proj₁ (merge Q))
 
 {- Program Reduction Rules -}
 
 data _/_,_⟶ₑ_,_,_ {Σ} where
 
-  switch : ∀ {Σ' Σ'' A} {Q : List (SuspendedCast Σ)}
-             {μ : Store Σ Σ} {μ' : Store Σ'' Σ'}
-             {M : Σ ∣ ∅ ⊢ A} {M' : Σ'' ∣ ∅ ⊢ A}
+  switch : ∀ {Σ' A} {Q : List (SuspendedCast Σ')}
+             {μ : Store Σ Σ} {μ' : Store (proj₁ (merge Q)) Σ'}
+             {M : Σ ∣ ∅ ⊢ A} {M' : proj₁ (merge Q) ∣ ∅ ⊢ A}
     → disallow / M , μ ⟶ₑ Q , M' , μ'
       -------------------------------
     → allow / M , μ ⟶ₑ Q , M' , μ'
@@ -61,16 +63,16 @@ data _/_,_⟶ₑ_,_,_ {Σ} where
       --------------------------------
     → disallow / M , μ ⟶ₑ [] , M' , μ
 
-  β-mono : ∀ {Σ' Σ'' A} {Q : List (SuspendedCast Σ)}
-             {μ : Store Σ Σ} {μ' : Store Σ'' Σ'}
-             {M : Σ ∣ ∅ ⊢ A} {M' : Σ'' ∣ ∅ ⊢ A}
+  β-mono : ∀ {Σ' A} {Q : List (SuspendedCast Σ')}
+             {μ : Store Σ Σ} {μ' : Store (proj₁ (merge Q)) Σ'}
+             {M : Σ ∣ ∅ ⊢ A} {M' : proj₁ (merge Q) ∣ ∅ ⊢ A}
     → M , μ ⟶ᵢₘ Q , M' , μ'
       --------------------------------
     → disallow / M , μ ⟶ₑ Q , M' , μ'
 
   cast/succeed : ∀ {A B} {μ : Store Σ Σ} {M : Σ ∣ ∅ ⊢ A} {c : A ⟹ B}
     → (v : Value M)
-    → (sc : SuccessfulCast (apply-cast [] v c))
+    → (sc : SuccessfulCast (apply-cast ⊑ₕ-refl [] v c))
       -----------------------------------------------------------------------------------------------------
     → disallow / M < c > , μ
     ⟶ₑ proj₁ (get-val-from-successful-cast sc)
@@ -79,7 +81,7 @@ data _/_,_⟶ₑ_,_,_ {Σ} where
 
   cast/fail : ∀ {A B} {μ : Store Σ Σ} {M : Σ ∣ ∅ ⊢ A} {c : A ⟹ B}
     → (v : Value M)
-    → (sc : FailedCast (apply-cast [] v c))
+    → (sc : FailedCast (apply-cast ⊑ₕ-refl [] v c))
       ------------------------------------------
     → disallow / M < c > , μ ⟶ₑ [] , error , μ
 
@@ -87,17 +89,17 @@ data _/_,_⟶ₑ_,_,_ {Σ} where
       -----------------------------------------------------------
     → disallow / M < c > < d > , μ ⟶ₑ [] , M < compose c d > , μ
 
-  ξ : ∀ {Σ' Σ'' A B} {Q : List (SuspendedCast Σ)}
-        {μ : Store Σ Σ} {μ' : Store Σ'' Σ'}
-        {M : Σ ∣ ∅ ⊢ A} {M' : Σ'' ∣ ∅ ⊢ A} 
+  ξ : ∀ {Σ' A B} {Q : List (SuspendedCast Σ')}
+        {μ : Store Σ Σ} {μ' : Store (proj₁ (merge Q)) Σ'}
+        {M : Σ ∣ ∅ ⊢ A} {M' : proj₁ (merge Q) ∣ ∅ ⊢ A} 
     → (F : Frame A B)
     → (red : allow / M , μ ⟶ₑ Q , M' , μ')
       ------------------------------------------------------------------------------
     → disallow / plug M F , μ ⟶ₑ Q , plug M' (weaken-frame (⟶ₑ⟹Σ'⊑Σ red) F) , μ'
 
-  ξ-cast : ∀ {Σ' Σ'' A B} {Q : List (SuspendedCast Σ)}
-             {μ : Store Σ Σ} {μ' : Store Σ'' Σ'}
-             {M : Σ ∣ ∅ ⊢ A} {M' : Σ'' ∣ ∅ ⊢ A} {c : A ⟹ B}
+  ξ-cast : ∀ {Σ' A B} {Q : List (SuspendedCast Σ')}
+             {μ : Store Σ Σ} {μ' : Store (proj₁ (merge Q)) Σ'}
+             {M : Σ ∣ ∅ ⊢ A} {M' : proj₁ (merge Q) ∣ ∅ ⊢ A} {c : A ⟹ B}
     → (red : disallow / M , μ ⟶ₑ Q , M' , μ')
       ------------------------------------------
     → allow / M < c > , μ ⟶ₑ Q , M' < c >  , μ'
@@ -135,29 +137,48 @@ data _/_,_⟶ₑ_,_,_ {Σ} where
 
 {- State Reduction Rules -}
 
-data _,_,_⟶_,_,_ {Σ T} : ∀ {Σ₂ Σ₃ Σ₄ Σ₅}
-    (Q  : List (SuspendedCast Σ)) → (M  : Σ₃ ∣ ∅ ⊢ T) → (μ  : Store Σ₃ Σ₂)
-  → (Q' : List (SuspendedCast Σ)) → (M' : Σ₅ ∣ ∅ ⊢ T) → (μ' : Store Σ₅ Σ₄)
+data _,_,_⟶_,_,_ {Σ T} : ∀ {Σ₁ Σ₂ Σ₃} {Σ₁⊑ₕΣ : Σ₁ ⊑ₕ Σ} {Σ₃⊑ₕΣ₂ : Σ₃ ⊑ₕ Σ₂} →
+    (Q  : List (SuspendedCast Σ)) →
+    (M  : proj₁ (merge' Σ₁⊑ₕΣ Q) ∣ ∅ ⊢ T) →
+    (μ  : Store (proj₁ (merge' Σ₁⊑ₕΣ Q)) Σ₁) → 
+    (Q' : List (SuspendedCast Σ₂)) →
+    (M' : proj₁ (merge' Σ₃⊑ₕΣ₂ Q') ∣ ∅ ⊢ T) →
+    (μ' : Store (proj₁ (merge' Σ₃⊑ₕΣ₂ Q')) Σ₃)
   → Set where
 
-  prog-reduce : ∀ {Σ' bc} {Q : List (SuspendedCast Σ)}
-                        {μ : Store Σ Σ} {μ' : Store (proj₁ (merge Q)) Σ'}
-                        {M : Σ ∣ ∅ ⊢ T} {M' : proj₁ (merge Q) ∣ ∅ ⊢ T}
+  state-reduce : ∀ {Σ₁ Σ₂ A B} {Q Q' : List (SuspendedCast Σ)} {A∈Σ : A ∈ Σ}
+                   {Σ₁⊑ₕΣ : Σ₁ ⊑ₕ Σ} {μ : Store (proj₁ (merge' Σ₁⊑ₕΣ (cast A∈Σ B ∷ Q))) Σ₁}
+                   {Σ₂⊑ₕΣ₁ : Σ₂ ⊑ₕ Σ₁}
+                   {μ' : Store (proj₁ (merge' (⊑ₕ-trans Σ₂⊑ₕΣ₁ Σ₁⊑ₕΣ) Q')) Σ₂}
+                   {M : proj₁ (merge' Σ₁⊑ₕΣ (cast A∈Σ B ∷ Q)) ∣ ∅ ⊢ T}
+                   {M' : proj₁ (merge' (⊑ₕ-trans Σ₂⊑ₕΣ₁ Σ₁⊑ₕΣ) Q') ∣ ∅ ⊢ T}
+    → _,_,_⟶ₛ_,_,_ {A∈Σ = A∈Σ} {Σ₁⊑ₕΣ = Σ₁⊑ₕΣ} Q M μ {Σ₂⊑ₕΣ₁ = Σ₂⊑ₕΣ₁} Q' M' μ'
+      --------------------------------------------------------------------------
+    → cast A∈Σ B ∷ Q , M , μ ⟶ Q' , M' , μ'
+
+  prog-reduce : ∀ {Σ' bc} {Q : List (SuspendedCast Σ')}
+                  {μ : Store Σ Σ} {μ' : Store (proj₁ (merge Q)) Σ'}
+                  {M : Σ ∣ ∅ ⊢ T} {M' : proj₁ (merge Q) ∣ ∅ ⊢ T}
     → bc / M , μ ⟶ₑ Q , M' , μ'
-      --------------------------
-    → [] , M , μ ⟶ Q , M' , μ'
+      ----------------------------------------------
+    → _,_,_⟶_,_,_ {Σ₁⊑ₕΣ = ⊑ₕ-refl} [] M μ Q M' μ'
 
-  state-reduce : ∀ {Σ₂ Σ₃ Σ₄ Σ₅} {Q Q' : List (SuspendedCast Σ)}
-                   {μ : Store Σ₃ Σ₂} {μ' : Store Σ₅ Σ₄}
-                   {M : Σ₃ ∣ ∅ ⊢ T} {M' : Σ₅ ∣ ∅ ⊢ T}
-    → Q , M , μ ⟶ₛ Q' , M' , μ'
-      --------------------------
-    → Q , M , μ ⟶ Q' , M' , μ'
-
-⟶⟹rtti⊑Σ : ∀ {Σ Σ₂ Σ₃ Σ₄ Σ₅ A} {Q Q' : List (SuspendedCast Σ)}
-                 {M : Σ₃ ∣ ∅ ⊢ A} {μ : Store Σ₃ Σ₂}
-                 {M' : Σ₅ ∣ ∅ ⊢ A} {μ' : Store Σ₅ Σ₄}
+⟶⟹rtti⊑Σ : ∀ {Σ Σ₁ Σ₂ Σ₃ A} {Q : List (SuspendedCast Σ)} {Q' : List (SuspendedCast Σ₂)}
+                {Σ₁⊑ₕΣ : Σ₁ ⊑ₕ Σ} {Σ₃⊑ₕΣ₂ : Σ₃ ⊑ₕ Σ₂} {M : proj₁ (merge' Σ₁⊑ₕΣ Q) ∣ ∅ ⊢ A}
+                 {μ : Store (proj₁ (merge' Σ₁⊑ₕΣ Q)) Σ₁}
+                 {M' : proj₁ (merge' Σ₃⊑ₕΣ₂ Q') ∣ ∅ ⊢ A}
+                 {μ' : Store (proj₁ (merge' Σ₃⊑ₕΣ₂ Q')) Σ₃}
   → Q , M , μ  ⟶ Q' , M' , μ'
-  → StoreTypingProgress Σ Σ₄
+  → StoreTypingProgress Σ Σ₃
 ⟶⟹rtti⊑Σ (prog-reduce red) = ⟶ₑ⟹rtti⊑Σ red
 ⟶⟹rtti⊑Σ (state-reduce red) = from⊑ₕ (⟶ₛ⟹rtti⊑Σ red)
+
+⟶⟹qst : ∀ {Σ Σ₁ Σ₂ Σ₃ A} {Q : List (SuspendedCast Σ)} {Q' : List (SuspendedCast Σ₂)}
+             {Σ₁⊑ₕΣ : Σ₁ ⊑ₕ Σ} {Σ₃⊑ₕΣ₂ : Σ₃ ⊑ₕ Σ₂} {M : proj₁ (merge' Σ₁⊑ₕΣ Q) ∣ ∅ ⊢ A}
+             {μ : Store (proj₁ (merge' Σ₁⊑ₕΣ Q)) Σ₁}
+             {M' : proj₁ (merge' Σ₃⊑ₕΣ₂ Q') ∣ ∅ ⊢ A}
+             {μ' : Store (proj₁ (merge' Σ₃⊑ₕΣ₂ Q')) Σ₃}
+  → Q , M , μ  ⟶ Q' , M' , μ'
+  → QueueStoreTyping Σ₁⊑ₕΣ Q
+⟶⟹qst (prog-reduce red) = normal
+⟶⟹qst (state-reduce {Q = Q} {A∈Σ = A∈Σ} red) = evolving Q A∈Σ

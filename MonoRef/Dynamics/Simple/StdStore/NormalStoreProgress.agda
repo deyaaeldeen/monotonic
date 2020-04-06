@@ -105,7 +105,7 @@ progress-normal-store (:= A x e₁ e₂) ν with progress-normal-store e₁ ν
 ... | done v₁ with progress-normal-store e₂ ν
 ...   | step e⟶e' = step (ξ (ξ-:=ᵣ A x e₁) e⟶e')
 ...   | error E-error = step (ξ-error (ξ-:=ᵣ A x e₁))
-...   | done v₂ with successful-cast? (apply-cast [] v₂ (make-coercion A (store-lookup-rtti/ref v₁ ν)))
+...   | done v₂ with successful-cast? (apply-cast ⊑ₕ-refl [] v₂ (make-coercion A (store-lookup-rtti/ref v₁ ν)))
 ...     | inj₁ e = step (β-mono (β-:= x v₁ v₂ e))
 ...     | inj₂ e = step (β-mono (β-:=/failed x v₁ v₂ e))
 
@@ -117,6 +117,6 @@ progress-normal-store (e < c >) ν with progress-normal-store e ν
 ... | step e⟶e' = step (ξ (ξ-<> c) e⟶e')
 ... | error E-error = step (ξ-error (ξ-<> c))
 ... | done v
-  with successful-cast? (apply-cast [] v c)
+  with successful-cast? (apply-cast ⊑ₕ-refl [] v c)
 ...   | inj₁ x = step (cast/succeed v x)
 ...   | inj₂ x = step (cast/fail v x)

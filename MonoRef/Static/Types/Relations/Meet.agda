@@ -66,6 +66,9 @@ B⊑A⇒⊓AB≡B (~-ref A∼B) (⊑-refl ())
 ⊓⟹⊑ₗ (~-⇒ x x₁) = ⊑-⇒ (⊓⟹⊑ₗ x) (⊓⟹⊑ₗ x₁)
 ⊓⟹⊑ₗ (~-ref x) = ⊑-ref (⊓⟹⊑ₗ x)
 
+⊓⟹⊑ₗ-with-≡ : ∀ {T T₁ T₂} → (T₁∼T₂ : T₁ ∼ T₂) → ⊓ T₁∼T₂ ≡ T → T ⊑ T₁
+⊓⟹⊑ₗ-with-≡ T₁∼T₂ refl = ⊓⟹⊑ₗ T₁∼T₂
+
 ⊓-respects-∼ᵣ : ∀ {A B} → (A∼B : A ∼ B) → A ∼ ⊓ A∼B
 ⊓-respects-∼ᵣ ∼-ℕ-refl = ∼-ℕ-refl
 ⊓-respects-∼ᵣ ∼-Unit-refl = ∼-Unit-refl

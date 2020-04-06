@@ -51,12 +51,13 @@ module ParamMonoReduction
 
   module ParamMonoReduction/store/apply-cast
     (store : ∀ {Σ A} {v : Σ ∣ ∅ ⊢ A} → Value v → Store Σ Σ → Store (Σ ∷ʳ A) (Σ ∷ʳ A))
-    (apply-cast : ∀ {A B Σ}
+    (apply-cast : ∀ {A B Σ Σ'}
+      → (Σ'⊑ₕΣ : Σ' ⊑ₕ Σ)
       → (Q : List (SuspendedCast Σ))
-      → ∀ {e : proj₁ (merge Q) ∣ ∅ ⊢ A}
+      → ∀ {e : proj₁ (merge' Σ'⊑ₕΣ Q) ∣ ∅ ⊢ A}
       → (v : Value e)
       → (c : A ⟹ B)
-      → CastResult Q B)
+      → CastResult Σ'⊑ₕΣ Q B)
     (typeprecise-strenthen-val : ∀ {Σ Σ' Γ A} {e : Σ ∣ Γ ⊢ A} → (Σ'⊑ₕΣ : Σ' ⊑ₕ Σ)
       → Value e
       → Value (typeprecise-strenthen-expr Σ'⊑ₕΣ e))
@@ -66,20 +67,12 @@ module ParamMonoReduction
 
     infix 3  _,_⟶ᵢₘ_,_,_
   
-    data _,_⟶ᵢₘ_,_,_ {Σ} : ∀ {Σ' Σ'' A}
+    data _,_⟶ᵢₘ_,_,_ {Σ} : ∀ {Σ' A}
       → Σ   ∣ ∅ ⊢ A → (μ : Store Σ Σ)
-      → (Q : List (SuspendedCast Σ)) → Σ'' ∣ ∅ ⊢ A → Store Σ'' Σ'
+      → (Q : List (SuspendedCast Σ'))
+      → proj₁ (merge Q) ∣ ∅ ⊢ A
+      → Store (proj₁ (merge Q)) Σ'
       → Set
-  
-    ⟶ᵢₘ⟹rtti⊑Σ : ∀ {Σ Σ' Σ'' A} {Q : List (SuspendedCast Σ)} {μ : Store Σ Σ} {μ' : Store Σ'' Σ'}
-                   {M : Σ ∣ ∅ ⊢ A} {M' : Σ'' ∣ ∅ ⊢ A}
-      → M , μ ⟶ᵢₘ Q , M' , μ'
-      → StoreTypingProgress Σ Σ'
-
-    ⟶ᵢₘ⟹Σ'⊑Σ : ∀ {Σ Σ' Σ'' A} {Q : List (SuspendedCast Σ)} {μ : Store Σ Σ} {μ' : Store Σ'' Σ'}
-                 {M : Σ ∣ ∅ ⊢ A} {M' : Σ'' ∣ ∅ ⊢ A}
-      → M , μ ⟶ᵢₘ Q , M' , μ'
-      → StoreTypingProgress Σ Σ''
   
     {- Impure Program Reduction Rules -}
   
@@ -114,8 +107,8 @@ module ParamMonoReduction
         → (x : ¬ static B)
         → (R : SimpleValue r)
         → (V : Value v)
-        → (c : SuccessfulCast (apply-cast [] V (make-coercion B (store-lookup-rtti/ref R μ))))
-          ------------------------------------------------------------------------------------
+        → (c : SuccessfulCast (apply-cast ⊑ₕ-refl [] V (make-coercion B (store-lookup-rtti/ref R μ))))
+          --------------------------------------------------------------------------------------------
         → := B x r v , μ
         ⟶ᵢₘ proj₁ (get-val-from-successful-cast c)
         , unit
@@ -127,10 +120,15 @@ module ParamMonoReduction
         → (x : ¬ static B)
         → (R : SimpleValue r)
         → (V : Value v)
-        → (c : FailedCast (apply-cast [] V (make-coercion B (store-lookup-rtti/ref R μ))))
-          --------------------------------------------------------------------------------
+        → (c : FailedCast (apply-cast ⊑ₕ-refl [] V (make-coercion B (store-lookup-rtti/ref R μ))))
+          ----------------------------------------------------------------------------------------
         → := B x r v , μ ⟶ᵢₘ [] , error , μ
 
+    ⟶ᵢₘ⟹rtti⊑Σ : ∀ {Σ Σ' A} {Q : List (SuspendedCast Σ')} {μ : Store Σ Σ}
+                      {μ' : Store (proj₁ (merge Q)) Σ'}
+                      {M : Σ ∣ ∅ ⊢ A} {M' : proj₁ (merge Q) ∣ ∅ ⊢ A}
+      → M , μ ⟶ᵢₘ Q , M' , μ'
+      → StoreTypingProgress Σ Σ'
     ⟶ᵢₘ⟹rtti⊑Σ (β-!ₛ _) = StoreTypingProgress-refl
     ⟶ᵢₘ⟹rtti⊑Σ (β-! _ _) = StoreTypingProgress-refl
     ⟶ᵢₘ⟹rtti⊑Σ (β-:=ₛ _ _) = StoreTypingProgress-refl
@@ -138,6 +136,11 @@ module ParamMonoReduction
     ⟶ᵢₘ⟹rtti⊑Σ (β-:=/failed _ _ _ _) = StoreTypingProgress-refl
     ⟶ᵢₘ⟹rtti⊑Σ {Σ} {A = Ref A} (β-ref _) = from⊑ₗ (∷ʳ-⊒ A Σ)
 
+    ⟶ᵢₘ⟹Σ'⊑Σ : ∀ {Σ Σ' A} {Q : List (SuspendedCast Σ')} {μ : Store Σ Σ}
+                    {μ' : Store (proj₁ (merge Q)) Σ'}
+                    {M : Σ ∣ ∅ ⊢ A} {M' : proj₁ (merge Q) ∣ ∅ ⊢ A}
+      → M , μ ⟶ᵢₘ Q , M' , μ'
+      → StoreTypingProgress Σ (proj₁ (merge Q))
     ⟶ᵢₘ⟹Σ'⊑Σ (β-!ₛ _) = StoreTypingProgress-refl
     ⟶ᵢₘ⟹Σ'⊑Σ (β-! _ _) = StoreTypingProgress-refl
     ⟶ᵢₘ⟹Σ'⊑Σ (β-:=ₛ _ _) = StoreTypingProgress-refl

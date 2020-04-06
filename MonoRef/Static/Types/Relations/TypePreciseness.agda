@@ -319,3 +319,11 @@ A⊑B⊑D≡A⊑C⊑D (⊑-ref A⊑B) (⊑-ref A⊑C) (⊑-ref B⊑D) (⊑-ref C
 ⊑-trans-assoc (⊑-ref D⊑C) (⊑-ref C⊑B) ⊑-dyn = refl
 ⊑-trans-assoc (⊑-ref D⊑C) (⊑-ref C⊑B) (⊑-ref B⊑A)
   rewrite ⊑-trans-assoc D⊑C C⊑B B⊑A = refl
+
+A⊑A≡⊑-reflexive : ∀ {A} → (A⊑A : A ⊑ A) → A⊑A ≡ ⊑-reflexive
+A⊑A≡⊑-reflexive (⊑-refl B-`ℕ) = refl
+A⊑A≡⊑-reflexive (⊑-refl B-Unit) = refl
+A⊑A≡⊑-reflexive ⊑-dyn = refl
+A⊑A≡⊑-reflexive (⊑-× A⊑A₁ A⊑A₂) rewrite A⊑A≡⊑-reflexive A⊑A₁ | A⊑A≡⊑-reflexive A⊑A₂ = refl
+A⊑A≡⊑-reflexive (⊑-⇒ A⊑A₁ A⊑A₂) rewrite A⊑A≡⊑-reflexive A⊑A₁ | A⊑A≡⊑-reflexive A⊑A₂ = refl
+A⊑A≡⊑-reflexive (⊑-ref A⊑A₁) rewrite A⊑A≡⊑-reflexive A⊑A₁ = refl

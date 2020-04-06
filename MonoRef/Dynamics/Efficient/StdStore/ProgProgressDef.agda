@@ -1,6 +1,7 @@
 module MonoRef.Dynamics.Efficient.StdStore.ProgProgressDef where
 
 open import Data.List using (List)
+open import Data.Product using (proj₁)
 
 open import MonoRef.Dynamics.Efficient.StdStore.SuspendedCast
 open import MonoRef.Dynamics.Efficient.StdStore.Reduction
@@ -12,12 +13,14 @@ open import MonoRef.Static.Context
 
 data ProgProgress {Σ A} (M : Σ ∣ ∅ ⊢ A) (μ : Store Σ Σ) : Set where
 
-  step-d : ∀ {Σ' Σ''} {μ' : Store Σ'' Σ'} {N : Σ'' ∣ ∅ ⊢ A} {Q : List (SuspendedCast Σ)}
+  step-d : ∀ {Σ'} {Q : List (SuspendedCast Σ')} {μ' : Store (proj₁ (merge Q)) Σ'}
+             {N : proj₁ (merge Q) ∣ ∅ ⊢ A}
     → disallow / M , μ ⟶ₑ Q , N , μ'
       -------------------------------
     → ProgProgress M μ
 
-  step-a : ∀ {Σ' Σ''} {μ' : Store Σ'' Σ'} {N : Σ'' ∣ ∅ ⊢ A} {Q : List (SuspendedCast Σ)}
+  step-a : ∀ {Σ'} {Q : List (SuspendedCast Σ')} {μ' : Store (proj₁ (merge Q)) Σ'}
+             {N : proj₁ (merge Q) ∣ ∅ ⊢ A}
     → allow / M , μ ⟶ₑ Q , N , μ'
       ----------------------------
     → ProgProgress M μ

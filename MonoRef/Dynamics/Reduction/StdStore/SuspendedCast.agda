@@ -31,6 +31,10 @@ open import MonoRef.Static.Types.Relations
 data SuspendedCast (Σ : StoreTyping) : Set where
   cast : ∀ {A} → (A∈Σ : A ∈ Σ) → Type → SuspendedCast Σ
 
+data QueueStoreTyping {Σ} : ∀ {Σ'} → (Σ'⊑ₕΣ : Σ' ⊑ₕ Σ) → (Q : List (SuspendedCast Σ)) → Set where
+  normal : QueueStoreTyping (⊑ₕ-refl {Σ = Σ}) []
+  evolving : ∀ {A B Σ'} {Σ'⊑ₕΣ : Σ' ⊑ₕ Σ} → (Q : List (SuspendedCast Σ)) → (A∈Σ : A ∈ Σ) → QueueStoreTyping Σ'⊑ₕΣ (cast A∈Σ B ∷ Q)
+
 merge' : ∀ {Σ Σ'}
   → (Σ'⊑ₕΣ : Σ' ⊑ₕ Σ) → List (SuspendedCast Σ) → ∃[ Σ'' ] ((Σ' ⊑ₕ Σ) × (Σ'' ⊑ₕ Σ'))
 merge' Σ'⊑ₕΣ [] = -, ⟨ Σ'⊑ₕΣ , ⊑ₕ-refl ⟩
@@ -61,21 +65,16 @@ merge-respects-⊑ₕ' Σ'⊑ₕΣ (cast A∈Σ B ∷ Q) Q'
                                Σ'⊑ₕΣ)
                      Q Q'
 
-merge-respects-⊑ₕ : ∀ {Σ}
-  → (Q Q' : List (SuspendedCast Σ)) → proj₁ (merge (Q ++ Q')) ⊑ₕ proj₁ (merge Q)
-merge-respects-⊑ₕ Q Q' = merge-respects-⊑ₕ' ⊑ₕ-refl Q Q'
-
-merge-soundness : ∀ {Σ A B}
-  → (A∈Σ : A ∈ Σ) → (A∼B : A ∼ B) → (Q : List (SuspendedCast Σ))
-  → proj₁ (merge' (build-prec A∈Σ (⊓⟹⊑ₗ A∼B)) Q) ⊑ₕ proj₁ (merge (cast A∈Σ B ∷ Q))
-merge-soundness {A = A}{B} A∈Σ A∼B Q
-  with ⊑ₕ∈⇒∈ (proj₂ (∈-⊒ₕ (pw-lift-∈ ⊑ₕ-refl A∈Σ))) | ⊑ₕ∈⇒∈-refl A∈Σ
-... | A'∈Σ | q rewrite ∈-⊒ₕ-refl A∈Σ | ≅-to-≡ q
-    with ∼-decidable A B
-...   | no ¬p = ⊥-elim (¬p A∼B)
-...   | yes p
-  rewrite ∼-respects-≡ p A∼B
-        | ⊑ₕ-trans-respects-reflʳ (build-prec A∈Σ (⊓⟹⊑ₗ A∼B)) = ⊑ₕ-refl
+merge-soundness : ∀ {Σ Σ' A B}
+  → (Σ'⊑ₕΣ : Σ' ⊑ₕ Σ)
+  → (A∈Σ : A ∈ Σ)
+  → (A∼B : proj₁ (strenthen-ptr/⊑ₕ Σ'⊑ₕΣ A∈Σ) ∼ B)
+  → (Q : List (SuspendedCast Σ))
+  → proj₁ (merge' (⊑ₕ-trans (build-prec (proj₂ (strenthen-ptr/⊑ₕ Σ'⊑ₕΣ A∈Σ)) (⊓⟹⊑ₗ A∼B)) Σ'⊑ₕΣ) Q) ⊑ₕ proj₁ (merge' Σ'⊑ₕΣ (cast A∈Σ B ∷ Q))
+merge-soundness {B = B} Σ'⊑ₕΣ A∈Σ A∼B Q
+  with ∼-decidable (proj₁ (strenthen-ptr/⊑ₕ Σ'⊑ₕΣ A∈Σ)) B
+... | no ¬p = ⊥-elim (¬p A∼B)
+... | yes p rewrite ∼-respects-≡ p A∼B = ⊑ₕ-refl
 
 merge'-respects-++' : ∀ {Σ Σ'}
   → (Σ'⊑ₕΣ : Σ' ⊑ₕ Σ)
@@ -93,30 +92,26 @@ merge'-respects-++' Σ'⊑ₕΣ (cast {A} A∈Σ B ∷ Q) Q'
                          (build-prec (⊑ₕ∈⇒∈ A'∈Σ') (⊓⟹⊑ₗ p)) Σ'⊑ₕΣ
         | merge'-respects-++' (⊑ₕ-trans (build-prec (⊑ₕ∈⇒∈ A'∈Σ') (⊓⟹⊑ₗ p)) Σ'⊑ₕΣ) Q Q' = refl
 
-merge'-respects-++ : ∀ {Σ}
-  → (Q Q' : List (SuspendedCast Σ))
-  → proj₁ (merge (Q ++ Q')) ≡ proj₁ (merge' (proj₂ (merge Q)) Q')
-merge'-respects-++ {Σ = Σ} [] Q' rewrite ⊑ₕ-trans-respects-reflʳ {Σ = Σ} ⊑ₕ-refl = refl
-merge'-respects-++ (cast {A} A∈Σ B ∷ Q) Q'
-  with ⊑ₕ∈⇒∈ (proj₂ (∈-⊒ₕ (pw-lift-∈ ⊑ₕ-refl A∈Σ)))
-... | A'∈Σ rewrite ∈-⊒ₕ-refl A∈Σ
-    with ∼-decidable A B
-...   | no ¬p rewrite merge'-respects-++ Q Q' = refl
-...   | yes p
-  rewrite ⊑ₕ-trans-respects-reflʳ (build-prec A'∈Σ (⊓⟹⊑ₗ p))
-        | ⊑ₕ-trans-respects-reflʳ (⊑ₕ-trans (proj₂ (proj₂ (merge' (build-prec A'∈Σ (⊓⟹⊑ₗ p)) Q))) (build-prec A'∈Σ (⊓⟹⊑ₗ p)))
-        | merge'-respects-++' (build-prec A'∈Σ (⊓⟹⊑ₗ p)) Q Q' = refl
+merge'-ret-in : ∀ {Σ Σ'}
+  → (Σ'⊑ₕΣ : Σ' ⊑ₕ Σ) → (Q : List (SuspendedCast Σ)) → (proj₁ (proj₂ (merge' Σ'⊑ₕΣ Q))) ≡ Σ'⊑ₕΣ
+merge'-ret-in Σ'⊑ₕΣ [] = refl
+merge'-ret-in Σ'⊑ₕΣ (cast A∈Σ B ∷ Q)
+  with ∼-decidable (proj₁ (strenthen-ptr/⊑ₕ Σ'⊑ₕΣ A∈Σ)) B
+... | no _  = merge'-ret-in Σ'⊑ₕΣ Q
+... | yes _ = refl
 
-merge-extension-soundness : ∀ {Σ A B}
+merge-extension-soundness : ∀ {Σ Σ' A B}
+  → (Σ'⊑ₕΣ : Σ' ⊑ₕ Σ)
   → (Q : List (SuspendedCast Σ))
-  → (A∈mergeQ : A ∈ proj₁ (merge Q))
-  → (A∼B : A ∼ B) → ⊓ A∼B ∈ proj₁ (merge (Q ++ [ cast (proj₂ (weaken-ptr/⊑ₕ (proj₂ (merge Q)) A∈mergeQ)) B ]))
-merge-extension-soundness {B = B} Q A∈mergeQ A∼B
-  rewrite merge'-respects-++ Q [ cast (proj₂ (weaken-ptr/⊑ₕ (proj₂ (merge Q)) A∈mergeQ)) B ]
-  with proj₁ (∈-⊒ₕ (pw-lift-∈ Σ'⊑ₕΣ (⊑ₕ∈⇒∈ᵣ (proj₂ (∈ᵣ-⊒ₕ (pw-lift-∈ᵣ Σ'⊑ₕΣ A∈mergeQ))))))
-     | ⊑ₕ∈⇒∈ (proj₂ (∈-⊒ₕ (pw-lift-∈ Σ'⊑ₕΣ (⊑ₕ∈⇒∈ᵣ (proj₂ (∈ᵣ-⊒ₕ (pw-lift-∈ᵣ Σ'⊑ₕΣ A∈mergeQ)))))))
-     | strenthen-respects-weaken Σ'⊑ₕΣ A∈mergeQ
-  where Σ'⊑ₕΣ = ⊑ₕ-trans (proj₂ (proj₂ (merge' ⊑ₕ-refl Q))) (proj₁ (proj₂ (merge' ⊑ₕ-refl Q)))
+  → (A∈mergeQ : A ∈ proj₁ (merge' Σ'⊑ₕΣ Q))
+  → (A∼B : A ∼ B)
+  → ⊓ A∼B ∈ proj₁ (merge' Σ'⊑ₕΣ (Q ++ [ cast (proj₂ (weaken-ptr/⊑ₕ (⊑ₕ-trans (proj₂ (proj₂ (merge' Σ'⊑ₕΣ Q))) (proj₁ (proj₂ (merge' Σ'⊑ₕΣ Q)))) A∈mergeQ)) B ]))
+merge-extension-soundness {B = B} Σ'⊑ₕΣ Q A∈mergeQ A∼B
+  rewrite merge'-respects-++' Σ'⊑ₕΣ Q [ cast (proj₂ (weaken-ptr/⊑ₕ (⊑ₕ-trans (proj₂ (proj₂ (merge' Σ'⊑ₕΣ Q))) (proj₁ (proj₂ (merge' Σ'⊑ₕΣ Q)))) A∈mergeQ)) B ]
+        | merge'-ret-in Σ'⊑ₕΣ Q
+  with (proj₁ (∈-⊒ₕ (pw-lift-∈ (⊑ₕ-trans (proj₂ (proj₂ (merge' Σ'⊑ₕΣ Q))) Σ'⊑ₕΣ) (⊑ₕ∈⇒∈ᵣ (proj₂ (∈ᵣ-⊒ₕ (pw-lift-∈ᵣ (⊑ₕ-trans (proj₂ (proj₂ (merge' Σ'⊑ₕΣ Q))) Σ'⊑ₕΣ) A∈mergeQ)))))))
+     | ⊑ₕ∈⇒∈ (proj₂ (∈-⊒ₕ (pw-lift-∈ (⊑ₕ-trans (proj₂ (proj₂ (merge' Σ'⊑ₕΣ Q))) Σ'⊑ₕΣ) (⊑ₕ∈⇒∈ᵣ (proj₂ (∈ᵣ-⊒ₕ (pw-lift-∈ᵣ (⊑ₕ-trans (proj₂ (proj₂ (merge' Σ'⊑ₕΣ Q))) Σ'⊑ₕΣ) A∈mergeQ)))))))
+     | strenthen-respects-weaken (⊑ₕ-trans (proj₂ (proj₂ (merge' Σ'⊑ₕΣ Q))) Σ'⊑ₕΣ) A∈mergeQ
 ... | A | _ | intro
     with ∼-decidable A B
 ... | no ¬A∼B = ⊥-elim (¬A∼B A∼B)
@@ -129,65 +124,86 @@ module ParamSuspendedCast
   open ParamStoreValue Value
   open ParamStoreDef StoreValue
 
-  data CastResult {Σ} (Q : List (SuspendedCast Σ)) (A : Type) : Set where
+  data CastResult {Σ Σ'} (Σ'⊑ₕΣ : Σ' ⊑ₕ Σ) (Q : List (SuspendedCast Σ)) (B : Type) : Set where
     error :
-        ------------------
-        CastResult Q A
-  
+        CastResult Σ'⊑ₕΣ Q B
+
     done :
         (Q' : List (SuspendedCast Σ))
-      → ∀ {M : proj₁ (merge (Q ++ Q')) ∣ ∅ ⊢ A}
+      → ∀ {M : proj₁ (merge' Σ'⊑ₕΣ (Q ++ Q')) ∣ ∅ ⊢ B}
       → Value M
         -----------------------------
-      → CastResult Q A
+      → CastResult Σ'⊑ₕΣ Q B
 
-  data StorePartialCast {Σ A B} (Q : List (SuspendedCast Σ)) (A∈Σ : A ∈ Σ) (B⊑A : B ⊑ A) : Set where
+  data StorePartialCast {Σ Σ' A B}
+    (Σ'⊑ₕΣ : Σ' ⊑ₕ Σ)
+    (Q : List (SuspendedCast Σ))
+    (A∈Σ : A ∈ Σ)
+    (B⊑A : B ⊑ (proj₁ (strenthen-ptr/⊑ₕ Σ'⊑ₕΣ A∈Σ))) : Set where
     error :
-        --------------------------
-        StorePartialCast Q A∈Σ B⊑A
+        --------------------------------
+        StorePartialCast Σ'⊑ₕΣ Q A∈Σ B⊑A
 
     done :
         (Q' : List (SuspendedCast Σ))
-      → Store (proj₁ (merge' (build-prec A∈Σ B⊑A) (Q ++ Q'))) (Σ-cast A∈Σ B)
-        --------------------------------------------------------------------
-      → StorePartialCast Q A∈Σ B⊑A
+      → Store (proj₁ (merge' (⊑ₕ-trans (build-prec (proj₂ (strenthen-ptr/⊑ₕ Σ'⊑ₕΣ A∈Σ)) B⊑A) Σ'⊑ₕΣ)
+                             (Q ++ Q')))
+              (Σ-cast (proj₂ (strenthen-ptr/⊑ₕ Σ'⊑ₕΣ A∈Σ)) B)
+        -------------------------------------------------------------------------------------------
+      → StorePartialCast Σ'⊑ₕΣ Q A∈Σ B⊑A
 
-  data SuccessfulCast {Σ A} {Q : List (SuspendedCast Σ)} : CastResult Q A → Set where
+  data SuccessfulCast {Σ Σ' B} {Q : List (SuspendedCast Σ)} {Σ'⊑ₕΣ : Σ' ⊑ₕ Σ} : CastResult Σ'⊑ₕΣ Q B → Set where
     intro :
         (Q' : List (SuspendedCast Σ))
-      → ∀ {M : proj₁ (merge (Q ++ Q')) ∣ ∅ ⊢ A}
+      → ∀ {M : proj₁ (merge' Σ'⊑ₕΣ (Q ++ Q')) ∣ ∅ ⊢ B}
       → (v : Value M)
         ------------------------------
       → SuccessfulCast (done Q' v)
 
-  data FailedCast {Σ A} {Q : List (SuspendedCast Σ)} : CastResult Q A → Set where
+  data FailedCast {Σ Σ' B} {Q : List (SuspendedCast Σ)} {Σ'⊑ₕΣ : Σ' ⊑ₕ Σ} : CastResult Σ'⊑ₕΣ Q B → Set where
     intro : FailedCast error
 
-  data SuccessfulStoreCast {Σ A B} {Q : List (SuspendedCast Σ)} {A∈Σ : A ∈ Σ} {B⊑A : B ⊑ A} : StorePartialCast Q A∈Σ B⊑A → Set where
+  data SuccessfulStoreCast {Σ Σ' A B} {Σ'⊑ₕΣ : Σ' ⊑ₕ Σ} {Q : List (SuspendedCast Σ)}
+                           {A∈Σ : A ∈ Σ} {B⊑A : B ⊑ proj₁ (strenthen-ptr/⊑ₕ Σ'⊑ₕΣ A∈Σ)}
+                           : StorePartialCast Σ'⊑ₕΣ Q A∈Σ B⊑A → Set where
     intro :
         (Q' : List (SuspendedCast Σ))
-      → (μ' : Store (proj₁ (merge' (build-prec A∈Σ B⊑A) (Q ++ Q'))) (Σ-cast A∈Σ B))
-        ---------------------------------------------------------------------------
+      → (μ' : Store (proj₁ (merge' (⊑ₕ-trans (build-prec (proj₂ (strenthen-ptr/⊑ₕ Σ'⊑ₕΣ A∈Σ)) B⊑A) Σ'⊑ₕΣ)
+                                   (Q ++ Q')))
+              (Σ-cast (proj₂ (strenthen-ptr/⊑ₕ Σ'⊑ₕΣ A∈Σ)) B))
+        -------------------------------------------------------------------------------------------------
       → SuccessfulStoreCast (done Q' μ')
 
-  data FailedStoreCast {Σ A B} {Q : List (SuspendedCast Σ)} {A∈Σ : A ∈ Σ} {B⊑A : B ⊑ A} : StorePartialCast Q A∈Σ B⊑A → Set where
-    intro : FailedStoreCast error
+  data FailedStoreCast {Σ Σ' A B} {Σ'⊑ₕΣ : Σ' ⊑ₕ Σ} {Q : List (SuspendedCast Σ)}
+                       {A∈Σ : A ∈ Σ} {B⊑A : B ⊑ proj₁ (strenthen-ptr/⊑ₕ Σ'⊑ₕΣ A∈Σ)}
+                       : StorePartialCast Σ'⊑ₕΣ Q A∈Σ B⊑A → Set where
+    intro :
+        FailedStoreCast error
 
-  get-val-from-successful-cast : ∀ {Σ A} {Q : List (SuspendedCast Σ)} {c : CastResult Q A}
-    → SuccessfulCast c → Σ[ Q' ∈ List (SuspendedCast Σ) ] (Σ[ M ∈ proj₁ (merge (Q ++ Q')) ∣ ∅ ⊢ A ] Value M)
+  get-val-from-successful-cast :
+    ∀ {Σ Σ' B} {Σ'⊑ₕΣ : Σ' ⊑ₕ Σ} {Q : List (SuspendedCast Σ)}
+      {c : CastResult Σ'⊑ₕΣ Q B}
+    → SuccessfulCast c → Σ[ Q' ∈ List (SuspendedCast Σ) ] (Σ[ M ∈ proj₁ (merge' Σ'⊑ₕΣ (Q ++ Q')) ∣ ∅ ⊢ B ] Value M)
   get-val-from-successful-cast (intro Q' v) = -, -, v
 
-  get-μ-from-successful-μ-cast : ∀ {Σ A B} {Q : List (SuspendedCast Σ)} {A∈Σ : A ∈ Σ} {B⊑A : B ⊑ A}
-                                   {spc : StorePartialCast Q A∈Σ B⊑A}
+  get-μ-from-successful-μ-cast :
+    ∀ {Σ Σ' A B} {Σ'⊑ₕΣ : Σ' ⊑ₕ Σ} {Q : List (SuspendedCast Σ)} {A∈Σ : A ∈ Σ}
+      {B⊑A : B ⊑ proj₁ (strenthen-ptr/⊑ₕ Σ'⊑ₕΣ A∈Σ)}
+      {spc : StorePartialCast Σ'⊑ₕΣ Q A∈Σ B⊑A}
     → SuccessfulStoreCast spc → Σ[ Q' ∈ List (SuspendedCast Σ) ]
-      (Store (proj₁ (merge' (build-prec A∈Σ B⊑A) (Q ++ Q'))) (Σ-cast A∈Σ B))
+      (Store (proj₁ (merge' (⊑ₕ-trans (build-prec (proj₂ (strenthen-ptr/⊑ₕ Σ'⊑ₕΣ A∈Σ)) B⊑A) Σ'⊑ₕΣ)
+                                   (Q ++ Q')))
+              (Σ-cast (proj₂ (strenthen-ptr/⊑ₕ Σ'⊑ₕΣ A∈Σ)) B))
   get-μ-from-successful-μ-cast (intro Q' μ') = -, μ'
 
-  successful-cast? : ∀ {Σ A} {Q : List (SuspendedCast Σ)} → (c : CastResult Q A) → SuccessfulCast c ⊎ FailedCast c
+  successful-cast? : ∀ {Σ Σ' B} {Σ'⊑ₕΣ : Σ' ⊑ₕ Σ} {Q : List (SuspendedCast Σ)}
+    → (c : CastResult Σ'⊑ₕΣ Q B) → SuccessfulCast c ⊎ FailedCast c
   successful-cast? error = inj₂ intro
   successful-cast? (done Q' v) = inj₁ (intro Q' v)
 
-  successful-μ-cast? : ∀ {Σ A B} {Q : List (SuspendedCast Σ)} {A∈Σ : A ∈ Σ} {B⊑A : B ⊑ A}
-    → (c : StorePartialCast Q A∈Σ B⊑A) → SuccessfulStoreCast c ⊎ FailedStoreCast c
+  successful-μ-cast? :
+    ∀ {Σ Σ' A B} {Σ'⊑ₕΣ : Σ' ⊑ₕ Σ} {Q : List (SuspendedCast Σ)} {A∈Σ : A ∈ Σ}
+      {B⊑A : B ⊑ proj₁ (strenthen-ptr/⊑ₕ Σ'⊑ₕΣ A∈Σ)}
+    → (c : StorePartialCast Σ'⊑ₕΣ Q A∈Σ B⊑A) → SuccessfulStoreCast c ⊎ FailedStoreCast c
   successful-μ-cast? error = inj₂ intro
-  successful-μ-cast? (done Q' x) = inj₁ (intro Q' x)
+  successful-μ-cast? (done Q' μ) = inj₁ (intro Q' μ)

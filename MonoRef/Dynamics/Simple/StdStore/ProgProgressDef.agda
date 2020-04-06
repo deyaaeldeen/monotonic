@@ -1,6 +1,7 @@
 module MonoRef.Dynamics.Simple.StdStore.ProgProgressDef where
 
 open import Data.List using (List)
+open import Data.Product using (proj₁)
 
 open import MonoRef.Dynamics.Simple.Error
 open import MonoRef.Dynamics.Simple.StdStore.SuspendedCast
@@ -13,7 +14,8 @@ open import MonoRef.Static.Context
 
 data ProgProgress {Σ A} (M : Σ ∣ ∅ ⊢ A) (μ : Store Σ Σ) : Set where
 
-  step : ∀ {Σ' Σ''} {μ' : Store Σ'' Σ'} {N : Σ'' ∣ ∅ ⊢ A} {Q : List (SuspendedCast Σ)}
+  step : ∀ {Σ'} {Q : List (SuspendedCast Σ')} {μ' : Store (proj₁ (merge Q)) Σ'}
+           {N : proj₁ (merge Q) ∣ ∅ ⊢ A}
     → M , μ ⟶ₑ Q , N , μ'
       --------------------
     → ProgProgress M μ

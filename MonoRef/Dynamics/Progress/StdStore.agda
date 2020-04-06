@@ -45,39 +45,49 @@ module ParamStdStoreProgress/Pre
     (typeprecise-strenthen-val : ∀ {Σ Σ' Γ A} {v : Σ ∣ Γ ⊢ A} → (Σ'⊑ₕΣ : Σ' ⊑ₕ Σ)
       → Value v
       → Value (typeprecise-strenthen-expr Σ'⊑ₕΣ v))
-    (apply-cast : ∀ {A B Σ}
+    (apply-cast : ∀ {A B Σ Σ'}
+      → (Σ'⊑ₕΣ : Σ' ⊑ₕ Σ)
       → (Q : List (SuspendedCast Σ))
-      → ∀ {e : proj₁ (merge Q) ∣ ∅ ⊢ A} → (v : Value e)
+      → ∀ {e : proj₁ (merge' Σ'⊑ₕΣ Q) ∣ ∅ ⊢ A} → (v : Value e)
       → A ⟹ B
-      → CastResult Q B) where
+      → CastResult Σ'⊑ₕΣ Q B) where
 
     open ParamStoreValue Value
     open ParamStoreDef StoreValue
     open ParamStore SimpleValue Value ref⟹T ref⟹∈ ref⟹⊑
     open ParamStateReduction make-coercion SimpleValue ref⟹T ref⟹∈ ref⟹⊑
       typeprecise-strenthen-val apply-cast
-    
 
-    data Progress {Σ Σ₂ Σ₃ A} (Q : List (SuspendedCast Σ)) (M : Σ₃ ∣ ∅ ⊢ A) (μ : Store Σ₃ Σ₂) : Set where
-    
-      step : ∀ {Σ₄ Σ₅} {Q' : List (SuspendedCast Σ)} {μ' : Store Σ₅ Σ₄} {N : Σ₅ ∣ ∅ ⊢ A}
-        → Q , M , μ ⟶ Q' , N , μ'
-          ------------------------
-        → Progress Q M μ
-    
-    suspended-cast-progress : ∀ {Σ A}
-      → (c : SuspendedCast Σ)
+    data Progress {Σ Σ₁ T A}
+      (Σ₁⊑ₕΣ : Σ₁ ⊑ₕ Σ)
+      (A∈Σ : A ∈ Σ)
+      (B : Type)
+      (Q : List (SuspendedCast Σ))
+      (M : proj₁ (merge' Σ₁⊑ₕΣ (cast A∈Σ B ∷ Q)) ∣ ∅ ⊢ T)
+      (μ : Store (proj₁ (merge' Σ₁⊑ₕΣ (cast A∈Σ B ∷ Q))) Σ₁) : Set where
+
+      step : ∀ {Σ₂} {Σ₂⊑ₕΣ₁ : Σ₂ ⊑ₕ Σ₁} {Q' : List (SuspendedCast Σ)}
+               {N : (proj₁ (merge' (⊑ₕ-trans Σ₂⊑ₕΣ₁ Σ₁⊑ₕΣ) Q')) ∣ ∅ ⊢ T}
+               {μ' : Store (proj₁ (merge' (⊑ₕ-trans Σ₂⊑ₕΣ₁ Σ₁⊑ₕΣ) Q')) Σ₂}
+        → _,_,_⟶_,_,_ {A∈Σ = A∈Σ} {Σ₁⊑ₕΣ = Σ₁⊑ₕΣ} Q M μ {Σ₂⊑ₕΣ₁ = Σ₂⊑ₕΣ₁} Q' N μ'
+          -----------------------------------------------------------------------
+        → Progress Σ₁⊑ₕΣ A∈Σ B Q M μ
+
+    suspended-cast-progress : ∀ {Σ Σ₁ T A}
+      → (Σ₁⊑ₕΣ : Σ₁ ⊑ₕ Σ)
+      → (A∈Σ : A ∈ Σ)
+      → (B : Type)
       → (Q : List (SuspendedCast Σ))
-      → ∀ {M : proj₁ (merge (c ∷ Q)) ∣ ∅ ⊢ A}
-      → (μ : Store (proj₁ (merge (c ∷ Q))) Σ)
-      → Progress (c ∷ Q) M μ
-    suspended-cast-progress (cast A∈Σ B) Q μ
-      with ∼-decidable (store-lookup-rtti A∈Σ μ) B
+      → ∀ {M : proj₁ (merge' Σ₁⊑ₕΣ (cast A∈Σ B ∷ Q)) ∣ ∅ ⊢ T}
+      → (μ : Store (proj₁ (merge' Σ₁⊑ₕΣ (cast A∈Σ B ∷ Q))) Σ₁)
+      → Progress Σ₁⊑ₕΣ A∈Σ B Q M μ
+    suspended-cast-progress Σ₁⊑ₕΣ A∈Σ B Q μ
+      with ∼-decidable (store-lookup-rtti (proj₂ (strenthen-ptr/⊑ₕ Σ₁⊑ₕΣ A∈Σ)) μ) B
     ... | no ¬rtti∼B = step (state/error2 ¬rtti∼B)
     ... | yes rtti∼B
-        with ≡Type-decidable (⊓ rtti∼B) (store-lookup-rtti A∈Σ μ)
+        with ≡Type-decidable (⊓ rtti∼B) (store-lookup-rtti (proj₂ (strenthen-ptr/⊑ₕ Σ₁⊑ₕΣ A∈Σ)) μ)
     ...   | yes p = step (state/discard rtti∼B p)
     ...   | no ¬p
-          with successful-μ-cast? (μ-cast Q A∈Σ B μ rtti∼B)
+          with successful-μ-cast? (μ-cast Q A∈Σ B Σ₁⊑ₕΣ μ rtti∼B)
     ...     | inj₁ c = step (state/update-store rtti∼B ¬p c)
     ...     | inj₂ ¬c = step (state/error1 rtti∼B ¬p ¬c)

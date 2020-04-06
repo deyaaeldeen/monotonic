@@ -34,12 +34,21 @@ _⊑ₕ_ Σ' Σ = Pointwise _⊑_ Σ' Σ
 ⊑ₕ-refl : ∀ {Σ} → Σ ⊑ₕ Σ
 ⊑ₕ-refl = pw-refl ⊑-reflexive
 
+Σ⊑ₕΣ≡⊑ₕ-refl : ∀ {Σ} → (Σ⊑ₕΣ : Σ ⊑ₕ Σ) → Σ⊑ₕΣ ≡ (⊑ₕ-refl {Σ = Σ})
+Σ⊑ₕΣ≡⊑ₕ-refl [] = refl
+Σ⊑ₕΣ≡⊑ₕ-refl (x∼y ∷ x) rewrite Σ⊑ₕΣ≡⊑ₕ-refl x | A⊑A≡⊑-reflexive x∼y = refl
+
 ⊑ₕ-trans : Transitive _⊑ₕ_
 ⊑ₕ-trans = pw-trans ⊑-trans
 
 Σ-cast : ∀ {Σ T} → T ∈ Σ → Type → StoreTyping
 Σ-cast {x ∷ Σ} (here refl) t = t ∷ Σ
 Σ-cast {x ∷ Σ} (there mem) t = x ∷ Σ-cast mem t
+
+Σ-cast/A∈Σ/A≡Σ : ∀ {A Σ} → (A∈Σ : A ∈ Σ) → Σ-cast A∈Σ A ≡ Σ
+Σ-cast/A∈Σ/A≡Σ (here refl) = refl
+Σ-cast/A∈Σ/A≡Σ (there A∈Σ) rewrite Σ-cast/A∈Σ/A≡Σ A∈Σ = refl
+
 
 build-prec : ∀ {Σ A B} → (A∈Σ : A ∈ Σ) → B ⊑ A → Σ-cast A∈Σ B ⊑ₕ Σ
 build-prec (here refl) Σ'⊑ₕΣ = Σ'⊑ₕΣ ∷ ⊑ₕ-refl
