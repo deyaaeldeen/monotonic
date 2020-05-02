@@ -23,6 +23,11 @@ data _⟶ᵤ_ {Γ Σ} : ∀ {A} → Σ ∣ Γ ⊢ A → Σ ∣ Γ ⊢ A → Set 
       -----------------------------------------------------------------------------------------------
     → V < inj iA > < prj iB > ⟶ᵤ V < make-coercion (injectable-to-type iA) (injectable-to-type iB) >
 
+  seq : ∀ {A B C} {V : Σ ∣ Γ ⊢ A} {a : A ⟹ B} {b : B ⟹ C}
+    → Value V
+      --------------------------------
+    → V < seq a b > ⟶ᵤ V < a > < b >
+
   `× : ∀ {A B A' B'} {V₁ : Σ ∣ Γ ⊢ A} {V₂ : Σ ∣ Γ ⊢ B}
          {c₁ : A ⟹ A'} {c₂ : B ⟹ B'}
     → Value V₁ → Value V₂

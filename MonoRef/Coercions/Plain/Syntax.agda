@@ -16,6 +16,7 @@ data _⟹_ : Type → Type → Set where
   ι : ∀ {A} → A ⟹ A
   prj : ∀ {A} → Injectable A → ⋆ ⟹ A
   inj : ∀ {A} → Injectable A → A ⟹ ⋆
+  seq : ∀ {A B C} → (a : A ⟹ B) → (b : B ⟹ C) → A ⟹ C
   _⇒_ : ∀ {A A' B B'}
     → (c : A' ⟹ A) → (d : B ⟹ B')
       ------------------------------
@@ -34,6 +35,7 @@ data Inert : ∀ {A B} → A ⟹ B → Set where
 data Active : ∀ {A B} → A ⟹ B → Set where
   A-ι : ∀ {A} → Active (ι {A})
   A-prj : ∀ {A} → (iA : Injectable A) → Active (prj iA)
+  A-seq : ∀ {A B C} → (a : A ⟹ B) → (b : B ⟹ C) → Active (seq a b)
   A-× : ∀ {A B A' B'} {c : A ⟹ A'} {d : B ⟹ B'} → Active (c `× d)
   A-Ref : ∀ {A B} → Active (Ref A B)
   A-⊥ : ∀ {A B} {A≁B : ¬ A ∼ B} → Active (`⊥ A≁B)
@@ -66,6 +68,7 @@ inertP (_ ⇒ _) = yes I-⇒
 inertP (_ `× _) = no (λ ())
 inertP (Ref _ _) = no (λ ())
 inertP (`⊥ _) = no (λ ())
+inertP (seq _ _) = no (λ ())
 
 ¬Inert⇒Active : ∀ {A B} {c : A ⟹ B} → ¬ Inert c → Active c
 ¬Inert⇒Active {c = ι} _ = A-ι
@@ -75,3 +78,4 @@ inertP (`⊥ _) = no (λ ())
 ¬Inert⇒Active {c = _ `× _} _ = A-×
 ¬Inert⇒Active {c = Ref _ _} _ = A-Ref
 ¬Inert⇒Active {c = `⊥ _} _ = A-⊥
+¬Inert⇒Active {c = seq a b} _ = A-seq a b
