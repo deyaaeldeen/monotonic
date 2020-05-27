@@ -206,11 +206,11 @@ module ParamStateReduction/Pre
     ⟶⟹rtti⊑Σ {Σ₁⊑ₕΣ = Σ₁⊑ₕΣ} (state/discard _ _) = Σ₁⊑ₕΣ
 
     ⟶⟹Σ'⊑Σ : ∀ {Σ Σ₁ Σ₂ T A B} {Q Q' : List (SuspendedCast Σ)} {A∈Σ : A ∈ Σ}
-                    {Σ₁⊑ₕΣ : Σ₁ ⊑ₕ Σ} {M : proj₁ (merge' Σ₁⊑ₕΣ (cast A∈Σ B ∷ Q)) ∣ ∅ ⊢ T}
-                    {μ  : Store (proj₁ (merge' Σ₁⊑ₕΣ (cast A∈Σ B ∷ Q))) Σ₁}
-                    {Σ₂⊑ₕΣ₁ : Σ₂ ⊑ₕ Σ₁}
-                    {M' : (proj₁ (merge' (⊑ₕ-trans Σ₂⊑ₕΣ₁ Σ₁⊑ₕΣ) Q')) ∣ ∅ ⊢ T}
-                    {μ' : Store (proj₁ (merge' (⊑ₕ-trans Σ₂⊑ₕΣ₁ Σ₁⊑ₕΣ) Q')) Σ₂}
+                  {Σ₁⊑ₕΣ : Σ₁ ⊑ₕ Σ} {M : proj₁ (merge' Σ₁⊑ₕΣ (cast A∈Σ B ∷ Q)) ∣ ∅ ⊢ T}
+                  {μ  : Store (proj₁ (merge' Σ₁⊑ₕΣ (cast A∈Σ B ∷ Q))) Σ₁}
+                  {Σ₂⊑ₕΣ₁ : Σ₂ ⊑ₕ Σ₁}
+                  {M' : (proj₁ (merge' (⊑ₕ-trans Σ₂⊑ₕΣ₁ Σ₁⊑ₕΣ) Q')) ∣ ∅ ⊢ T}
+                  {μ' : Store (proj₁ (merge' (⊑ₕ-trans Σ₂⊑ₕΣ₁ Σ₁⊑ₕΣ) Q')) Σ₂}
       → _,_,_⟶_,_,_ {A∈Σ = A∈Σ} {Σ₁⊑ₕΣ = Σ₁⊑ₕΣ} Q M μ Q' M' μ'
       → proj₁ (merge' (⊑ₕ-trans Σ₂⊑ₕΣ₁ Σ₁⊑ₕΣ) Q') ⊑ₕ Σ
     ⟶⟹Σ'⊑Σ {Q' = Q'} {Σ₁⊑ₕΣ = Σ₁⊑ₕΣ} {Σ₂⊑ₕΣ₁ = Σ₂⊑ₕΣ₁} red =

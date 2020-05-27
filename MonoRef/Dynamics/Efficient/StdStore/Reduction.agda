@@ -173,12 +173,23 @@ data _,_,_⟶_,_,_ {Σ T} : ∀ {Σ₁ Σ₂ Σ₃} {Σ₁⊑ₕΣ : Σ₁ ⊑�
 ⟶⟹rtti⊑Σ (prog-reduce red) = ⟶ₑ⟹rtti⊑Σ red
 ⟶⟹rtti⊑Σ (state-reduce red) = from⊑ₕ (⟶ₛ⟹rtti⊑Σ red)
 
-⟶⟹qst : ∀ {Σ Σ₁ Σ₂ Σ₃ A} {Q : List (SuspendedCast Σ)} {Q' : List (SuspendedCast Σ₂)}
-             {Σ₁⊑ₕΣ : Σ₁ ⊑ₕ Σ} {Σ₃⊑ₕΣ₂ : Σ₃ ⊑ₕ Σ₂} {M : proj₁ (merge' Σ₁⊑ₕΣ Q) ∣ ∅ ⊢ A}
-             {μ : Store (proj₁ (merge' Σ₁⊑ₕΣ Q)) Σ₁}
-             {M' : proj₁ (merge' Σ₃⊑ₕΣ₂ Q') ∣ ∅ ⊢ A}
-             {μ' : Store (proj₁ (merge' Σ₃⊑ₕΣ₂ Q')) Σ₃}
-  → Q , M , μ  ⟶ Q' , M' , μ'
-  → QueueStoreTyping Σ₁⊑ₕΣ Q
-⟶⟹qst (prog-reduce red) = normal
-⟶⟹qst (state-reduce {Q = Q} {A∈Σ = A∈Σ} red) = evolving Q A∈Σ
+⟶ₑ⟹qst : ∀ {bc Σ Σ' A} {Q : List (SuspendedCast Σ')} {μ : Store Σ Σ}
+             {μ' : Store (proj₁ (merge Q)) Σ'}
+             {M : Σ ∣ ∅ ⊢ A} {M' : proj₁ (merge Q) ∣ ∅ ⊢ A}
+  → bc / M , μ ⟶ₑ Q , M' , μ'
+  → QueueStoreTyping ⊑ₕ-refl Q
+⟶ₑ⟹qst (switch red) = ⟶ₑ⟹qst red
+⟶ₑ⟹qst (β-pure _) = normal
+⟶ₑ⟹qst (β-mono red) = ⟶ᵢₘ⟹qst red
+⟶ₑ⟹qst (cast/succeed {c = c} v sc)
+  with apply-cast ⊑ₕ-refl [] v c | sc
+... | _ | intro Q' v'
+    with Q'
+...   | [] = normal
+...   | cast A∈Σ _ ∷ Q'' = evolving Q'' A∈Σ
+⟶ₑ⟹qst (cast/fail v sc) = normal
+⟶ₑ⟹qst compose-casts = normal
+⟶ₑ⟹qst (ξ F red) = ⟶ₑ⟹qst red
+⟶ₑ⟹qst (ξ-cast red) = ⟶ₑ⟹qst red
+⟶ₑ⟹qst (ξ-error ξ₁) = normal
+⟶ₑ⟹qst ξ-cast-error = normal
